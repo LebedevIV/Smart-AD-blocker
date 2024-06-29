@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-30_02-52
+// @version      2024-06-30_03-58
 // @description  Smart AD blocker for dynamic blocking protection, for: Yandex, Mail.ru
 // @description:ru  Умный блокировщик рекламы для динамической защиты от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
@@ -15,7 +15,7 @@
 // @grant        none
 // @run-at       document-end
 // @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.user.js
-// @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.user.js
+// @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.meta.js
 // ==/UserScript==
 
 (function() {
@@ -129,16 +129,43 @@
             dist_stripe?.parentNode.remove()
 
         }
+        // каталог игр
         else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
-            const targetNodes = document.querySelectorAll('div.page__page.main-page > div#feeds > div.adaptive-width')
-            targetNodes?.forEach(node => {
+            // реклама в каталоге игр
+            function AD_remove_node(node, mutation_test) {
+                const nodeDiv = node.querySelector('div')
                 // Проверяем, является ли элемент div и не содержит ли он указанные классы
-                if (!node.classList.contains('feed_block_suggested') &&
-                    !node.classList.contains('feed_block_categorized')) {
-                    node.parentNode.remove()
+                if (!nodeDiv.classList.contains('feed_block_suggested') &&
+                    !nodeDiv.classList.contains('feed_block_categorized')) {
+                    clearInterval(interval_AD_remove)
+                    node.remove()
+                }
+            }
+            function AD_remove() {
+                const targetNodes = document.querySelectorAll('div.page__page.main-page > div#feeds > div.adaptive-width')
+                targetNodes?.forEach(node => {
+                    AD_remove_node(node)
+                });
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500);
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        // console.log('Новые узлы добавлены:', mutation.addedNodes);
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV' &&
+                                node.className === 'adaptive-width') {
+                                AD_remove_node(node, mutation)
+                            }
+                        });
+
+                    }
                 }
             });
+            observer.observe(document.querySelector('div.page__right'), observer_config);
         }
+        // на странице игры
         else if (currentURL.startsWith('https://yandex.ru/games/app/')) {
             // центральный баннер
             function AD_center_remove() {
