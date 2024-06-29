@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-30_02-29
+// @version      2024-06-30_02-52
 // @description  Smart AD blocker for dynamic blocking protection, for: Yandex, Mail.ru
 // @description:ru  Умный блокировщик рекламы для динамической защиты от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
@@ -14,6 +14,8 @@
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
 // @run-at       document-end
+// @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.user.js
+// @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.user.js
 // ==/UserScript==
 
 (function() {
