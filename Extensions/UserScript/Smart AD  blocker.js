@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         ADS smart blocker for Yandex, MailRu
+// @name         Smart AD blocker for: Yandex, MailRu
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-25
+// @version      2024-06-30_02-29
 // @description  try to take over the world!
 // @author       Igor Lebedev
 // @match        http://*.mail.ru/*
