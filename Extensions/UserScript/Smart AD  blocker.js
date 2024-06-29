@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Smart AD blocker for: yandex, mail.ru
+// @name         Smart AD blocker for: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
 // @version      2024-06-30_02-29
 // @description  try to take over the world!
