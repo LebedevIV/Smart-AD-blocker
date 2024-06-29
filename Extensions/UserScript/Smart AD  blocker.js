@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-30_03-58
+// @version      2024-06-30_04-03
 // @description  Smart AD blocker for dynamic blocking protection, for: Yandex, Mail.ru
 // @description:ru  Умный блокировщик рекламы для динамической защиты от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
@@ -135,7 +135,8 @@
             function AD_remove_node(node, mutation_test) {
                 const nodeDiv = node.querySelector('div')
                 // Проверяем, является ли элемент div и не содержит ли он указанные классы
-                if (!nodeDiv.classList.contains('feed_block_suggested') &&
+                if (nodeDiv &&
+                    !nodeDiv.classList.contains('feed_block_suggested') &&
                     !nodeDiv.classList.contains('feed_block_categorized')) {
                     clearInterval(interval_AD_remove)
                     node.remove()
