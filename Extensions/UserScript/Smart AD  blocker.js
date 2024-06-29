@@ -1,9 +1,12 @@
 // ==UserScript==
 // @name         Smart AD blocker for: Yandex, Mail.ru
+// @name         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
 // @version      2024-06-30_02-29
-// @description  try to take over the world!
+// @description  Smart AD blocker for dynamic blocking protection, for: Yandex, Mail.ru
+// @description: ru  Умный блокировщик рекламы для динамической защиты от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
+// @license        GPL-3.0-or-later
 // @match        http://*.mail.ru/*
 // @match        https://*.mail.ru/*
 // @match        https://*.ya.ru/*
