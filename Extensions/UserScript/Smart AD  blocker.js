@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
-// @version      2024-06-30_04-03
+// @version      2024-07-01_04-16
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
@@ -176,10 +176,17 @@
                     targetNodes.forEach(node => {
                         // Проверяем, является ли элемент div и не содержит ли он указанные классы
 
-                        node.parentNode.remove()
+                        // node.parentNode.remove()
+                        node.parentNode.style.display = 'none'
+                        // node.querySelector('span.Icon')?.click()
 
                     });
                 }
+                // const targetNode = document.querySelector('div.prowo-container_with-blur > div.prowo__wrapper > div.prowo > span.Icon.Icon_size_m.close-button') || document.querySelector('div.play-modal__inner > div > span.Icon.Icon_size_m.close-button')
+                // if (targetNode) {
+                //     // clearInterval(interval_AD_center_remove)
+                //     targetNode.click()
+                // }
             }
             const interval_AD_center_remove = setInterval(AD_center_remove, 500);
             // правый блок рекламы
@@ -204,7 +211,48 @@
 
 
         }
+        // почтовый ящик
+        else if (currentURL.startsWith('https://mail.yandex.ru/')) {
+            // реклама внизу слева
 
+            function AD_remove_node(node, mutation_test) {
+                // Проверяем, не содержит ли node он указанные классы
+                if (!node.classList.contains('ns-view-react-left-column') &&
+                    !node.classList.contains('ns-view-fill-height-placeholder-box') &&
+                    !node.classList.contains('ns-view-skin-saver-box') &&
+                    !node.classList.contains('ns-view-copyright-box')) {
+                    node.remove()
+                }
+            }
+            function AD_remove() {
+                const targetNode = document.querySelector('div.ns-view-left-box.mail-Layout-Aside-Inner-Box.js-layout-aside-inner-box[data-key="box=left-box"]')
+                if (targetNode) {
+                    clearInterval(interval_AD_remove)
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for (let mutation of mutationsList) {
+                            if (mutation.type === 'childList') {
+                                // console.log('Новые узлы добавлены:', mutation.addedNodes);
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeName === 'DIV' &&
+                                       node.parentNode === targetNode) {
+                                        AD_remove_node(node, mutation)
+                                    }
+                                });
+
+                            }
+                        }
+                    });
+                    observer.observe(targetNode, observer_config);
+
+                    const targetNodes = targetNode.querySelectorAll('div')
+                    targetNodes?.forEach(node => {
+                        AD_remove_node(node)
+                    });
+                }
+
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500);
+        }
     }
 
 
