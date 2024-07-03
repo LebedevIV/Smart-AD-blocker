@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-01_22-24
+// @version      2024-07-03_22-51
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru
 // @author       Igor Lebedev
