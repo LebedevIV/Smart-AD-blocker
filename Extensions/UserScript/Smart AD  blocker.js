@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru
-// @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru
+// @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
+// @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-06_00-36
-// @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru
-// @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru
+// @version      2024-07-06_12-49
+// @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
+// @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
 // @license        GPL-3.0-or-later
 // @match        http://*.mail.ru/*
@@ -317,7 +317,7 @@
 
         }
         // Яндекс.погода: сводка
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl')) {
+        else if (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?')) {
 
             // реклама справа
             const targetNode_rightColumn = document.querySelector('div#content_right.content__right')
@@ -356,19 +356,16 @@
             observer.observe(document.body, observer_config);
 
         }
-        // ok.ru
-        else if (currentURL.startsWith('https://ok.ru/')) {
-            // реклама справа
+        // Яндекс.погода: на месяц
+        else if (currentURL.startsWith('https://dzen.ru/pogoda/month')) {
 
-            function AD_remove() {
-                const targetNode_rightColumn = document.querySelector('div#rightColumn')
-                if (targetNode_rightColumn) {
-                    clearInterval(interval_AD_remove)
-                    targetNode_rightColumn.remove()
-                }
-
+            // реклама в теле страницы
+            const targetNode_rightColumn = document.querySelector('section.content__section.content__section_type_adv')
+            if (targetNode_rightColumn) {
+                targetNode_rightColumn.remove()
             }
-            const interval_AD_remove = setInterval(AD_remove, 500);
+
+
         }
         // vk.com
         else if (currentURL.startsWith('https://vk.com/')) {
@@ -383,7 +380,64 @@
 
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
+
+
+            // реклама в теле страницы
+            const spans = document.querySelectorAll('span.PostHeaderSubtitle__item');
+            for (let span of spans) {
+                if (span.textContent === 'Реклама в сообществе') {
+                    span.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
+                }
+            }
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        // console.log('Новые узлы добавлены:', mutation.addedNodes);
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+
+                                if (node.classList.contains('page_block') &&
+                                    node.classList.contains('no_posts')) {
+
+                                    const spans = document.querySelectorAll('span.PostHeaderSubtitle__item');
+                                    // if (spans.length > 0) { // на время тестирования
+                                        spans.forEach(span => {
+                                            if (span.textContent === 'Реклама в сообществе') {
+                                                span.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
+                                            }
+                                        });
+                                    // }
+
+
+                                }
+
+
+                            }
+                        });
+
+                    }
+                }
+            });
+            observer.observe(document.querySelector('div#public'), observer_config);
+
         }
+
+        // ok.ru
+        else if (currentURL.startsWith('https://ok.ru/')) {
+            // реклама справа
+
+            function AD_remove() {
+                const targetNode_rightColumn = document.querySelector('div#rightColumn')
+                if (targetNode_rightColumn) {
+                    clearInterval(interval_AD_remove)
+                    targetNode_rightColumn.remove()
+                }
+
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500);
+        }
+
     }
 
 
