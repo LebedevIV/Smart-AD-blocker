@@ -11,8 +11,8 @@
 // @match        https://*.mail.ru/*
 // @match        https://*.ya.ru/*
 // @match        https://*.yandex.ru/*
-// @match        https://*.ok.ru/*
 // @match        https://*.vk.com/*
+// @match        https://*.ok.ru/*
 // @match        https://dzen.ru/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
