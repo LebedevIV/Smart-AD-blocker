@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-08_13-27
+// @version      2024-07-08_13-54
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -265,14 +265,14 @@
                 let RightBlockFromImages
                 RightBlockFromImages = document.querySelector('div[data-chunk="promo"]')
                 if (RightBlockFromImages) RightBlockFromImages.parentNode.parentNode.parentNode.remove()
-                RightBlockFromImages = document.querySelector('div.media-gallery__frame-wrapper')
-                if (RightBlockFromImages) RightBlockFromImages.remove()
             }
 
             function AD_remove() {
-                const targetNode = document.querySelector('div._has-banner')
+                // const targetNode = document.querySelector('div._has-banner') // более глобальный блок
+                const targetNode = document.querySelector('div.banner-view') // более точный блок
                 if (targetNode) {
                     clearInterval(interval_AD_remove)
+                    AD_remove_first()
                     const observer = new MutationObserver((mutationsList, observer) => {
                         for (let mutation of mutationsList) {
                             if (mutation.type === 'childList') {
@@ -287,7 +287,6 @@
                     observer.observe(targetNode, observer_config);
                 }
             }
-            AD_remove_first()
             const interval_AD_remove = setInterval(AD_remove, 500);
 
 
