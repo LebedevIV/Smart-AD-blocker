@@ -12,7 +12,7 @@ Incomplete blocking is possible since portals can change algorithms, and this is
 Возможна неполная блокировка так как порталы могут менять алгоритмы, и это постоянная битва меча и щита.
 
 ************
-Установка для Tampermonkey:
+Userscript (Tampermonkey):
 https://greasyfork.org/en/scripts/499243-smart-ad-blocker-for-yandex-mail-ru-dzen-ru-vk-ok 
 
 ************
