@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-06_12-49
+// @version      2024-07-08_13-27
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -11,8 +11,8 @@
 // @match        https://*.mail.ru/*
 // @match        https://*.ya.ru/*
 // @match        https://*.yandex.ru/*
-// @match        https://*.vk.com/*
 // @match        https://*.ok.ru/*
+// @match        https://*.vk.com/*
 // @match        https://dzen.ru/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
@@ -123,6 +123,9 @@
         else if (currentURL.startsWith('https://ya.ru/search/')) {
             const targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
             targetNode?.remove()
+            const targetNodePopup = document.querySelector('div.Distribution-Popup')
+            targetNodePopup?.remove()
+
         }
         else if (currentURL.startsWith('https://ya.ru/')) {
             const targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
@@ -255,7 +258,40 @@
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
         }
+        // почтовый ящик
+        else if (currentURL.startsWith('https://yandex.ru/maps/')) {
+            // реклама справа
+            function AD_remove_first() {
+                let RightBlockFromImages
+                RightBlockFromImages = document.querySelector('div[data-chunk="promo"]')
+                if (RightBlockFromImages) RightBlockFromImages.parentNode.parentNode.parentNode.remove()
+                RightBlockFromImages = document.querySelector('div.media-gallery__frame-wrapper')
+                if (RightBlockFromImages) RightBlockFromImages.remove()
+            }
 
+            function AD_remove() {
+                const targetNode = document.querySelector('div._has-banner')
+                if (targetNode) {
+                    clearInterval(interval_AD_remove)
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for (let mutation of mutationsList) {
+                            if (mutation.type === 'childList') {
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeName === 'DIV') {
+                                        AD_remove_first()
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    observer.observe(targetNode, observer_config);
+                }
+            }
+            AD_remove_first()
+            const interval_AD_remove = setInterval(AD_remove, 500);
+
+
+        }
         // Яндекс.погода: карта
         else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
             // внизу справа "Сделать поиск Яндекса основным?"
@@ -268,6 +304,7 @@
                 const classes = div.classList;
                 return classes.length === 3;
             });
+
 
             divsWithThreeClasses.forEach(div => {
                 const DivChild = div.querySelector('div');
@@ -359,13 +396,16 @@
         // Яндекс.погода: на месяц
         else if (currentURL.startsWith('https://dzen.ru/pogoda/month')) {
 
-            // реклама в теле страницы
-            const targetNode_rightColumn = document.querySelector('section.content__section.content__section_type_adv')
+            // реклама справа страницы
+            let targetNode_rightColumn
+            targetNode_rightColumn = document.querySelector('section.content__section.content__section_type_adv')
             if (targetNode_rightColumn) {
                 targetNode_rightColumn.remove()
             }
-
-
+            targetNode_rightColumn = document.querySelector('div.climate-calendar-container__adv-wide')
+            if (targetNode_rightColumn) {
+                targetNode_rightColumn.remove()
+            }
         }
         // vk.com
         else if (currentURL.startsWith('https://vk.com/')) {
@@ -402,11 +442,11 @@
 
                                     const spans = document.querySelectorAll('span.PostHeaderSubtitle__item');
                                     // if (spans.length > 0) { // на время тестирования
-                                        spans.forEach(span => {
-                                            if (span.textContent === 'Реклама в сообществе') {
-                                                span.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
-                                            }
-                                        });
+                                    spans.forEach(span => {
+                                        if (span.textContent === 'Реклама в сообществе') {
+                                            span.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
+                                        }
+                                    });
                                     // }
 
 
