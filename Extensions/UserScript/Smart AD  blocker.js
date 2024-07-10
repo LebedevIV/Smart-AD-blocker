@@ -271,8 +271,10 @@
                 // маленькая рекламная кнопка сверху
                 const TopBlock = document.querySelector('div.map-controls__additional-button')
                 if (TopBlock) TopBlock.parentNode.remove()
+                const LeftBlockFromPlaces = document.querySelector('div.banner-view')
+                if (LeftBlockFromPlaces) LeftBlockFromPlaces.parentNode.remove()
             }
-
+            // требует донастройки
             function AD_remove() {
                 // const targetNode = document.querySelector('div._has-banner') // более глобальный блок
                 const targetNode = document.querySelector('div.banner-view') // более точный блок
