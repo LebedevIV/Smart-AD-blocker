@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-09_05-24
+// @version      2024-07-10_13-06
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -16,8 +16,8 @@
 // @match        https://dzen.ru/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
-// @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.user.js
-// @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru.meta.js
+// @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru%2C%20Dzenru%2C%20VK%2C%20OK.user.js
+// @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru%2C%20Dzenru%2C%20VK%2C%20OK.meta.js
 // ==/UserScript==
 
 (function() {
@@ -262,9 +262,15 @@
         else if (currentURL.startsWith('https://yandex.ru/maps/')) {
             // реклама справа
             function AD_remove_first() {
-                let RightBlockFromImages
-                RightBlockFromImages = document.querySelector('div[data-chunk="promo"]')
+                // реклама справа
+                const RightBlockFromImages = document.querySelector('div[data-chunk="promo"]')
                 if (RightBlockFromImages) RightBlockFromImages.parentNode.parentNode.parentNode.remove()
+                // реклама слева
+                const LeftBlock = document.querySelector('div.banner-view')
+                if (LeftBlock) LeftBlock.parentNode.parentNode.parentNode.remove()
+                // маленькая рекламная кнопка сверху
+                const TopBlock = document.querySelector('div.map-controls__additional-button')
+                if (TopBlock) TopBlock.parentNode.remove()
             }
 
             function AD_remove() {
@@ -572,7 +578,7 @@
         if (classList.length === 3 &&
             classList.some(className => className.length === 7) &&
             classList.some(className => className.length === 7) &&
-            classList.some(className => className.includes('-') )) { // замечены варианты 15 и 17 длиной
+            classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
             Node.remove();
             // Node.style.display = 'none';
 
