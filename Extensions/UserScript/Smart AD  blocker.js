@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-10_13-06
+// @version      2024-07-10_14-24
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -125,6 +125,60 @@
             targetNode?.remove()
             const targetNodePopup = document.querySelector('div.Distribution-Popup')
             targetNodePopup?.remove()
+
+        }
+        // настроить обсервер
+        else if (currentURL.startsWith('https://ya.ru/images/')) {
+            // блок справа
+            function AD_remove_node(node, mutation_test) {
+                const targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
+                targetNode?.parentNode.remove()
+            }
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                const targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
+                                targetNode?.parentNode.remove()
+                            }
+                        });
+
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config);
+            AD_remove_node()
+
+        }
+        // настроить обсервер
+        // сделать пропуск видеозаставки
+        else if (currentURL.startsWith('https://ya.ru/video/')) {
+            // баннер сверху
+            function AD_remove_node(node, mutation_test) {
+                const targetNodes = document.querySelectorAll('div[role="button"]')
+                targetNodes?.forEach(node => {
+                    node.remove()
+                });
+            }
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                const targetNodes = document.querySelectorAll('div[role="button"]')
+                                targetNodes?.forEach(node => {
+                                    node.remove()
+                                });
+                            }
+                        });
+
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config);
+            AD_remove_node()
+            yandex_dzen_questionYandexGeneralSearch()
 
         }
         else if (currentURL.startsWith('https://ya.ru/')) {
@@ -303,56 +357,6 @@
         else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
             // внизу справа "Сделать поиск Яндекса основным?"
             yandex_dzen_questionYandexGeneralSearch()
-            //             // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
-            //             // Выбираем все div
-            //             const allDivs = document.querySelectorAll('div');
-
-            //             // Фильтруем div, чтобы оставить только те, у которых ровно три класса
-            //             const divsWithThreeClasses = Array.from(allDivs).filter(div => {
-            //                 const classes = div.classList;
-            //                 return classes.length === 3;
-            //             });
-
-
-            //             divsWithThreeClasses.forEach(div => {
-            //                 const DivChild = div.querySelector('div');
-            //                 function checkDivHasAnyId(div) {
-            //                     if (!div) {
-            //                         // console.log('Div not found.');
-            //                         return false;
-            //                     }
-
-            //                     if (!div.id) {
-            //                         // console.log('Div does not have an id.');
-            //                         return false;
-            //                     }
-
-            //                     // console.log('Div has an id.');
-            //                     // Проверяем, что div имеет ровно один класс
-            //                     if (div.classList.length !== 1) {
-            //                         // console.log('Div does not have exactly one class.');
-            //                         return false;
-            //                     }
-
-            //                     // есть вложенный div, принадлежащий пяти классам
-            //                     const DivChild2 = div.querySelector('div');
-            //                     if (!DivChild2) {
-            //                         return false;
-
-            //                     }
-            //                     // Проверяем, что div принадлежит ровно 5-ти классам
-            //                     if (DivChild2.classList.length !== 5) {
-            //                         // console.log('Div does not have exactly 5 classes.');
-            //                         return false;
-            //                     }
-
-            //                     return true;
-            //                 }
-
-            //                 const result = checkDivHasAnyId(DivChild);
-            //                 if (result) div.remove()
-
-            //             });
 
             // реклама слева
             const targetNode_leftColumn = document.querySelector('div.weather-maps__ad.weather-maps__ad_visible_yes.map-left-pane__ad')
