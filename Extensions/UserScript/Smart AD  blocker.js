@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-10_14-24
+// @version      2024-07-17_18-02
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -128,19 +128,27 @@
 
         }
         // настроить обсервер
-        else if (currentURL.startsWith('https://ya.ru/images/')) {
+        else if (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) {
             // блок справа
             function AD_remove_node(node, mutation_test) {
-                const targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
+                let targetNode
+                // баннер справа
+                targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
                 targetNode?.parentNode.remove()
+                targetNode = document.querySelector('div#ImagesViewer-SidebarAdv')
+                targetNode?.parentNode.parentNode.parentNode.remove()
+                // баннер вверху
+                targetNode = document.querySelector('div.AdvMastHead')
+                targetNode?.remove()
+                // if (node) observer.disconnect()
+
             }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeName === 'DIV') {
-                                const targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
-                                targetNode?.parentNode.remove()
+                                AD_remove_node(node, mutation)
                             }
                         });
 
@@ -151,6 +159,7 @@
             AD_remove_node()
 
         }
+
         // настроить обсервер
         // сделать пропуск видеозаставки
         else if (currentURL.startsWith('https://ya.ru/video/')) {
