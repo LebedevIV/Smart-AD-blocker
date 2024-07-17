@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-17_18-02
+// @version      2024-07-17_18-21
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -120,11 +120,30 @@
             observer.observe(document.querySelector(config.nodes.mail_ru_banner_top_parent), observer_config);
 
         }
-        else if (currentURL.startsWith('https://ya.ru/search/')) {
-            const targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
-            targetNode?.remove()
-            const targetNodePopup = document.querySelector('div.Distribution-Popup')
-            targetNodePopup?.remove()
+        else if (currentURL.startsWith('https://ya.ru/search/') || currentURL.startsWith('https://yandex.ru/search/')) {
+            function AD_remove_node(node, mutation_test) {
+                // баннер внизу справа "Сделать Яндекс основным поисковиком?"
+                const targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
+                targetNode?.remove()
+                const targetNodePopup = document.querySelector('div.Distribution-Popup')
+                targetNodePopup?.remove()
+
+            }
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                AD_remove_node(node, mutation)
+                            }
+                        });
+
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config);
+            AD_remove_node()
+
 
         }
         // настроить обсервер
