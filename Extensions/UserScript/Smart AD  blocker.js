@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-17_18-21
+// @version      2024-07-17_18-41
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -123,11 +123,14 @@
         else if (currentURL.startsWith('https://ya.ru/search/') || currentURL.startsWith('https://yandex.ru/search/')) {
             function AD_remove_node(node, mutation_test) {
                 // баннер внизу справа "Сделать Яндекс основным поисковиком?"
-                const targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
+                let targetNode
+                targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
                 targetNode?.remove()
-                const targetNodePopup = document.querySelector('div.Distribution-Popup')
-                targetNodePopup?.remove()
-
+                targetNode = document.querySelector('div.Distribution-Popup')
+                targetNode?.remove()
+                // вверху слева кнопка "Установите Яндекс Браузер"
+                targetNode = document.querySelector('div.DistrNav') || document.querySelector('div.HeaderDesktopActions-Distribution')
+                targetNode?.remove()
             }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
