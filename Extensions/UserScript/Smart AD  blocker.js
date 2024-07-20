@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-20_23-59
+// @version      2024-07-21_02-23
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -57,6 +57,7 @@
                     checkAndRemoveRightBlock(targetNode)
                     checkAndRemoveTopBlock(targetNode)
                     checkAndRemoveMailruSuggestions(null)
+                    mail_ru_checkAndRemoveTopBlock()
 
                     // Настраиваем наблюдение за изменениями в документе
                     const observer = new MutationObserver((mutationsList, observer) => {
@@ -74,6 +75,7 @@
                                 mutation.addedNodes.forEach(node => {
                                     if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
                                         checkAndRemoveMailruSuggestions(mutation)
+                                        mail_ru_checkAndRemoveTopBlock()
 
                                     }
                                 });
@@ -518,16 +520,23 @@
         // ok.ru
         else if (currentURL.startsWith('https://ok.ru/')) {
             // реклама справа
-
             function AD_remove() {
                 const targetNode_rightColumn = document.querySelector('div#rightColumn')
                 if (targetNode_rightColumn) {
                     clearInterval(interval_AD_remove)
                     targetNode_rightColumn.remove()
                 }
-
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
+            // реклама слева
+            function AD_Left_remove() {
+                const targetNode_LeftColumn = document.querySelector('div#hook_Block_StickyBannerContainer')
+                if (targetNode_LeftColumn) {
+                    clearInterval(interval_AD_Left_remove)
+                    targetNode_LeftColumn.remove()
+                }
+            }
+            const interval_AD_Left_remove = setInterval(AD_Left_remove, 500);
         }
 
     }
@@ -602,7 +611,8 @@
     // https://mail.ru/
     // Функция для проверки наличия и удаления верхнего рекламного блока
     function mail_ru_checkAndRemoveTopBlock() {
-        const targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
+        let targetNode
+        targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
         if (targetNode) {
             // тип ноды меняется через каждые несколько секунд
             let targetNode_banner
@@ -612,9 +622,11 @@
             if (targetNode_banner) {
                 targetNode_banner.remove()
             }
-            // });
-
         }
+        const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
+        targetNodes.forEach(node => {
+            node.remove();
+        });
     }
 
     function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
