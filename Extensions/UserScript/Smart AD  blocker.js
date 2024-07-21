@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-22_03-18
+// @version      2024-07-22_03-49
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -46,8 +46,6 @@
         const observer_config = { childList: true, subtree: true };
 
         if (currentURL.startsWith('https://e.mail.ru/')) {
-
-
 
             function checkFor_GeneralBlock() {
                 const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
@@ -523,14 +521,39 @@
         }
         // Дзен.Статьи
         else if (currentURL.startsWith('https://dzen.ru/a/')) {
-            const targetNodes = document.querySelectorAll('aside:not(.navigation-sidebar__container-TO)')
-            targetNodes.forEach(node => {
-                node.remove();
-            });
+            let targetNode_observer
+            function AD_remove_node(node, mutation_test) {
+                const targetNodes = targetNode_observer.querySelectorAll('aside:not(.navigation-sidebar__container-TO)') || targetNode_observer.querySelectorAll('div.article-right-ad-block__sticky') || targetNode_observer.querySelectorAll('ya-recommendation-widget') || targetNode_observer.querySelectorAll('article-right-ad-block__sticky')
+                targetNodes.forEach(node => {
+                    node.remove();
+                });
+            }
+            function AD_remove() {
+                targetNode_observer = document.querySelector('div#page-root') // более точный блок для наблюдения изменений
+                if (targetNode_observer) {
+                    clearInterval(interval_AD_remove)
+                    AD_remove_node()
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for (let mutation of mutationsList) {
+                            if (mutation.type === 'childList') {
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeName === 'DIV') {
+                                        AD_remove_node(node, mutation)
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    observer.observe(targetNode_observer, observer_config);
+                }
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500);
+
         }
         // Дзен: общее
         // брать за образец
         else if (currentURL.startsWith('https://dzen.ru/')) {
+            let targetNode_observer
             function AD_remove_node(node, mutation_test) {
                 // баннер сверху
                 const targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
@@ -545,8 +568,8 @@
                 targetNode?.remove()
             }
             function AD_remove() {
-                const targetNode = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
-                if (targetNode) {
+                targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
+                if (targetNode_observer) {
                     clearInterval(interval_AD_remove)
                     AD_remove_node()
                     const observer = new MutationObserver((mutationsList, observer) => {
@@ -560,7 +583,7 @@
                             }
                         }
                     });
-                    observer.observe(targetNode, observer_config);
+                    observer.observe(targetNode_observer, observer_config);
                 }
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
