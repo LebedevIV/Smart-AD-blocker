@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-21_22-23
+// @version      2024-07-22_03-18
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -122,7 +122,7 @@
             observer.observe(document.querySelector(config.nodes.mail_ru_banner_top_parent), observer_config);
 
         }
-        else if (currentURL.startsWith('https://ya.ru/search/') || currentURL.startsWith('https://yandex.ru/search/')) {
+        else if (currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search')) {
             function AD_remove_node(node, mutation_test) {
                 // баннер внизу справа "Сделать Яндекс основным поисковиком?"
                 let targetNode
@@ -218,12 +218,76 @@
 
         }
         else if (currentURL.startsWith('https://ya.ru/')) {
-            const targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
-            targetNode?.remove()
-            const dist_stripe = document.querySelector("div.dist-stripe")
-            dist_stripe?.parentNode.remove()
+            // Добавление кнопки "Специально для Вас..."
+            const EspeciallyForYou = CreateEspeciallyForYou()
+            // const EspeciallyForYou_Content = EspeciallyForYou.querySelector('div.shimmer')
 
-        }
+
+            // Удаление без наблюдения
+            // перенос всей рекламы в специальный фрейм "Специально для Вас..."
+            // const headline__personal = document.querySelector('div.headline__personal')
+            let targetNode
+            // курсы валют и нефти (сделать опциональным)
+            targetNode = document.querySelector('section.informers3__stocks')
+            // targetNode?.remove()
+            if (targetNode) {
+                targetNode.style.marginTop = '0.3rem'
+                EspeciallyForYou?.appendChild(targetNode)
+            }
+            targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
+            // targetNode?.remove()
+            if (targetNode) EspeciallyForYou?.appendChild(targetNode)
+            const dist_stripe = document.querySelector("div.dist-stripe")
+            // dist_stripe?.parentNode.remove()
+            if (targetNode) EspeciallyForYou?.appendChild(targetNode)
+
+            // Добавление EspeciallyForYou под блок поля поиска
+            const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
+            if (ForEspeciallyForYou_Container) {
+                ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
+                // EspeciallyForYou.style.removeProperty('display')
+            }
+
+            // Удаление с наблюдением
+            function AD_remove_node(node, mutation_test) {
+                // Кнопка "Установить Яндекс.браузер"
+                let targetNode = document.querySelector('div.link-bro')
+                // targetNode?.remove()
+                if (targetNode) {
+                    if (EspeciallyForYou.querySelector('div.link-bro')) {
+                        targetNode?.remove()
+                    }
+                    else {
+                        targetNode.style.position = 'unset'
+                        targetNode.style.marginTop = '0.3rem'
+                        const targetNodeA = targetNode.querySelector('a')
+                        if (targetNodeA) targetNodeA.style.marginBottom = 0
+                        EspeciallyForYou?.appendChild(targetNode)
+                    }
+                }
+            }
+            function AD_remove() {
+                const targetNode = document.querySelector('div.search3__inner') // более точный блок для наблюдения изменений
+                if (targetNode) {
+                    clearInterval(interval_AD_remove)
+                    AD_remove_node()
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for (let mutation of mutationsList) {
+                            if (mutation.type === 'childList') {
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeName === 'DIV') {
+                                        AD_remove_node(node, mutation)
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    observer.observe(targetNode, observer_config)
+                }
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500)
+
+            }
         // каталог игр
         else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
@@ -464,6 +528,43 @@
                 node.remove();
             });
         }
+        // Дзен: общее
+        // брать за образец
+        else if (currentURL.startsWith('https://dzen.ru/')) {
+            function AD_remove_node(node, mutation_test) {
+                // баннер сверху
+                const targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
+                targetNodes.forEach(node => {
+                    node.remove()
+                })
+                // Кнопка "Установить Яндекс.браузер"
+                let targetNode = document.querySelector('div#ya-dist-link_bro')
+                targetNode?.remove()
+                // курсы валют и нефти (сделать опциональным)
+                targetNode = document.querySelector('div.header-widgets__rates-ii')
+                targetNode?.remove()
+            }
+            function AD_remove() {
+                const targetNode = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
+                if (targetNode) {
+                    clearInterval(interval_AD_remove)
+                    AD_remove_node()
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for (let mutation of mutationsList) {
+                            if (mutation.type === 'childList') {
+                                mutation.addedNodes.forEach(node => {
+                                    if (node.nodeName === 'DIV') {
+                                        AD_remove_node(node, mutation)
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    observer.observe(targetNode, observer_config);
+                }
+            }
+            const interval_AD_remove = setInterval(AD_remove, 500);
+        }
         // vk.com
         else if (currentURL.startsWith('https://vk.com/')) {
             // реклама слева
@@ -544,6 +645,69 @@
 
     }
 
+    // Добавлекние раскрывающегося блока "Специально для Вас..."
+    function CreateEspeciallyForYou() {
+        // Создание стилей с помощью JavaScript
+        const style = document.createElement("style");
+        style.textContent = `
+                details {
+                    // display: none;
+                    font-family: Arial, sans-serif;
+                    font-size: 18px;
+                    color: #333;
+                    position: relative;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    background-color: #fff;
+                }
+                summary {
+                    cursor: pointer;
+                    outline: none;
+                    position: relative;
+                    z-index: 1;
+                    color: #df4a0f; /* Изменение цвета текста на красный */
+                }
+                .shimmer {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+                    animation: shimmer 60s linear infinite;
+                    pointer-events: none;
+                }
+                @keyframes shimmer {
+                    0% {
+                        transform: translateX(-100%);
+                    }
+                    100% {
+                        transform: translateX(100%);
+                    }
+                }
+            `;
+        document.head.appendChild(style);
+
+        // Создание элемента details
+        const details = document.createElement("details");
+
+        const summary = document.createElement("summary");
+        summary.textContent = "Специально для Вас...";
+
+        const shimmer = document.createElement("div");
+        shimmer.className = "shimmer";
+
+        // const content = document.createElement("p");
+        // content.textContent = "Содержимое деталей...";
+
+        details.appendChild(summary);
+        details.appendChild(shimmer);
+        // details.appendChild(content);
+
+        // document.body.appendChild(details);
+        return details
+    }
 
 
     // https://e.mail.ru/inbox/
