@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-22_11-36
+// @version      2024-07-22_17-18
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -241,9 +241,8 @@
 
             // Добавление EspeciallyForYou под блок поля поиска
             const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
-            if (ForEspeciallyForYou_Container) {
+            if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
                 ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
-                EspeciallyForYou.style.removeProperty('display')
             }
 
             const mainElement = document.querySelector('main.body__wrapper');
@@ -256,8 +255,7 @@
             function AD_remove_node(node, mutation_test) {
                 // Кнопка "Установить Яндекс.браузер"
                 let targetNode = document.querySelector('div.link-bro')
-                // targetNode?.remove()
-                if (targetNode) {
+                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
                     if (EspeciallyForYou.querySelector('div.link-bro')) {
                         targetNode?.remove()
                     }
@@ -560,20 +558,77 @@
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
         else if (currentURL.startsWith('https://dzen.ru/')) {
+            // Добавление кнопки "Специально для Вас..."
+            const EspeciallyForYou = CreateEspeciallyForYou()
             let targetNode_observer
+
             function AD_remove_node(node, mutation_test) {
-                // баннер сверху
-                const targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
-                targetNodes.forEach(node => {
-                    node.remove()
-                })
-                // Кнопка "Установить Яндекс.браузер"
-                let targetNode = document.querySelector('div#ya-dist-link_bro')
-                targetNode?.remove()
+                let targetNode
+                let targetNodes
                 // курсы валют и нефти (сделать опциональным)
                 targetNode = document.querySelector('div.header-widgets__rates-ii')
-                targetNode?.remove()
+                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                    if (EspeciallyForYou.querySelector('div.header-widgets__rates-ii')) {
+                        targetNode?.remove()
+                    }
+                    else {
+                        targetNode.style.position = 'unset'
+                        targetNode.style.marginTop = '0.3rem'
+                        const targetNodeA = targetNode.querySelector('a')
+                        if (targetNodeA) targetNodeA.style.marginBottom = 0
+                        EspeciallyForYou?.appendChild(targetNode)
+                    }
+                }
+
+                // Кнопка "Установить Яндекс.браузер"
+                targetNode = document.querySelector('div#ya-dist-link_bro') || document.querySelector('div#ya-dist-teaser')
+                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                    if (EspeciallyForYou.querySelector('div#ya-dist-link_bro') || EspeciallyForYou.querySelector('div#ya-dist-teaser')) {
+                        targetNode?.remove()
+                    }
+                    else {
+                        targetNode.style.position = 'unset'
+                        targetNode.style.marginTop = '0.3rem'
+                        const targetNodeA = targetNode.querySelector('a')
+                        if (targetNodeA) targetNodeA.style.marginBottom = 0
+                        EspeciallyForYou?.appendChild(targetNode)
+                    }
+                }
+                // баннер сверху
+                targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
+                if (targetNodes.length > 0) {
+                    const targetNodes_EspeciallyForYou = EspeciallyForYou.querySelectorAll('div[data-testid="ad-banner"]')
+                    if (targetNodes_EspeciallyForYou.length > 0) {
+                        targetNodes.forEach(node => {
+                            if (node.parentNode !== EspeciallyForYou) {
+                                node.remove()
+                            }
+                        })
+                    }
+                    else {
+                        targetNodes.forEach(node => {
+                            node.style.marginTop = '0.3rem'
+                            EspeciallyForYou?.appendChild(node)
+                        })
+                    }
+                }
+                // реклама в видеоблоках
+                targetNodes = document.querySelectorAll('div.zenad-card-rtb__ad')
+                targetNodes.forEach(node => {
+                    if (node.parentNode !== EspeciallyForYou) {
+                        node.style.marginTop = '0.3rem'
+                        EspeciallyForYou?.appendChild(node)
+                    }
+                })
+
+                // Добавление EspeciallyForYou под блок поля поиска
+                const ForEspeciallyForYou_Container = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot')
+                if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
+                    ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
+                }
+
             }
+            // Удаление с наблюдением
             function AD_remove() {
                 targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
                 if (targetNode_observer) {
@@ -690,6 +745,8 @@
                     border: 1px solid #ccc;
                     border-radius: 5px;
                     background-color: #fff;
+                    max-height: 50vh;
+                    overflow-y: auto;
                 }
                 summary {
                     cursor: pointer;
