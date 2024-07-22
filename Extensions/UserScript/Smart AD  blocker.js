@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-22_17-18
+// @version      2024-07-22_17-42
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -580,20 +580,23 @@
                     }
                 }
 
-                // Кнопка "Установить Яндекс.браузер"
-                targetNode = document.querySelector('div#ya-dist-link_bro') || document.querySelector('div#ya-dist-teaser')
-                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
-                    if (EspeciallyForYou.querySelector('div#ya-dist-link_bro') || EspeciallyForYou.querySelector('div#ya-dist-teaser')) {
-                        targetNode?.remove()
-                    }
-                    else {
-                        targetNode.style.position = 'unset'
-                        targetNode.style.marginTop = '0.3rem'
-                        const targetNodeA = targetNode.querySelector('a')
-                        if (targetNodeA) targetNodeA.style.marginBottom = 0
-                        EspeciallyForYou?.appendChild(targetNode)
-                    }
-                }
+                // Кнопка "Установить Яндекс.браузер" под поиском
+                // targetNode = document.querySelector('div#ya-dist-link_bro')
+                // if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                //     if (EspeciallyForYou.querySelector('div#ya-dist-link_bro')) {
+                //         // targetNode?.remove()
+                //     }
+                //     else {
+                //         targetNode.style.position = 'unset'
+                //         targetNode.style.marginTop = '0.3rem'
+                //         const targetNodeA = targetNode.querySelector('a')
+                //         if (targetNodeA) targetNodeA.style.marginBottom = 0
+                //         EspeciallyForYou?.appendChild(targetNode)
+                //     }
+                // }
+                // Кнопка "Установить Яндекс.браузер" внизу справа
+                targetNode = document.querySelector('div#ya-dist-teaser')
+                if (targetNode) targetNode?.remove()
                 // баннер сверху
                 targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
                 if (targetNodes.length > 0) {
@@ -615,10 +618,12 @@
                 // реклама в видеоблоках
                 targetNodes = document.querySelectorAll('div.zenad-card-rtb__ad')
                 targetNodes.forEach(node => {
-                    if (node.parentNode !== EspeciallyForYou) {
-                        node.style.marginTop = '0.3rem'
-                        EspeciallyForYou?.appendChild(node)
-                    }
+                    // if (node.parentNode !== EspeciallyForYou) {
+                    //     node.style.marginTop = '0.3rem'
+                    //     EspeciallyForYou?.appendChild(node)
+                    // }
+                    // удаление так как слишком много этой рекламы
+                    node.remove()
                 })
 
                 // Добавление EspeciallyForYou под блок поля поиска
