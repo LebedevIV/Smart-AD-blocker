@@ -723,7 +723,7 @@
         const details = document.createElement("details");
 
         const summary = document.createElement("summary");
-        summary.textContent = "Специально для Вас...";
+        summary.textContent = "Специальные предложения";
 
         const shimmer = document.createElement("div");
         shimmer.className = "shimmer";
