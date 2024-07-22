@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-22_03-49
+// @version      2024-07-22_11-36
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -243,7 +243,13 @@
             const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
             if (ForEspeciallyForYou_Container) {
                 ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
-                // EspeciallyForYou.style.removeProperty('display')
+                EspeciallyForYou.style.removeProperty('display')
+            }
+
+            const mainElement = document.querySelector('main.body__wrapper');
+            if (mainElement) {
+                const targetNode = mainElement.querySelector('div[data-hydration-id] > div.dist-stripe');
+                if (targetNode) EspeciallyForYou?.appendChild(targetNode.parentNode)
             }
 
             // Удаление с наблюдением
@@ -520,6 +526,7 @@
             }
         }
         // Дзен.Статьи
+        // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (currentURL.startsWith('https://dzen.ru/a/')) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
@@ -551,7 +558,7 @@
 
         }
         // Дзен: общее
-        // брать за образец
+        // брать за образец в случае хаотичной рекламы
         else if (currentURL.startsWith('https://dzen.ru/')) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
