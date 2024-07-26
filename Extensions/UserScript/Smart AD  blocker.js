@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-22_17-42
+// @version      2024-07-26_22-55
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -452,9 +452,50 @@
                 }
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
-
-
         }
+        // https://yandex.ru/health
+        // брать за образец в случае рекламы внутри наблюдаемой ноды
+        else if (currentURL.startsWith('https://yandex.ru/health')) {
+
+            function AD_remove_node(node, mutation_test) {
+                let targetNode
+                let targetNodes
+
+                // баннер сверху
+                // реклама по всем направлениям
+                targetNodes = document.querySelectorAll('div.advert_type_horizontal')
+                targetNodes.forEach(node => {
+                    node.remove()
+                })
+                targetNodes = document.querySelectorAll('span.advert_type_horizontal')
+                targetNodes.forEach(node => {
+                    node.remove()
+                })
+
+                // правый стобец
+                targetNode = document.querySelector('div.row__col.layout__right')
+                targetNode?.remove()
+
+            }
+            // Удаление с наблюдением
+            function AD_remove() {
+                AD_remove_node()
+                const observer = new MutationObserver((mutationsList, observer) => {
+                    for (let mutation of mutationsList) {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach(node => {
+                                if (node.nodeName === 'DIV') {
+                                    AD_remove_node(node, mutation)
+                                }
+                            });
+                        }
+                    }
+                });
+                observer.observe(document.body, observer_config)
+            }
+            AD_remove()
+        }
+
         // Яндекс.погода: карта
         else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
             // внизу справа "Сделать поиск Яндекса основным?"
@@ -784,8 +825,19 @@
         // Создание элемента details
         const details = document.createElement("details");
 
+        // Определение языка браузера
+        const browserLanguage = navigator.language || navigator.userLanguage;
+        let messageSpecialOffer = 'Специальные предложения'
+
+        switch (browserLanguage) {
+            case "uken":
+                messageSpecialOffer = 'Спеціальні пропозиції'
+                break;
+            default:
+                messageSpecialOffer = 'Специальные предложения'
+        }
         const summary = document.createElement("summary");
-        summary.textContent = "Специальные предложения";
+        summary.textContent = messageSpecialOffer;
 
         const shimmer = document.createElement("div");
         shimmer.className = "shimmer";
@@ -839,29 +891,20 @@
     // Функция для проверки наличия и удаления верхнего блока
     function checkAndRemoveTopBlock(mutation_test) {
         // блок опрделяется непосредственно перед анализом так как иначе теряется
-        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
+        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock); // div.application-mail__layout.application-mail__layout_main
         const span = targetNode.querySelector('span');
         if (span) {
             // const divs = span.querySelectorAll('div');
             // Получаем непосредственные дочерние элементы
-            const divs = span.children;
-
-            // Перебираем дочерние элементы
-            for (let div of divs) {
-                const classList = Array.from(div.classList);
-                if (classList.length === 1 &&
-                    classList.some(className => className.length === 7) ) {
-
-                    const DivBlock = div.querySelector('div > div > div > div > div > div > div')
-                    const DivBlockclassList = Array.from(DivBlock.classList);
-                    if (DivBlockclassList.length === 3 &&
-                        DivBlockclassList.some(className => className.length === 7) &&
-                        DivBlockclassList.some(className => className.length === 15) &&
-                        DivBlockclassList.some(className => className.length === 15)) {
-                        // console.log('Найден и удален div:', div);
-                        DivBlock.remove();
-                        break;
-                    }
+            const DivBlock = span.querySelector("div.new-menu").previousSibling
+            if (DivBlock) {
+                const DivBlockclassList = Array.from(DivBlock.classList);
+                if (DivBlockclassList.length === 3 &&
+                    DivBlockclassList.some(className => className.length === 7) &&
+                    DivBlockclassList.some(className => className.length === 15) &&
+                    DivBlockclassList.some(className => className.length === 15)) {
+                    // console.log('Найден и удален div:', div);
+                    DivBlock.remove();
                 }
             }
         }
