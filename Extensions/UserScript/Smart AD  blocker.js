@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-26_22-55
+// @version      2024-07-27_13-12
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -154,6 +154,7 @@
             // блок справа
             function AD_remove_node(node, mutation_test) {
                 let targetNode
+                let targetNodes
                 // баннер "Сделать Яндекс основным поисковиком?"
                 targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
                 targetNode?.remove()
@@ -166,7 +167,11 @@
                 targetNode = document.querySelector('div.AdvMastHead')
                 targetNode?.remove()
                 // if (node) observer.disconnect()
-
+                // блое поверх страницы
+                targetNodes = document.querySelectorAll('div[id^="ImagesViewer-"]');
+                targetNodes.forEach(node => {
+                    node.parentNode.parentNode.remove()
+                });
             }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
