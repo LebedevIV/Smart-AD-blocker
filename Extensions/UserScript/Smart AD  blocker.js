@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-27_13-34
+// @version      2024-07-28_12-47
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -151,13 +151,27 @@
         }
         // настроить обсервер
         else if (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) {
+            // Добавление кнопки "Специальные предложения"
+            const EspeciallyForYou = CreateEspeciallyForYou()
+            let EspeciallyForYou_fact = false
+            let ADRight_fact = false // факт вывода рекоамного блока справа
+
             // блок справа
             function AD_remove_node(node, mutation_test) {
                 let targetNode
                 let targetNodes
+
                 // баннер "Сделать Яндекс основным поисковиком?"
                 targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
-                targetNode?.remove()
+                if (targetNode) {
+                    if (EspeciallyForYou_fact === false) {
+                        targetNode.style.marginTop = '0.3rem'
+                        EspeciallyForYou?.appendChild(targetNode)
+                    }
+                    else {
+                        targetNode?.remove()
+                    }
+                }
                 // баннер справа
                 targetNode = document.querySelector('div.ImagesViewer-SidebarAdv')
                 targetNode?.parentNode.remove()
@@ -170,21 +184,79 @@
                 // при нажатии на какую-либо картинку открывается модальное окно
                 const targetNodeModal = document.querySelector('div.Modal.Modal_visible.Modal_theme_normal.ImagesViewer-Modal.ImagesViewer')
                 if (targetNodeModal) {
-                    targetNodes = targetNodeModal.querySelectorAll('div[id^="ImagesViewer-"]');
+                    // в модальном окне удаление рекламы справа
+                    targetNodes = targetNodeModal.querySelectorAll('div[id^="ImagesViewer-"]')
                     targetNodes.forEach(node => {
-                        node.parentNode.parentNode.remove()
+                        // Поиск главного родительского блока, содержащего рекламу
+                        const node_parentNode = findParentWithClassEndingInCard(node)
+                        if (!ADRight_fact) {
+                            node.style.marginTop = '0.3rem'
+                            EspeciallyForYou?.appendChild(node)
+                            ADRight_fact = true
+                        }
+                        node_parentNode?.remove()
+
                     });
+
+                    // добавление "Специальные предложения" под блок-ссылку на источник изображения
+                    if (EspeciallyForYou_fact === false) {
+                        const div_imageSource = targetNodeModal.querySelector('div.ImagesViewer-LayoutSideblock')
+                        if (div_imageSource) {
+                            div_imageSource.appendChild(EspeciallyForYou)
+                            EspeciallyForYou_fact = true
+                        }
+                    }
+
+                    // Поиск главного родительского блока, содержащего рекламу
+                    function findParentWithClassEndingInCard(node) {
+                        let currentNode = node
+
+                        // Проверяем каждого родителя, пока не найдем нужный элемент или не дойдем до корня документа
+                        while (currentNode && currentNode !== document.body) {
+                            // Проверяем, есть ли у текущего элемента класс, оканчивающийся на "-Card"
+                            if (currentNode.classList && Array.from(currentNode.classList).some(className => className.endsWith('-Card'))) {
+                                return currentNode;
+                            }
+                            // Переходим к следующему родителю
+                            currentNode = currentNode.parentNode
+                        }
+
+                        // Если нужный элемент не найден, возвращаем null
+                        return null;
+                    }
                 }
+                // else {
+                //     // сброс флага вывода блока "Специлаьные предложения" при закрытии модального окна
+                //     EspeciallyForYou_fact = false
+                // }
             }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
                             // if (node.nodeName === 'DIV') {
+                            if (node.className !== 'details_EspeciallyForYou') {
                                 AD_remove_node(node, mutation)
-                            // }
-                        });
+                            }
 
+                        });
+                        mutation.removedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                const targetNodeModal = document.querySelector('div.Modal.Modal_visible.Modal_theme_normal.ImagesViewer-Modal.ImagesViewer')
+                                // модальное окно изображения было закрыто
+                                if (!targetNodeModal) {
+                                    EspeciallyForYou_fact = false
+                                    ADRight_fact = false
+                                    // Очистка <details>
+                                    // Выбираем все дочерние элементы <details>, кроме <summary>
+                                    const childNodes = EspeciallyForYou.querySelectorAll('details > *:not(summary)');
+                                    // Удаляем каждый из выбранных элементов
+                                    childNodes.forEach(node => {
+                                        EspeciallyForYou.removeChild(node);
+                                    });
+                                }
+                            }
+                        });
                     }
                 }
             });
@@ -787,7 +859,7 @@
     // Добавлекние раскрывающегося блока "Специально для Вас..."
     function CreateEspeciallyForYou() {
         // Создание стилей с помощью JavaScript
-        const style = document.createElement("style");
+        const style = document.createElement("style")
         style.textContent = `
                 details {
                     // display: none;
@@ -832,6 +904,8 @@
 
         // Создание элемента details
         const details = document.createElement("details");
+        // Добавляем класс my-details-class к элементу <details>
+        details.classList.add('details_EspeciallyForYou');
 
         // Определение языка браузера
         const browserLanguage = navigator.language || navigator.userLanguage;
