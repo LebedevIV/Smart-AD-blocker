@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-30_16-11
+// @version      2024-07-31_18-04
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -151,10 +151,10 @@
         }
         // настроить обсервер
         else if (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) {
-            // Добавление кнопки "Специальные предложения"
+            // Добавление кнопки "Реклама"
             const EspeciallyForYou = CreateEspeciallyForYou()
             let EspeciallyForYou_fact = false
-            let ADRight_fact = false // факт вывода рекоамного блока справа внутри "Специальные предложения"
+            let ADRight_fact = false // факт вывода рекоамного блока справа внутри "Реклама"
 
             // блок справа
             function AD_remove_node(node, mutation_test) {
@@ -198,7 +198,7 @@
 
                     });
 
-                    // добавление "Специальные предложения" под блок-ссылку на источник изображения
+                    // добавление "Реклама" под блок-ссылку на источник изображения
                     if (EspeciallyForYou_fact === false) {
                         const div_imageSource = targetNodeModal.querySelector('div.ImagesViewer-LayoutSideblock')
                         if (div_imageSource) {
@@ -226,7 +226,7 @@
                     }
                 }
                 // else {
-                //     // сброс флага вывода блока "Специлаьные предложения" при закрытии модального окна
+                //     // сброс флага вывода блока "Реклама" при закрытии модального окна
                 //     EspeciallyForYou_fact = false
                 // }
             }
@@ -296,7 +296,7 @@
 
         }
         else if (currentURL.startsWith('https://ya.ru/')) {
-            // Добавление кнопки "Специально для Вас..."
+            // Добавление кнопки "Реклама"
             const EspeciallyForYou = CreateEspeciallyForYou()
             // const EspeciallyForYou_Content = EspeciallyForYou.querySelector('div.shimmer')
             // simple-popup dist-overlay__popup simple-popup_direction_center simple-popup_theme_modal simple-popup_autoclosable_yes simple-popup_overlay_yes simple-popup_has-close_yes simple-popup_delay-close_yes simple-popup_overlay-color_default simple-popup_shown_true simple-popup_delay-close-shown_yes
@@ -735,6 +735,7 @@
                 //         EspeciallyForYou?.appendChild(targetNode)
                 //     }
                 // }
+
                 // Кнопка "Установить Яндекс.браузер" внизу справа
                 targetNode = document.querySelector('div#ya-dist-teaser')
                 if (targetNode) targetNode?.remove()
@@ -766,7 +767,10 @@
                     // удаление так как слишком много этой рекламы
                     node.remove()
                 })
-
+                // Модальное окно "Яндекс станет основным поиском"
+                document.querySelector('div#ya-dist-splashscreen')?.remove()
+                // Слева вверху "Сделать поиск Яндекса основным?"
+                document.querySelector('div#ya-dist-popup')?.remove()
                 // Добавление EspeciallyForYou под блок поля поиска
                 const ForEspeciallyForYou_Container = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot')
                 if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
@@ -876,7 +880,7 @@
 
     }
 
-    // Добавлекние раскрывающегося блока "Специально для Вас..."
+    // Добавлекние раскрывающегося блока "Реклама"
     function CreateEspeciallyForYou() {
         // Создание стилей с помощью JavaScript
         const style = document.createElement("style")
@@ -929,14 +933,14 @@
 
         // Определение языка браузера
         const browserLanguage = navigator.language || navigator.userLanguage;
-        let messageSpecialOffer = 'Специальные предложения'
+        let messageSpecialOffer = 'Реклама'
 
         switch (browserLanguage) {
             case "uken":
-                messageSpecialOffer = 'Спеціальні пропозиції'
+                messageSpecialOffer = 'Реклама'
                 break;
             default:
-                messageSpecialOffer = 'Специальные предложения'
+                messageSpecialOffer = 'Реклама'
         }
         const summary = document.createElement("summary");
         summary.textContent = messageSpecialOffer;
