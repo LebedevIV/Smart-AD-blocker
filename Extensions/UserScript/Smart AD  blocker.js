@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-07-31_18-04
+// @version      2024-07-31_23-43
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -696,6 +696,29 @@
             const interval_AD_remove = setInterval(AD_remove, 500);
 
         }
+        // Дзен.Видео
+        // брать за образец в случае рекламы внутри наблюдаемой ноды
+        else if (currentURL.startsWith('https://dzen.ru/video/')) {
+            function AD_remove_node(node, mutation_test) {
+                // document.querySelectorAll('div[class^="video-card-ad"]').forEach(node => {
+                document.querySelectorAll('div.video-card-ads').forEach(node => {
+                    node?.remove()
+                })
+            }
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                AD_remove_node(node, mutation)
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+            AD_remove_node()
+        }
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
         else if (currentURL.startsWith('https://dzen.ru/')) {
@@ -960,151 +983,151 @@
     }
 
 
-// https://e.mail.ru/inbox/
-// Функция для проверки наличия и удаления правого блока
-function checkAndRemoveRightBlock(mutation_test) {
-    // блок опрделяется непосредственно перед анализом так как иначе теряется
-    const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
-    const span = targetNode.querySelector('span');
-    if (span) {
-        const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented');
-        if (RightBlock) {
-            RightBlock.remove();
-        }
-        else {
-            // const divs = span.querySelectorAll('div');
-            // Получаем непосредственные дочерние элементы
-            const divs = span.children;
+    // https://e.mail.ru/inbox/
+    // Функция для проверки наличия и удаления правого блока
+    function checkAndRemoveRightBlock(mutation_test) {
+        // блок опрделяется непосредственно перед анализом так как иначе теряется
+        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
+        const span = targetNode.querySelector('span');
+        if (span) {
+            const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented');
+            if (RightBlock) {
+                RightBlock.remove();
+            }
+            else {
+                // const divs = span.querySelectorAll('div');
+                // Получаем непосредственные дочерние элементы
+                const divs = span.children;
 
-            // Перебираем дочерние элементы
-            if (divs.length === 3) {
-                for (let div of divs) {
-                    const classList = Array.from(div.classList);
-                    if (classList.length === 3 &&
-                        classList.some(className => className.length === 7) &&
-                        classList.some(className => className.length === 15) &&
-                        classList.some(className => className.length === 15)) {
-                        // console.log('Найден и удален div:', div);
-                        div.remove();
-                        break;
+                // Перебираем дочерние элементы
+                if (divs.length === 3) {
+                    for (let div of divs) {
+                        const classList = Array.from(div.classList);
+                        if (classList.length === 3 &&
+                            classList.some(className => className.length === 7) &&
+                            classList.some(className => className.length === 15) &&
+                            classList.some(className => className.length === 15)) {
+                            // console.log('Найден и удален div:', div);
+                            div.remove();
+                            break;
+                        }
                     }
                 }
             }
         }
     }
-}
-// https://e.mail.ru/inbox/
-// Функция для проверки наличия и удаления верхнего блока
-function checkAndRemoveTopBlock(mutation_test) {
-    // блок опрделяется непосредственно перед анализом так как иначе теряется
-    const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock); // div.application-mail__layout.application-mail__layout_main
-    const span = targetNode.querySelector('span');
-    if (span) {
-        // const divs = span.querySelectorAll('div');
-        // Получаем непосредственные дочерние элементы
-        const DivBlock = span.querySelector("div.new-menu").previousSibling
-        if (DivBlock) {
-            const DivBlockclassList = Array.from(DivBlock.classList);
-            if (DivBlockclassList.length === 3 &&
-                DivBlockclassList.some(className => className.length === 7) &&
-                DivBlockclassList.some(className => className.length === 15) &&
-                DivBlockclassList.some(className => className.length === 15)) {
-                // console.log('Найден и удален div:', div);
-                DivBlock.remove();
+    // https://e.mail.ru/inbox/
+    // Функция для проверки наличия и удаления верхнего блока
+    function checkAndRemoveTopBlock(mutation_test) {
+        // блок опрделяется непосредственно перед анализом так как иначе теряется
+        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock); // div.application-mail__layout.application-mail__layout_main
+        const span = targetNode.querySelector('span');
+        if (span) {
+            // const divs = span.querySelectorAll('div');
+            // Получаем непосредственные дочерние элементы
+            const DivBlock = span.querySelector("div.new-menu").previousSibling
+            if (DivBlock) {
+                const DivBlockclassList = Array.from(DivBlock.classList);
+                if (DivBlockclassList.length === 3 &&
+                    DivBlockclassList.some(className => className.length === 7) &&
+                    DivBlockclassList.some(className => className.length === 15) &&
+                    DivBlockclassList.some(className => className.length === 15)) {
+                    // console.log('Найден и удален div:', div);
+                    DivBlock.remove();
+                }
             }
         }
     }
-}
 
-// https://mail.ru/
-// Функция для проверки наличия и удаления верхнего рекламного блока
-function mail_ru_checkAndRemoveTopBlock() {
-    let targetNode
-    targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
-    if (targetNode) {
-        // тип ноды меняется через каждые несколько секунд
-        let targetNode_banner
+    // https://mail.ru/
+    // Функция для проверки наличия и удаления верхнего рекламного блока
+    function mail_ru_checkAndRemoveTopBlock() {
+        let targetNode
+        targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
+        if (targetNode) {
+            // тип ноды меняется через каждые несколько секунд
+            let targetNode_banner
 
-        targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
+            targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
 
-        if (targetNode_banner) {
-            targetNode_banner.remove()
+            if (targetNode_banner) {
+                targetNode_banner.remove()
+            }
+        }
+        const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
+        targetNodes.forEach(node => {
+            node.remove();
+        });
+    }
+
+    function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
+        const classList = Array.from(Node.classList);
+        if (classList.length === 3 &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
+            Node.remove();
+            // Node.style.display = 'none';
+
         }
     }
-    const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
-    targetNodes.forEach(node => {
-        node.remove();
-    });
-}
 
-function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
-    const classList = Array.from(Node.classList);
-    if (classList.length === 3 &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
-        Node.remove();
-        // Node.style.display = 'none';
+    // внизу справа "Сделать поиск Яндекса основным?"
+    function yandex_dzen_questionYandexGeneralSearch() {
+        // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
+        // Выбираем все div
+        const allDivs = document.querySelectorAll('div');
+
+        // Фильтруем div, чтобы оставить только те, у которых ровно три класса
+        const divsWithThreeClasses = Array.from(allDivs).filter(div => {
+            const classes = div.classList;
+            return classes.length === 3;
+        });
+
+
+        divsWithThreeClasses.forEach(div => {
+            const DivChild = div.querySelector('div');
+            function checkDivHasAnyId(div) {
+                if (!div) {
+                    // console.log('Div not found.');
+                    return false;
+                }
+
+                if (!div.id) {
+                    // console.log('Div does not have an id.');
+                    return false;
+                }
+
+                // console.log('Div has an id.');
+                // Проверяем, что div имеет ровно один класс
+                if (div.classList.length !== 1) {
+                    // console.log('Div does not have exactly one class.');
+                    return false;
+                }
+
+                // есть вложенный div, принадлежащий пяти классам
+                const DivChild2 = div.querySelector('div');
+                if (!DivChild2) {
+                    return false;
+
+                }
+                // Проверяем, что div принадлежит ровно 5-ти классам
+                if (DivChild2.classList.length !== 5) {
+                    // console.log('Div does not have exactly 5 classes.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            const result = checkDivHasAnyId(DivChild);
+            if (result) div.remove()
+
+        });
 
     }
-}
 
-// внизу справа "Сделать поиск Яндекса основным?"
-function yandex_dzen_questionYandexGeneralSearch() {
-    // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
-    // Выбираем все div
-    const allDivs = document.querySelectorAll('div');
-
-    // Фильтруем div, чтобы оставить только те, у которых ровно три класса
-    const divsWithThreeClasses = Array.from(allDivs).filter(div => {
-        const classes = div.classList;
-        return classes.length === 3;
-    });
-
-
-    divsWithThreeClasses.forEach(div => {
-        const DivChild = div.querySelector('div');
-        function checkDivHasAnyId(div) {
-            if (!div) {
-                // console.log('Div not found.');
-                return false;
-            }
-
-            if (!div.id) {
-                // console.log('Div does not have an id.');
-                return false;
-            }
-
-            // console.log('Div has an id.');
-            // Проверяем, что div имеет ровно один класс
-            if (div.classList.length !== 1) {
-                // console.log('Div does not have exactly one class.');
-                return false;
-            }
-
-            // есть вложенный div, принадлежащий пяти классам
-            const DivChild2 = div.querySelector('div');
-            if (!DivChild2) {
-                return false;
-
-            }
-            // Проверяем, что div принадлежит ровно 5-ти классам
-            if (DivChild2.classList.length !== 5) {
-                // console.log('Div does not have exactly 5 classes.');
-                return false;
-            }
-
-            return true;
-        }
-
-        const result = checkDivHasAnyId(DivChild);
-        if (result) div.remove()
-
-    });
-
-}
-
-checkForTargetNode()
+    checkForTargetNode()
 
 
 })();
