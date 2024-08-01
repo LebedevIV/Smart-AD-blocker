@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-01_16-54
+// @version      2024-08-01_17-30
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -674,13 +674,20 @@
                 const targetNodes = targetNode_observer.querySelectorAll('aside:not(.navigation-sidebar__container-TO)') ||
                       targetNode_observer.querySelectorAll('ya-recommendation-widget')
                 targetNodes.forEach(node => {
-                    node.remove()
+                    node?.remove()
                 })
-                // рекламные блоки справа:
+                // рекламные блоки справа
                 // 'div.article-right-ad-block__sticky' 'div.article-right-ad-block__main' 'div.article-right-ad-block__ad-content-wrapper'
                 targetNode_observer.querySelectorAll('div[class^="article-right-ad-block__"]').forEach(node => {
-                    node.remove()
+                    node?.remove()
                 })
+                // рекламные блоки снизу статьи
+                if (node) {
+                    targetNode_observer.querySelectorAll('div[class^="ad-split-embed"][id]').forEach(node => {
+                        // ad-split-embed__container
+                        node?.remove()
+                    })
+                }
             }
             function AD_remove() {
                 targetNode_observer = document.querySelector('div#page-root') // более точный блок для наблюдения изменений
