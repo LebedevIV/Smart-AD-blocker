@@ -2,13 +2,14 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-01_17-30
+// @version      2024-08-05_23-30
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
 // @license        GPL-3.0-or-later
 // @match        http://*.mail.ru/*
 // @match        https://*.mail.ru/*
+// @match        https://sportmail.ru/*
 // @match        https://*.ya.ru/*
 // @match        https://*.yandex.ru/*
 // @match        https://*.ok.ru/*
@@ -96,9 +97,43 @@
             const interval_GeneralBlock = setInterval(checkFor_GeneralBlock, 200);
 
         }
-
+        else if (currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
+            // нижний узкий баннер
+            document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+        }
+        else if (currentURL.startsWith('https://news.mail.ru/') ||
+                 currentURL.startsWith('https://vfokuse.mail.ru/') ||
+                currentURL.startsWith('https://sportmail.ru/')) {
+            // нижний узкий баннер
+            document.querySelector('div.mailru-visibility-check')?.remove()
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                document.querySelector('div.mailru-visibility-check')?.remove()
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+        }
         else if (currentURL.startsWith('https://mail.ru/')) {
             mail_ru_checkAndRemoveTopBlock()
+            // mail_ru_checkAndRemove_РекламаInSpan()
 
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
@@ -110,7 +145,11 @@
                             mutation.addedNodes.forEach(node => {
                                 if (node.nodeName === item.toUpperCase()) {
                                     mail_ru_checkAndRemoveTopBlock_classList(node,mutation)
+
                                 }
+                                // mail_ru_checkAndRemove_РекламаВShadow()
+                                mail_ru_checkAndRemove_РекламаInSpan(node, mutation)
+
                             });
                         });
 
@@ -1073,6 +1112,203 @@
         targetNodes.forEach(node => {
             node.remove();
         });
+
+
+        // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+
+        // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        function findElementByTextInShadow(shadowRoot, tag, text) {
+            const elements = shadowRoot.querySelectorAll(tag);
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i].textContent === text) {
+                    return elements[i];
+                }
+            }
+            return null;
+        }
+
+        //         // Найти все shadow host'ы на странице
+        //         const shadowHosts = document.querySelectorAll('*');
+
+        //         shadowHosts.forEach(shadowHost => {
+        //             const shadowRoot = shadowHost.shadowRoot;
+
+        //             if (shadowRoot) {
+        //                 // Найти элемент с текстом "Реклама" внутри shadow root
+        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+        //                 if (рекламаElement) {
+        //                     // Подняться по родительским нодам вплоть до shadow-root
+        //                     let currentNode = рекламаElement;
+        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+        //                         currentNode = currentNode.parentNode;
+        //                     }
+
+        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+        //                     console.log(currentNode);
+        //                 } else {
+        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+        //                 }
+        //             } else {
+        //                 console.log('Shadow root не найден');
+        //             }
+        //         });
+
+    }
+    function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
+        if (node_test && node_test.nodeName === 'DIV') {
+            const DivBlockclassList = Array.from(node_test.classList);
+            if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
+                // DivBlockclassList.some(className => className === 'feed__row') &&
+                // DivBlockclassList.some(className => className === '_is-mailru-morda')
+               ) {
+                document.querySelectorAll('article.card-wrapper').forEach(node => {
+                    node?.remove()
+                })
+                document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+                    node?.remove()
+                })
+            }
+        }
+        // if (node_test && node_test.nodeName === 'IMG') {
+        //     const DivBlockclassList = Array.from(node_test.classList);
+        //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
+        //        ) {
+        //         document.querySelectorAll('article.card-wrapper').forEach(node => {
+        //             node?.remove()
+        //         })
+        //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+        //             node?.remove()
+        //         })
+        //     }
+        // }
+
+
+    }
+    // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+    function mail_ru_checkAndRemove_РекламаВShadow() {
+
+        //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        //         function findElementByTextInShadow(shadowRoot, tag, text) {
+        //             const elements = shadowRoot.querySelectorAll(tag);
+        //             for (let i = 0; i < elements.length; i++) {
+        //                 if (elements[i].textContent === text) {
+        //                     return elements[i];
+        //                 }
+        //             }
+        //             return null;
+        //         }
+
+        //         // Найти все shadow host'ы на странице
+        //         const shadowHosts = document.querySelectorAll('*');
+
+        //         shadowHosts.forEach(shadowHost => {
+        //             const shadowRoot = shadowHost.shadowRoot;
+
+        //             if (shadowRoot) {
+        //                 // Найти элемент с текстом "Реклама" внутри shadow root
+        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+        //                 if (рекламаElement) {
+        //                     // Подняться по родительским нодам вплоть до shadow-root
+        //                     let currentNode = рекламаElement;
+        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+        //                         currentNode = currentNode.parentNode;
+        //                     }
+
+        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+        //                     console.log(currentNode);
+        //                 } else {
+        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+        //                 }
+        //             } else {
+        //                 console.log('Shadow root не найден');
+        //             }
+        //         });
+
+
+
+
+
+        //*************
+
+
+        //         function findParentNodeAboveShadowRoot() {
+        //             const adSpan = document.querySelector('span:contains("Реклама")');
+
+        //             if (adSpan) {
+        //                 let currentNode = adSpan.parentNode;
+        //                 while (currentNode && currentNode.id !== 'shadow-root') {
+        //                     currentNode = currentNode.parentNode;
+        //                 }
+
+        //                 if (currentNode && currentNode.parentNode) {
+        //                     return currentNode.parentNode;
+        //                 }
+        //             }
+
+        //             return null;
+        //         }
+
+        //         const parentNode = findParentNodeAboveShadowRoot();
+
+        //         if (parentNode) {
+        //             console.log('Parent node above shadow-root:', parentNode);
+        //         } else {
+        //             console.log('Could not find the specified node.');
+        //         }
+
+        //*****************
+
+
+        function findParentNodeAboveShadowRoot() {
+
+            // Find all elements with a closed shadow root
+            const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
+
+            // Iterate through the shadow roots and change their mode to 'open'
+            shadowRoots.forEach(el => {
+                el.shadowRoot.mode = 'open';
+            });
+
+            // Find all span elements
+            const spans = document.querySelectorAll('span');
+
+            // Iterate through the spans and find the one with the text "Реклама"
+            for (let i = 0; i < spans.length; i++) {
+                if (spans[i].textContent === 'Реклама') {
+                    let currentNode = spans[i].parentNode;
+
+                    // Traverse up the DOM until the shadow root is found
+                    while (currentNode && currentNode.id !== 'shadow-root') {
+                        currentNode = currentNode.parentNode;
+                    }
+
+                    // Return the parent of the shadow root
+                    if (currentNode && currentNode.parentNode) {
+                        return currentNode.parentNode;
+                    }
+                }
+            }
+
+            return null; // Return null if the node is not found
+        }
+
+        const parentNode = findParentNodeAboveShadowRoot();
+
+        if (parentNode) {
+            console.log('Parent node above shadow-root:', parentNode);
+        } else {
+            console.log('Could not find the specified node.');
+        }
+
+
+
+
+
+
+
+
     }
 
     function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
