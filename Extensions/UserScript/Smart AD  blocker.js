@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-05_23-30
+// @version      2024-08-07_12-35
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -115,7 +115,7 @@
         }
         else if (currentURL.startsWith('https://news.mail.ru/') ||
                  currentURL.startsWith('https://vfokuse.mail.ru/') ||
-                currentURL.startsWith('https://sportmail.ru/')) {
+                 currentURL.startsWith('https://sportmail.ru/')) {
             // нижний узкий баннер
             document.querySelector('div.mailru-visibility-check')?.remove()
             const observer = new MutationObserver((mutationsList, observer) => {
@@ -135,6 +135,75 @@
             mail_ru_checkAndRemoveTopBlock()
             // mail_ru_checkAndRemove_РекламаInSpan()
 
+//             // Удаление всех нод, содержащих shaodw-root (именно там запрятана реклама)
+//             const observer_shadow = new MutationObserver((mutations) => {
+//                 mutations.forEach((mutation) => {
+//                     // Check if the mutation is a node addition (addedNodes)
+//                     if (mutation.type === 'childList') {
+//                         mutation.addedNodes.forEach((node) => {
+//                             // Check if the added node has a shadow root
+//                             if (node.shadowRoot) {
+//                                 // console.log('Element with shadow root added:', node);
+//                                 node.remove()
+//                             }
+//                         });
+//                     }
+//                 });
+//             });
+
+//             // Start observing the entire document for changes
+//             observer_shadow.observe(document.body, {
+//                 subtree: true, // Observe changes in the entire document subtree
+//                 childList: true, // Observe changes in child nodes (additions and removals)
+//             });
+
+//             //**********************
+//             // Удаление рекламы, появляющейся на экране по мере прокрутки страницы
+//             // Функция для проверки, содержит ли элемент заданный класс
+//             function hasClass(element, className) {
+//                 return element.classList.contains(className);
+//             }
+
+//             // Создаем экземпляр MutationObserver для отслеживания изменений в DOM
+//             const mutationObserver = new MutationObserver((mutationsList, observer) => {
+//                 for (const mutation of mutationsList) {
+//                     if (mutation.type === 'childList') {
+//                         mutation.addedNodes.forEach(node => {
+//                             if (node.nodeType === Node.ELEMENT_NODE) {
+//                                 const element = node;
+//                                 // if (hasClass(element, 'zenad-card-rtb__ad')) {
+//                                 if (hasClass(element, 'zenad-card-rtb')) {
+
+//                                     // console.log('Элемент с классом "your-class-name" добавлен в DOM:', element);
+//                                     // Начинаем отслеживать видимость элемента с помощью IntersectionObserver
+//                                     intersectionObserver.observe(element);
+//                                 }
+//                             }
+//                         });
+//                     }
+//                 }
+//             });
+
+//             // Настройка наблюдения за изменениями в корневом элементе
+//             const targetNode = document.body; // Можно заменить на другой элемент
+//             const config_Observer = { childList: true, subtree: true };
+//             mutationObserver.observe(targetNode, config_Observer);
+
+//             // Создаем экземпляр IntersectionObserver для отслеживания видимости элементов
+//             const intersectionObserver = new IntersectionObserver((entries, observer) => {
+//                 entries.forEach(entry => {
+//                     if (entry.isIntersecting) {
+//                         // console.log('Элемент с классом "your-class-name" появился на экране:', entry.target);
+//                         // Здесь можно выполнить дополнительные действия, когда элемент становится видимым
+//                         observer.unobserve(entry.target); // Перестаем отслеживать этот элемент после того, как он появился на экране
+//                         entry.remove()
+//                     }
+//                 });
+//             });
+//             //*********************
+
+            // function AD_remove() {
+            //     if (document.querySelector(config.nodes.mail_ru_banner_top_parent)) {
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
@@ -144,19 +213,32 @@
                             // mail_ru_checkAndRemoveTopBlock()
                             mutation.addedNodes.forEach(node => {
                                 if (node.nodeName === item.toUpperCase()) {
-                                    mail_ru_checkAndRemoveTopBlock_classList(node,mutation)
-
+                                    // mail_ru_checkAndRemoveTopBlock_classList(node,mutation)
                                 }
                                 // mail_ru_checkAndRemove_РекламаВShadow()
-                                mail_ru_checkAndRemove_РекламаInSpan(node, mutation)
+                                // mail_ru_checkAndRemove_РекламаInSpan(node, mutation)
 
                             });
                         });
-
+                        // document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
+                        //                         document.querySelectorAll('article.zenad-card-rtb[data-testid="card-rtb"]').forEach(node => {
+                        document.querySelectorAll('article.zenad-card-rtb[aria-label="Карточка рекламы"]').forEach((node, index, array) => {
+                            // if (index > 0 && index < array.length - 1 ) {
+                            // node?.remove()
+                            node.style.display = 'none'
+                            // }
+                            // Если удалить сразу все ноды - возникают глюки. Удаляем первые ноды, оставляя последующие невидимыми
+                            if (array.length > 10 && index < 5) {
+                                node?.remove()
+                            }
+                        })
                     }
                 }
             });
             observer.observe(document.querySelector(config.nodes.mail_ru_banner_top_parent), observer_config);
+            // }
+            // }
+            // const interval_AD_remove = setInterval(AD_remove, 500)
 
         }
         else if (currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search')) {
@@ -773,6 +855,63 @@
             observer.observe(document.body, observer_config)
             AD_remove_node()
         }
+        // Дзен.Shorts
+        // брать за образец в случае рекламы внутри наблюдаемой ноды
+        else if (currentURL.startsWith('https://dzen.ru/shorts/')) {
+            function AD_remove_node(node, mutation_test) {
+                // банерок вверху справа
+                // возможно, для более точноо поиска: auto-slide-ad__ ; более общий правый блок: short-viewer-layout__
+                if (!node) { // первый вызов без обсервера
+                    // document.querySelectorAll('div[class^="short-viewer-layout__rightSidebarWrapper"]').forEach(node => {
+                    //     node?.remove()
+                    // })
+                    // возникает в единственном экземпляре
+                    document.querySelector('div[class^="short-viewer-layout__rightSidebarWrapper"]')?.remove()
+                }
+                else { // вызов из обсервера
+                    if (node.tagName === 'DIV') {
+                        const classList = node.classList;
+                        // for (let i = 0; i < classList.length; i++) {
+                        //     if (classList[i].startsWith('short-viewer-layout__rightSidebarWrapper')) {
+                        //         node?.remove()
+                        //         break
+                        //     }
+                        // }
+                        if (classList.contains('auto-slide-ad__container-1D')) {
+                            node?.remove()
+                            return true
+                        }
+                    }
+                }
+                // предложение скачат приложение по QR-коду
+                document.querySelector('div.Modal')?.remove()
+
+                return false
+            }
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                // при срабатывании удаления рекламы отключаетяс наблюдение, так как реклама бльше не появляется
+                                // не отключаем наблюдение, так как появляются разные предлагалки. Красивые предлагалки по теме конкретного видео справа от видео не удаляю - такой и должна быть умная реклама
+                                // if (AD_remove_node(node, mutation)) observer.disconnect()
+                                AD_remove_node(node, mutation)
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+            AD_remove_node()
+        }
+
+
+
+
+
+
+
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
         else if (currentURL.startsWith('https://dzen.ru/')) {
@@ -1162,7 +1301,10 @@
                 // DivBlockclassList.some(className => className === 'feed__row') &&
                 // DivBlockclassList.some(className => className === '_is-mailru-morda')
                ) {
-                document.querySelectorAll('article.card-wrapper').forEach(node => {
+                // document.querySelectorAll('article.card-wrapper').forEach(node => {
+                //     node?.remove()
+                // })
+                document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
                     node?.remove()
                 })
                 document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
