@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-07_12-35
+// @version      2024-08-08_19-06
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -113,6 +113,10 @@
             });
             observer.observe(document.body, observer_config)
         }
+        else if (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) {
+            // верхний узкий баннер
+            document.querySelector('div[class^="Worm__root--"]')?.remove()
+        }
         else if (currentURL.startsWith('https://news.mail.ru/') ||
                  currentURL.startsWith('https://vfokuse.mail.ru/') ||
                  currentURL.startsWith('https://sportmail.ru/')) {
@@ -135,72 +139,72 @@
             mail_ru_checkAndRemoveTopBlock()
             // mail_ru_checkAndRemove_РекламаInSpan()
 
-//             // Удаление всех нод, содержащих shaodw-root (именно там запрятана реклама)
-//             const observer_shadow = new MutationObserver((mutations) => {
-//                 mutations.forEach((mutation) => {
-//                     // Check if the mutation is a node addition (addedNodes)
-//                     if (mutation.type === 'childList') {
-//                         mutation.addedNodes.forEach((node) => {
-//                             // Check if the added node has a shadow root
-//                             if (node.shadowRoot) {
-//                                 // console.log('Element with shadow root added:', node);
-//                                 node.remove()
-//                             }
-//                         });
-//                     }
-//                 });
-//             });
+            //             // Удаление всех нод, содержащих shaodw-root (именно там запрятана реклама)
+            //             const observer_shadow = new MutationObserver((mutations) => {
+            //                 mutations.forEach((mutation) => {
+            //                     // Check if the mutation is a node addition (addedNodes)
+            //                     if (mutation.type === 'childList') {
+            //                         mutation.addedNodes.forEach((node) => {
+            //                             // Check if the added node has a shadow root
+            //                             if (node.shadowRoot) {
+            //                                 // console.log('Element with shadow root added:', node);
+            //                                 node.remove()
+            //                             }
+            //                         });
+            //                     }
+            //                 });
+            //             });
 
-//             // Start observing the entire document for changes
-//             observer_shadow.observe(document.body, {
-//                 subtree: true, // Observe changes in the entire document subtree
-//                 childList: true, // Observe changes in child nodes (additions and removals)
-//             });
+            //             // Start observing the entire document for changes
+            //             observer_shadow.observe(document.body, {
+            //                 subtree: true, // Observe changes in the entire document subtree
+            //                 childList: true, // Observe changes in child nodes (additions and removals)
+            //             });
 
-//             //**********************
-//             // Удаление рекламы, появляющейся на экране по мере прокрутки страницы
-//             // Функция для проверки, содержит ли элемент заданный класс
-//             function hasClass(element, className) {
-//                 return element.classList.contains(className);
-//             }
+            //             //**********************
+            //             // Удаление рекламы, появляющейся на экране по мере прокрутки страницы
+            //             // Функция для проверки, содержит ли элемент заданный класс
+            //             function hasClass(element, className) {
+            //                 return element.classList.contains(className);
+            //             }
 
-//             // Создаем экземпляр MutationObserver для отслеживания изменений в DOM
-//             const mutationObserver = new MutationObserver((mutationsList, observer) => {
-//                 for (const mutation of mutationsList) {
-//                     if (mutation.type === 'childList') {
-//                         mutation.addedNodes.forEach(node => {
-//                             if (node.nodeType === Node.ELEMENT_NODE) {
-//                                 const element = node;
-//                                 // if (hasClass(element, 'zenad-card-rtb__ad')) {
-//                                 if (hasClass(element, 'zenad-card-rtb')) {
+            //             // Создаем экземпляр MutationObserver для отслеживания изменений в DOM
+            //             const mutationObserver = new MutationObserver((mutationsList, observer) => {
+            //                 for (const mutation of mutationsList) {
+            //                     if (mutation.type === 'childList') {
+            //                         mutation.addedNodes.forEach(node => {
+            //                             if (node.nodeType === Node.ELEMENT_NODE) {
+            //                                 const element = node;
+            //                                 // if (hasClass(element, 'zenad-card-rtb__ad')) {
+            //                                 if (hasClass(element, 'zenad-card-rtb')) {
 
-//                                     // console.log('Элемент с классом "your-class-name" добавлен в DOM:', element);
-//                                     // Начинаем отслеживать видимость элемента с помощью IntersectionObserver
-//                                     intersectionObserver.observe(element);
-//                                 }
-//                             }
-//                         });
-//                     }
-//                 }
-//             });
+            //                                     // console.log('Элемент с классом "your-class-name" добавлен в DOM:', element);
+            //                                     // Начинаем отслеживать видимость элемента с помощью IntersectionObserver
+            //                                     intersectionObserver.observe(element);
+            //                                 }
+            //                             }
+            //                         });
+            //                     }
+            //                 }
+            //             });
 
-//             // Настройка наблюдения за изменениями в корневом элементе
-//             const targetNode = document.body; // Можно заменить на другой элемент
-//             const config_Observer = { childList: true, subtree: true };
-//             mutationObserver.observe(targetNode, config_Observer);
+            //             // Настройка наблюдения за изменениями в корневом элементе
+            //             const targetNode = document.body; // Можно заменить на другой элемент
+            //             const config_Observer = { childList: true, subtree: true };
+            //             mutationObserver.observe(targetNode, config_Observer);
 
-//             // Создаем экземпляр IntersectionObserver для отслеживания видимости элементов
-//             const intersectionObserver = new IntersectionObserver((entries, observer) => {
-//                 entries.forEach(entry => {
-//                     if (entry.isIntersecting) {
-//                         // console.log('Элемент с классом "your-class-name" появился на экране:', entry.target);
-//                         // Здесь можно выполнить дополнительные действия, когда элемент становится видимым
-//                         observer.unobserve(entry.target); // Перестаем отслеживать этот элемент после того, как он появился на экране
-//                         entry.remove()
-//                     }
-//                 });
-//             });
-//             //*********************
+            //             // Создаем экземпляр IntersectionObserver для отслеживания видимости элементов
+            //             const intersectionObserver = new IntersectionObserver((entries, observer) => {
+            //                 entries.forEach(entry => {
+            //                     if (entry.isIntersecting) {
+            //                         // console.log('Элемент с классом "your-class-name" появился на экране:', entry.target);
+            //                         // Здесь можно выполнить дополнительные действия, когда элемент становится видимым
+            //                         observer.unobserve(entry.target); // Перестаем отслеживать этот элемент после того, как он появился на экране
+            //                         entry.remove()
+            //                     }
+            //                 });
+            //             });
+            //             //*********************
 
             // function AD_remove() {
             //     if (document.querySelector(config.nodes.mail_ru_banner_top_parent)) {
@@ -854,6 +858,34 @@
             });
             observer.observe(document.body, observer_config)
             AD_remove_node()
+
+            // Удаление видеорекламы
+            if (currentURL.startsWith('https://dzen.ru/video/watch/')) {
+                function ADvideo_remove() {
+                    // Находим ноду <yaplayertag>
+                    const yaplayertag = document.querySelector('yaplayertag')
+                    if (yaplayertag) {
+                        // Проверяем непосредственные потомки yaplayertag
+                        const children = yaplayertag.children
+                        if (children.length > 2) { // дочерние элементы заполняются на странице не сразу - ждём заполнения
+                            clearInterval(interval_ADvideo_remove)
+                            // Создаем массив для хранения div, которые нужно удалить
+                            const divsToRemove = [];
+
+                            for (let i = 0; i < children.length; i++) {
+                                const child = children[i];
+                                if (child.tagName === 'DIV' && !child.querySelector('video')) {
+                                    divsToRemove.push(child);
+                                }
+                            }
+
+                            // Удаляем все найденные div
+                            divsToRemove.forEach(div => yaplayertag.removeChild(div))
+                        }
+                    }
+                }
+                const interval_ADvideo_remove = setInterval(ADvideo_remove, 500)
+                }
         }
         // Дзен.Shorts
         // брать за образец в случае рекламы внутри наблюдаемой ноды
