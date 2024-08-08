@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-08_19-06
+// @version      2024-08-08_21-45
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -249,7 +249,7 @@
             function AD_remove_node(node, mutation_test) {
                 // баннер внизу справа "Сделать Яндекс основным поисковиком?"
                 let targetNode
-                targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
+                targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions) // 'div.Modal.Modal_visible.Modal_hasAnimation.Distribution-SplashScreenModal.Distribution-SplashScreenModal_outerCross.SplashscreenDefault'
                 targetNode?.remove()
                 targetNode = document.querySelector('div.Distribution-Popup')
                 targetNode?.remove()
@@ -286,8 +286,8 @@
                 let targetNode
                 let targetNodes
 
-                // баннер "Сделать Яндекс основным поисковиком?"
-                targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions)
+                // баннер "Сделать поиск Яндекса основным?"
+                targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions) || document.querySelector('div#distr-pcode-container') // 'div.Modal.Modal_visible.Modal_hasAnimation.Distribution-SplashScreenModal.Distribution-SplashScreenModal_outerCross.SplashscreenDefault'
                 if (targetNode) {
                     if (EspeciallyForYou_fact === false) {
                         targetNode.style.marginTop = '0.3rem'
@@ -305,6 +305,10 @@
                 // баннер вверху
                 targetNode = document.querySelector('div.AdvMastHead')
                 targetNode?.remove()
+                // реклама среди картинок
+                document.querySelectorAll('div.JustifierRowLayout-Incut').forEach(node => {node?.remove()})
+                document.querySelectorAll('div.AdvRsyaCrossPage').forEach(node => {node?.remove()})
+                document.querySelectorAll('div[aria-label="Рекламный баннер"]').forEach(node => {node?.remove()})
                 // if (node) observer.disconnect()
                 // при нажатии на какую-либо картинку открывается модальное окно
                 const targetNodeModal = document.querySelector('div.Modal.Modal_visible.Modal_theme_normal.ImagesViewer-Modal.ImagesViewer')
