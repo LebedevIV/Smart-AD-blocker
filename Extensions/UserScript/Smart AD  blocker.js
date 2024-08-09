@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-08_21-45
+// @version      2024-08-09_22-45
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -41,20 +41,119 @@
         }
     };
     let intervalId
+    const observer_config = { childList: true, subtree: true } // общи конфиг обсервера
+    // счётчики
+    let count_001 = 0, count_002 = 0
 
-    // Функция для проверки наличия целевой ноды
-    function checkForTargetNode() {
-        const observer_config = { childList: true, subtree: true };
-
+    // Функция для обработки изменений URL
+    function handleUrlChange() {
+        // console.log('URL changed to:', window.location.href);
         if (currentURL.startsWith('https://e.mail.ru/')) {
+            // удаление верхнего рекламного блока
+            function Remove_AD_Top(node) {
+                // count_001++
+                // console.log('Счётчик вызовов:', count_001)
+                // let Div_AD
+                if (!node) { // первый запуск
+                    document.querySelector("div.new-menu")?.previousSibling?.remove()
+                }
+                else { // запуск из обсервера
+                    if (node.nodeName === 'DIV') { // application app application_new-toolbar
+                        // const Div_AD_classList = Array.from(Div_AD.classList)
+                        if (node.classList.length === 3 &&
+                            node.classList[0] === 'application' &&
+                            node.classList[1] === 'app' &&
+                            node.classList[2] === 'application_new-toolbar' )
+                        {
+                            // count_001++
+                            // console.log('Счётчик вызовов:', count_001)
+                            // console.log('Remove_AD_Top:', node)
+                            // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
+                            node.querySelector("div.new-menu")?.previousSibling?.remove()
+                        }
+                    }
+                }
+            }
+            // удаление правых рекламных блоков
+            function Remove_AD_Right(node) {
+                // блок опрделяется непосредственно перед анализом так как иначе теряется
+                function Remove_AD_Right_IfNode(targetNode){
+                    const span = targetNode?.querySelector('span')
+                    if (span) {
+                        const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented') // классы элемента до переименования
+                        if (RightBlock) {
+                            // console.log('Remove_AD_Right_1:', RightBlock)
+                            RightBlock?.remove()
+                        }
+                        else { // классы элемента после переименования
+                            // Получаем непосредственные дочерние элементы
+                            const divs = span.children;
+
+                            // Перебираем дочерние элементы
+                            if (divs.length === 3) {
+                                for (let div of divs) {
+                                    // const classList = Array.from(div.classList);
+                                    if (div.classList.length === 3 &&
+                                        div.classList[0].length === 7 &&
+                                        div.classList[1].length === 15 &&
+                                        div.classList[2].length === 15)
+                                    {
+                                        // console.log('Remove_AD_Right_2:', div)
+                                        div?.remove()
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!node) { // первый запуск
+                    const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
+                    Remove_AD_Right_IfNode(targetNode)
+                }
+                else { // запуск из обсервера
+                    if (node.nodeName === 'DIV') { // application app application_new-toolbar
+                        // const Div_AD_classList = Array.from(Div_AD.classList)
+                        if (node.classList.length === 3 &&
+                            node.classList[0] === 'application' &&
+                            node.classList[1] === 'app' &&
+                            node.classList[2] === 'application_new-toolbar' )
+                        {
+                            // count_002++
+                            // console.log('Счётчик вызовов:', count_002)
+                            // console.log('Remove_AD_Right:', node)
+                            // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
+                            // node.querySelector("div.new-menu")?.previousSibling?.remove()
+                            const targetNode = node.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
+                            Remove_AD_Right_IfNode(targetNode)
+                        }
+                    }
+                }
+            }
+            // установка наблюдения за изменением блока-родителя
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            Remove_AD_Top(node)
+                            Remove_AD_Right(node)
+                        })
+                    }
+                }
+            })
+            observer.observe(document, observer_config) // удаление при изменении блока-родителя
+            Remove_AD_Top() // удаление при загрузке
+            Remove_AD_Right()
+
+
 
             function checkFor_GeneralBlock() {
-                const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
+                const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main
 
                 if (targetNode) {
                     clearInterval(interval_GeneralBlock)
-                    checkAndRemoveRightBlock(targetNode)
-                    checkAndRemoveTopBlock(targetNode)
+                    // checkAndRemoveRightBlock(targetNode)
+                    // checkAndRemoveTopBlock(targetNode)
                     checkAndRemoveMailruSuggestions(null)
                     mail_ru_checkAndRemoveTopBlock()
 
@@ -67,15 +166,15 @@
 
                                 mutation.removedNodes.forEach(node => {
                                     if (node.nodeType === Node.ELEMENT_NODE && node.matches('div.portal-menu-element.portal-menu-element_select.portal-menu-element_expanded.portal-menu-element_not-touch.portal-menu-element_pony-mode')) {
-                                        checkAndRemoveRightBlock(mutation);
-                                        checkAndRemoveTopBlock(mutation);
+                                        // checkAndRemoveRightBlock(mutation)
+                                        // checkAndRemoveTopBlock(node, mutation)
                                     }
                                 });
                                 mutation.addedNodes.forEach(node => {
                                     if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
                                         checkAndRemoveMailruSuggestions(mutation)
                                         mail_ru_checkAndRemoveTopBlock()
-
+                                        // checkAndRemoveTopBlock(node, mutation)
                                     }
                                 });
 
@@ -119,21 +218,66 @@
         }
         else if (currentURL.startsWith('https://news.mail.ru/') ||
                  currentURL.startsWith('https://vfokuse.mail.ru/') ||
-                 currentURL.startsWith('https://sportmail.ru/')) {
+                 currentURL.startsWith('https://sportmail.ru/') ||
+                 currentURL.startsWith('https://finance.mail.ru/')
+                ) {
             // нижний узкий баннер
-            document.querySelector('div.mailru-visibility-check')?.remove()
+            function AD_remove_node(node_test, mutation_test) {
+                if (currentURL.startsWith('https://finance.mail.ru/')) {
+                    // поиск блока с рекламой, занимающего верхнее пространство страницы
+                    function findParentWithProperties(targetNode) {
+                        function checkParent(node, level) {
+                            if (level > 4) {
+                                return null;
+                            }
+
+                            const parent = node.parentElement;
+                            if (!parent) {
+                                return null;
+                            }
+
+                            const style = parent.style.minHeight;
+                            const dataHideOrder = parent.getAttribute('data-hideorder');
+                            const dataSize = parent.getAttribute('data-size');
+
+                            if (style && dataHideOrder !== null && dataSize !== null) {
+                                return parent;
+                            }
+
+                            return checkParent(parent, level + 1);
+                        }
+
+                        return checkParent(targetNode, 1);
+                    }
+
+                    const targetNode = document.querySelector('div.mailru-visibility-check')
+                    if (targetNode) {
+                        const parentWithProperties = findParentWithProperties(targetNode);
+
+                        if (parentWithProperties) {
+                            parentWithProperties.remove()
+                        } else {
+                            targetNode.remove()
+                        }
+                    }
+                }
+                else {
+                    document.querySelector('div.mailru-visibility-check')?.remove()
+                }
+            }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeName === 'DIV') {
-                                document.querySelector('div.mailru-visibility-check')?.remove()
+                                AD_remove_node(node, mutation)
                             }
                         });
                     }
                 }
             });
             observer.observe(document.body, observer_config)
+            AD_remove_node()
         }
         else if (currentURL.startsWith('https://mail.ru/')) {
             mail_ru_checkAndRemoveTopBlock()
@@ -1216,7 +1360,7 @@
     // Функция для проверки наличия и удаления правого блока
     function checkAndRemoveRightBlock(mutation_test) {
         // блок опрделяется непосредственно перед анализом так как иначе теряется
-        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock);
+        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
         const span = targetNode.querySelector('span');
         if (span) {
             const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented');
@@ -1235,8 +1379,8 @@
                         if (classList.length === 3 &&
                             classList.some(className => className.length === 7) &&
                             classList.some(className => className.length === 15) &&
-                            classList.some(className => className.length === 15)) {
-                            // console.log('Найден и удален div:', div);
+                            classList.some(className => className.length === 15))
+                        {
                             div.remove();
                             break;
                         }
@@ -1247,25 +1391,64 @@
     }
     // https://e.mail.ru/inbox/
     // Функция для проверки наличия и удаления верхнего блока
-    function checkAndRemoveTopBlock(mutation_test) {
-        // блок опрделяется непосредственно перед анализом так как иначе теряется
-        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock); // div.application-mail__layout.application-mail__layout_main
-        const span = targetNode.querySelector('span');
-        if (span) {
-            // const divs = span.querySelectorAll('div');
-            // Получаем непосредственные дочерние элементы
-            const DivBlock = span.querySelector("div.new-menu").previousSibling
-            if (DivBlock) {
-                const DivBlockclassList = Array.from(DivBlock.classList);
-                if (DivBlockclassList.length === 3 &&
-                    DivBlockclassList.some(className => className.length === 7) &&
-                    DivBlockclassList.some(className => className.length === 15) &&
-                    DivBlockclassList.some(className => className.length === 15)) {
-                    // console.log('Найден и удален div:', div);
-                    DivBlock.remove();
+    function checkAndRemoveTopBlock(node_test, mutation_test) {
+        function checkFor_TopBlock() {
+            // блок опрделяется непосредственно перед анализом так как иначе теряется
+            const node_test = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // div.application-mail__layout.application-mail__layout_main
+            if (node_test) {
+                const span = node_test.querySelector('span')
+                if (span) {
+                    const Div_newMenu = span.querySelector("div.new-menu")
+                    const Div_newMenu_Parent = Div_newMenu?.parentNode
+
+                    // удаление рекламного блока
+                    function AD_remove() {
+                        // const Div_AD = span.querySelector("div.new-menu").previousSibling
+                        const node_test = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // div.application-mail__layout.application-mail__layout_main
+                        const span = node_test.querySelector('span')
+                        const Div_newMenu = span.querySelector("div.new-menu")
+                        const Div_newMenu_Parent = Div_newMenu?.parentNode
+                        const Div_AD = Div_newMenu.previousSibling
+                        if (Div_AD) {
+                            const Div_AD_classList = Array.from(Div_AD.classList)
+                            if ((Div_AD_classList.length === 3 &&
+                                 Div_AD_classList.some(className => className.length === 7) &&
+                                 Div_AD_classList.some(className => className.length === 15) &&
+                                 Div_AD_classList.some(className => className.length === 15)) ||
+                                Div_AD_classList.some(className => className === 'letter-list-item-adv'))
+                            {
+                                Div_AD.remove()
+                            }
+                        }
+                    }
+                    // установка наблюдения за изменением блока-родителя
+                    if (Div_newMenu_Parent) {
+                        clearInterval(interval_GeneralBlock)
+                        const observer = new MutationObserver((mutationsList, observer) => {
+                            for (let mutation of mutationsList) {
+                                if (mutation.type === 'childList') {
+                                    mutation.addedNodes.forEach(node => {
+                                        // if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
+                                        AD_remove()
+                                        // }
+                                    })
+                                    // mutation.removedNodes.forEach(node => {
+                                    //     // if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
+                                    //     AD_remove()
+                                    //     // }
+                                    // })
+                                }
+                            }
+                        })
+                        // observer.observe(Div_newMenu_Parent, observer_config) // удаление при изменении блока-родителя
+                        observer.observe(node_test, observer_config) // удаление при изменении блока-родителя
+
+                        AD_remove() // удаление при загрузке
+                    }
                 }
             }
         }
+        const interval_GeneralBlock = setInterval(checkFor_TopBlock, 200);
     }
 
     // https://mail.ru/
@@ -1556,7 +1739,15 @@
 
     }
 
-    checkForTargetNode()
+    //     // Обработка события hashchange
+    //     window.addEventListener('hashchange', handleUrlChange);
+
+    //     // Обработка события popstate
+    //     window.addEventListener('popstate', handleUrlChange);
+
+    // Проверка изменений в URL при загрузке страницы
+    handleUrlChange();
+
 
 
 })();
