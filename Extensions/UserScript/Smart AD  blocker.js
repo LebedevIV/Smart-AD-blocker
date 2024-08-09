@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-09_22-45
+// @version      2024-08-09_22-47
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -152,8 +152,6 @@
 
                 if (targetNode) {
                     clearInterval(interval_GeneralBlock)
-                    // checkAndRemoveRightBlock(targetNode)
-                    // checkAndRemoveTopBlock(targetNode)
                     checkAndRemoveMailruSuggestions(null)
                     mail_ru_checkAndRemoveTopBlock()
 
@@ -161,20 +159,16 @@
                     const observer = new MutationObserver((mutationsList, observer) => {
                         for (let mutation of mutationsList) {
                             if (mutation.type === 'childList') {
-                                // checkAndRemoveRightBlock(mutation);
-                                // checkAndRemoveTopBlock(mutation);
 
                                 mutation.removedNodes.forEach(node => {
                                     if (node.nodeType === Node.ELEMENT_NODE && node.matches('div.portal-menu-element.portal-menu-element_select.portal-menu-element_expanded.portal-menu-element_not-touch.portal-menu-element_pony-mode')) {
-                                        // checkAndRemoveRightBlock(mutation)
-                                        // checkAndRemoveTopBlock(node, mutation)
+
                                     }
                                 });
                                 mutation.addedNodes.forEach(node => {
                                     if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
                                         checkAndRemoveMailruSuggestions(mutation)
                                         mail_ru_checkAndRemoveTopBlock()
-                                        // checkAndRemoveTopBlock(node, mutation)
                                     }
                                 });
 
@@ -1353,102 +1347,6 @@
 
         // document.body.appendChild(details);
         return details
-    }
-
-
-    // https://e.mail.ru/inbox/
-    // Функция для проверки наличия и удаления правого блока
-    function checkAndRemoveRightBlock(mutation_test) {
-        // блок опрделяется непосредственно перед анализом так как иначе теряется
-        const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
-        const span = targetNode.querySelector('span');
-        if (span) {
-            const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented');
-            if (RightBlock) {
-                RightBlock.remove();
-            }
-            else {
-                // const divs = span.querySelectorAll('div');
-                // Получаем непосредственные дочерние элементы
-                const divs = span.children;
-
-                // Перебираем дочерние элементы
-                if (divs.length === 3) {
-                    for (let div of divs) {
-                        const classList = Array.from(div.classList);
-                        if (classList.length === 3 &&
-                            classList.some(className => className.length === 7) &&
-                            classList.some(className => className.length === 15) &&
-                            classList.some(className => className.length === 15))
-                        {
-                            div.remove();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // https://e.mail.ru/inbox/
-    // Функция для проверки наличия и удаления верхнего блока
-    function checkAndRemoveTopBlock(node_test, mutation_test) {
-        function checkFor_TopBlock() {
-            // блок опрделяется непосредственно перед анализом так как иначе теряется
-            const node_test = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // div.application-mail__layout.application-mail__layout_main
-            if (node_test) {
-                const span = node_test.querySelector('span')
-                if (span) {
-                    const Div_newMenu = span.querySelector("div.new-menu")
-                    const Div_newMenu_Parent = Div_newMenu?.parentNode
-
-                    // удаление рекламного блока
-                    function AD_remove() {
-                        // const Div_AD = span.querySelector("div.new-menu").previousSibling
-                        const node_test = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // div.application-mail__layout.application-mail__layout_main
-                        const span = node_test.querySelector('span')
-                        const Div_newMenu = span.querySelector("div.new-menu")
-                        const Div_newMenu_Parent = Div_newMenu?.parentNode
-                        const Div_AD = Div_newMenu.previousSibling
-                        if (Div_AD) {
-                            const Div_AD_classList = Array.from(Div_AD.classList)
-                            if ((Div_AD_classList.length === 3 &&
-                                 Div_AD_classList.some(className => className.length === 7) &&
-                                 Div_AD_classList.some(className => className.length === 15) &&
-                                 Div_AD_classList.some(className => className.length === 15)) ||
-                                Div_AD_classList.some(className => className === 'letter-list-item-adv'))
-                            {
-                                Div_AD.remove()
-                            }
-                        }
-                    }
-                    // установка наблюдения за изменением блока-родителя
-                    if (Div_newMenu_Parent) {
-                        clearInterval(interval_GeneralBlock)
-                        const observer = new MutationObserver((mutationsList, observer) => {
-                            for (let mutation of mutationsList) {
-                                if (mutation.type === 'childList') {
-                                    mutation.addedNodes.forEach(node => {
-                                        // if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
-                                        AD_remove()
-                                        // }
-                                    })
-                                    // mutation.removedNodes.forEach(node => {
-                                    //     // if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'A') {
-                                    //     AD_remove()
-                                    //     // }
-                                    // })
-                                }
-                            }
-                        })
-                        // observer.observe(Div_newMenu_Parent, observer_config) // удаление при изменении блока-родителя
-                        observer.observe(node_test, observer_config) // удаление при изменении блока-родителя
-
-                        AD_remove() // удаление при загрузке
-                    }
-                }
-            }
-        }
-        const interval_GeneralBlock = setInterval(checkFor_TopBlock, 200);
     }
 
     // https://mail.ru/
