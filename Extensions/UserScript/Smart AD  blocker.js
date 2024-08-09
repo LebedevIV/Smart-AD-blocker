@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-09_22-47
+// @version      2024-08-10_03-47
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -60,6 +60,7 @@
                 else { // запуск из обсервера
                     if (node.nodeName === 'DIV') { // application app application_new-toolbar
                         // const Div_AD_classList = Array.from(Div_AD.classList)
+                        // первое открытие страницы
                         if (node.classList.length === 3 &&
                             node.classList[0] === 'application' &&
                             node.classList[1] === 'app' &&
@@ -70,6 +71,12 @@
                             // console.log('Remove_AD_Top:', node)
                             // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
                             node.querySelector("div.new-menu")?.previousSibling?.remove()
+                        }
+                        // изменение адреса страницы при навигации - привязка к любому изменяемому элементу
+                        else if (node.classList[0] === 'portal-menu-element' &&
+                            node.classList[1] === 'portal-menu-element_select')
+                        {
+                            document.querySelector("div.new-menu")?.previousSibling?.remove()
                         }
                     }
                 }
