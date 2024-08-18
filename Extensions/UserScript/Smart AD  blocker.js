@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-10_03-47
+// @version      2024-08-18_22-04
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -42,6 +42,8 @@
     };
     let intervalId
     const observer_config = { childList: true, subtree: true } // общи конфиг обсервера
+    // Массив для хранения ссылок на обсерверы
+    const observers = []
     // счётчики
     let count_001 = 0, count_002 = 0
 
@@ -50,6 +52,7 @@
         // console.log('URL changed to:', window.location.href);
         if (currentURL.startsWith('https://e.mail.ru/')) {
             // удаление верхнего рекламного блока
+            let fact_Remove_AD_Top_3column = false // факт удаления верхнего рекламного блока в интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
             function Remove_AD_Top(node) {
                 // count_001++
                 // console.log('Счётчик вызовов:', count_001)
@@ -74,12 +77,56 @@
                         }
                         // изменение адреса страницы при навигации - привязка к любому изменяемому элементу
                         else if (node.classList[0] === 'portal-menu-element' &&
-                            node.classList[1] === 'portal-menu-element_select')
+                                 node.classList[1] === 'portal-menu-element_select')
                         {
                             document.querySelector("div.new-menu")?.previousSibling?.remove()
                         }
                     }
                 }
+
+                // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
+                if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
+                    // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
+                    const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer');
+                    if (container) {
+                        // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
+                        let targetDiv = null;
+                        for (let child of container.children) {
+                            if (child.tagName === 'DIV' && child.childElementCount === 0) {
+                                let previousSibling = child.previousElementSibling;
+                                let hasAnchorBefore = false;
+                                while (previousSibling) {
+                                    if (previousSibling.tagName === 'A') {
+                                        hasAnchorBefore = true;
+                                        break;
+                                    }
+                                    previousSibling = previousSibling.previousElementSibling;
+                                }
+                                if (!hasAnchorBefore) {
+                                    targetDiv = child;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (targetDiv) {
+                            // Удалить найденный div и все предшествующие ему внутри контейнера
+                            let currentChild = targetDiv;
+                            while (currentChild) {
+                                fact_Remove_AD_Top_3column = true
+                                let previousSibling = currentChild.previousElementSibling;
+                                if (previousSibling) {
+                                    container.removeChild(previousSibling);
+                                } else {
+                                    container.removeChild(currentChild);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+
             }
             // удаление правых рекламных блоков
             function Remove_AD_Right(node) {
@@ -149,7 +196,9 @@
                 }
             })
             observer.observe(document, observer_config) // удаление при изменении блока-родителя
-            Remove_AD_Top() // удаление при загрузке
+            observers.push(observer)
+            // удаление при загрузке
+            Remove_AD_Top()
             Remove_AD_Right()
 
 
@@ -183,7 +232,7 @@
                         }
                     });
                     observer.observe(targetNode, observer_config);
-
+                    observers.push(observer)
                 }
             }
             // Функция для проверки наличия и удаления блока рекламного банера Майлру в нижнем левом углу
@@ -212,6 +261,7 @@
                 }
             });
             observer.observe(document.body, observer_config)
+            observers.push(observer)
         }
         else if (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) {
             // верхний узкий баннер
@@ -278,6 +328,7 @@
                 }
             });
             observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
         }
         else if (currentURL.startsWith('https://mail.ru/')) {
@@ -384,7 +435,8 @@
                     }
                 }
             });
-            observer.observe(document.querySelector(config.nodes.mail_ru_banner_top_parent), observer_config);
+            observer.observe(document.querySelector(config.nodes.mail_ru_banner_top_parent), observer_config)
+            observers.push(observer)
             // }
             // }
             // const interval_AD_remove = setInterval(AD_remove, 500)
@@ -414,7 +466,8 @@
                     }
                 }
             });
-            observer.observe(document.body, observer_config);
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
 
 
@@ -534,7 +587,8 @@
                     }
                 }
             });
-            observer.observe(document.body, observer_config);
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
 
         }
@@ -564,7 +618,8 @@
                     }
                 }
             });
-            observer.observe(document.body, observer_config);
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
             yandex_dzen_questionYandexGeneralSearch()
 
@@ -641,6 +696,24 @@
                         EspeciallyForYou?.appendChild(targetNode)
                     }
                 }
+
+                // модальное окно посредине в начале "Сделайте Яндекс главной страницей"
+                targetNode = document.querySelector('div.simple-popup') ||
+                    document.querySelector('div.dist-overlay__popup') ||
+                    document.querySelector('div.simple-popup_direction_center') ||
+                    document.querySelector('div.simple-popup_theme_modal') ||
+                    document.querySelector('div.simple-popup_autoclosable_yes') ||
+                    document.querySelector('div.simple-popup_overlay_yes') ||
+                    document.querySelector('div.simple-popup_has-close_yes') ||
+                    document.querySelector('div.simple-popup_delay-close_yes') ||
+                    document.querySelector('div.simple-popup_overlay-color_default') ||
+                    document.querySelector('div.simple-popup_shown_true') ||
+                    document.querySelector('div.simple-popup_delay-close-shown_yes')
+                if (targetNode) {
+                    targetNode.style.marginTop = '0.3rem'
+                    EspeciallyForYou?.appendChild(targetNode)
+                }
+
             }
             function AD_remove() {
                 const targetNode = document.querySelector('div.search3__inner') // более точный блок для наблюдения изменений
@@ -659,6 +732,7 @@
                         }
                     });
                     observer.observe(targetNode, observer_config)
+                    observers.push(observer)
                 }
             }
             const interval_AD_remove = setInterval(AD_remove, 500)
@@ -699,7 +773,8 @@
                     }
                 }
             });
-            observer.observe(document.querySelector('div.page__right'), observer_config);
+            observer.observe(document.querySelector('div.page__right'), observer_config)
+            observers.push(observer)
         }
         // на странице игры
         else if (currentURL.startsWith('https://yandex.ru/games/app/')) {
@@ -777,7 +852,8 @@
                             }
                         }
                     });
-                    observer.observe(targetNode, observer_config);
+                    observer.observe(targetNode, observer_config)
+                    observers.push(observer)
 
                     const targetNodes = targetNode.querySelectorAll('div')
                     targetNodes?.forEach(node => {
@@ -822,7 +898,8 @@
                             }
                         }
                     });
-                    observer.observe(targetNode, observer_config);
+                    observer.observe(targetNode, observer_config)
+                    observers.push(observer)
                 }
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
@@ -866,6 +943,7 @@
                     }
                 });
                 observer.observe(document.body, observer_config)
+                observers.push(observer)
             }
             AD_remove()
         }
@@ -919,7 +997,8 @@
                     }
                 }
             });
-            observer.observe(document.body, observer_config);
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
 
             yandex_dzen_questionYandexGeneralSearch()
 
@@ -979,12 +1058,13 @@
                             }
                         }
                     });
-                    observer.observe(targetNode_observer, observer_config);
+                    observer.observe(targetNode_observer, observer_config)
+                    observers.push(observer)
                 }
             }
-            const interval_AD_remove = setInterval(AD_remove, 500);
+            const interval_AD_remove = setInterval(AD_remove, 500)
 
-        }
+            }
         // Дзен.Видео
         // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (currentURL.startsWith('https://dzen.ru/video/')) {
@@ -1006,6 +1086,7 @@
                 }
             });
             observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
 
             // Удаление видеорекламы
@@ -1084,6 +1165,7 @@
                 }
             });
             observer.observe(document.body, observer_config)
+            observers.push(observer)
             AD_remove_node()
         }
 
@@ -1192,7 +1274,8 @@
                             }
                         }
                     });
-                    observer.observe(targetNode_observer, observer_config);
+                    observer.observe(targetNode_observer, observer_config)
+                    observers.push(observer)
                 }
             }
             const interval_AD_remove = setInterval(AD_remove, 500);
@@ -1249,8 +1332,8 @@
                     }
                 }
             });
-            observer.observe(document.querySelector('div#public'), observer_config);
-
+            observer.observe(document.querySelector('div#public'), observer_config)
+            observers.push(observer)
         }
 
         // ok.ru
