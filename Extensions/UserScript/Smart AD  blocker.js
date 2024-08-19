@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-19_19-11
+// @version      2024-08-19_20-36
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -14,7 +14,7 @@
 // @match        https://*.yandex.ru/*
 // @match        https://*.ok.ru/*
 // @match        https://*.vk.com/*
-// @match        https://dzen.ru/*
+// @match        https://*.dzen.ru/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
 // @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru%2C%20Dzenru%2C%20VK%2C%20OK.user.js
@@ -1202,108 +1202,128 @@
 
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
-        else if (currentURL.startsWith('https://dzen.ru/')) {
-            // Добавление кнопки "Специально для Вас..."
-            const EspeciallyForYou = CreateEspeciallyForYou()
-            let targetNode_observer
-
-            function AD_remove_node(node, mutation_test) {
-                let targetNode
-                let targetNodes
-                // курсы валют и нефти (сделать опциональным)
-                targetNode = document.querySelector('div.header-widgets__rates-ii')
-                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
-                    if (EspeciallyForYou.querySelector('div.header-widgets__rates-ii')) {
-                        targetNode?.remove()
-                    }
-                    else {
-                        targetNode.style.position = 'unset'
-                        targetNode.style.marginTop = '0.3rem'
-                        const targetNodeA = targetNode.querySelector('a')
-                        if (targetNodeA) targetNodeA.style.marginBottom = 0
-                        EspeciallyForYou?.appendChild(targetNode)
-                    }
-                }
-
-                // Кнопка "Установить Яндекс.браузер" под поиском
-                // targetNode = document.querySelector('div#ya-dist-link_bro')
-                // if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
-                //     if (EspeciallyForYou.querySelector('div#ya-dist-link_bro')) {
-                //         // targetNode?.remove()
+        else if (currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/')) {
+            if (isMobileDevice()) {
+                // верхний баннер
+                document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
+                // const observer = new MutationObserver((mutationsList, observer) => {
+                //     for (let mutation of mutationsList) {
+                //         if (mutation.type === 'childList') {
+                //             mutation.addedNodes.forEach(node => {
+                //                 if (node.nodeName === 'DIV') {
+                //                     document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
+                //                 }
+                //             })
+                //         }
                 //     }
-                //     else {
-                //         targetNode.style.position = 'unset'
-                //         targetNode.style.marginTop = '0.3rem'
-                //         const targetNodeA = targetNode.querySelector('a')
-                //         if (targetNodeA) targetNodeA.style.marginBottom = 0
-                //         EspeciallyForYou?.appendChild(targetNode)
-                //     }
-                // }
-
-                // Кнопка "Установить Яндекс.браузер" внизу справа
-                targetNode = document.querySelector('div#ya-dist-teaser')
-                if (targetNode) targetNode?.remove()
-                // баннер сверху
-                targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
-                if (targetNodes.length > 0) {
-                    const targetNodes_EspeciallyForYou = EspeciallyForYou.querySelectorAll('div[data-testid="ad-banner"]')
-                    if (targetNodes_EspeciallyForYou.length > 0) {
-                        targetNodes.forEach(node => {
-                            if (node.parentNode !== EspeciallyForYou) {
-                                node.remove()
-                            }
-                        })
-                    }
-                    else {
-                        targetNodes.forEach(node => {
-                            node.style.marginTop = '0.3rem'
-                            EspeciallyForYou?.appendChild(node)
-                        })
-                    }
-                }
-                // реклама в видеоблоках
-                targetNodes = document.querySelectorAll('div.zenad-card-rtb__ad')
-                targetNodes.forEach(node => {
-                    // if (node.parentNode !== EspeciallyForYou) {
-                    //     node.style.marginTop = '0.3rem'
-                    //     EspeciallyForYou?.appendChild(node)
-                    // }
-                    // удаление так как слишком много этой рекламы
-                    node.remove()
-                })
-                // Модальное окно "Яндекс станет основным поиском"
-                document.querySelector('div#ya-dist-splashscreen')?.remove()
-                // Слева вверху "Сделать поиск Яндекса основным?"
-                document.querySelector('div#ya-dist-popup')?.remove()
-                // Добавление EspeciallyForYou под блок поля поиска
-                const ForEspeciallyForYou_Container = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot')
-                if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
-                    ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
-                }
-
+                // })
+                // observer.observe(document.body, observer_config)
+                // observers.push(observer)
             }
-            // Удаление с наблюдением
-            function AD_remove() {
-                targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
-                if (targetNode_observer) {
-                    clearInterval(interval_AD_remove)
-                    AD_remove_node()
-                    const observer = new MutationObserver((mutationsList, observer) => {
-                        for (let mutation of mutationsList) {
-                            if (mutation.type === 'childList') {
-                                mutation.addedNodes.forEach(node => {
-                                    if (node.nodeName === 'DIV') {
-                                        AD_remove_node(node, mutation)
-                                    }
-                                });
-                            }
+            else {
+                // Добавление кнопки "Специально для Вас..."
+                const EspeciallyForYou = CreateEspeciallyForYou()
+                let targetNode_observer
+
+                function AD_remove_node(node, mutation_test) {
+                    let targetNode
+                    let targetNodes
+                    // курсы валют и нефти (сделать опциональным)
+                    targetNode = document.querySelector('div.header-widgets__rates-ii')
+                    if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                        if (EspeciallyForYou.querySelector('div.header-widgets__rates-ii')) {
+                            targetNode?.remove()
                         }
-                    });
-                    observer.observe(targetNode_observer, observer_config)
-                    observers.push(observer)
+                        else {
+                            targetNode.style.position = 'unset'
+                            targetNode.style.marginTop = '0.3rem'
+                            const targetNodeA = targetNode.querySelector('a')
+                            if (targetNodeA) targetNodeA.style.marginBottom = 0
+                            EspeciallyForYou?.appendChild(targetNode)
+                        }
+                    }
+
+                    // Кнопка "Установить Яндекс.браузер" под поиском
+                    // targetNode = document.querySelector('div#ya-dist-link_bro')
+                    // if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                    //     if (EspeciallyForYou.querySelector('div#ya-dist-link_bro')) {
+                    //         // targetNode?.remove()
+                    //     }
+                    //     else {
+                    //         targetNode.style.position = 'unset'
+                    //         targetNode.style.marginTop = '0.3rem'
+                    //         const targetNodeA = targetNode.querySelector('a')
+                    //         if (targetNodeA) targetNodeA.style.marginBottom = 0
+                    //         EspeciallyForYou?.appendChild(targetNode)
+                    //     }
+                    // }
+
+                    // Кнопка "Установить Яндекс.браузер" внизу справа
+                    targetNode = document.querySelector('div#ya-dist-teaser')
+                    if (targetNode) targetNode?.remove()
+                    // баннер сверху
+                    targetNodes = document.querySelectorAll('div[data-testid="ad-banner"]')
+                    if (targetNodes.length > 0) {
+                        const targetNodes_EspeciallyForYou = EspeciallyForYou.querySelectorAll('div[data-testid="ad-banner"]')
+                        if (targetNodes_EspeciallyForYou.length > 0) {
+                            targetNodes.forEach(node => {
+                                if (node.parentNode !== EspeciallyForYou) {
+                                    node.remove()
+                                }
+                            })
+                        }
+                        else {
+                            targetNodes.forEach(node => {
+                                node.style.marginTop = '0.3rem'
+                                EspeciallyForYou?.appendChild(node)
+                            })
+                        }
+                    }
+                    // реклама в видеоблоках
+                    targetNodes = document.querySelectorAll('div.zenad-card-rtb__ad')
+                    targetNodes.forEach(node => {
+                        // if (node.parentNode !== EspeciallyForYou) {
+                        //     node.style.marginTop = '0.3rem'
+                        //     EspeciallyForYou?.appendChild(node)
+                        // }
+                        // удаление так как слишком много этой рекламы
+                        node.remove()
+                    })
+                    // Модальное окно "Яндекс станет основным поиском"
+                    document.querySelector('div#ya-dist-splashscreen')?.remove()
+                    // Слева вверху "Сделать поиск Яндекса основным?"
+                    document.querySelector('div#ya-dist-popup')?.remove()
+                    // Добавление EspeciallyForYou под блок поля поиска
+                    const ForEspeciallyForYou_Container = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot')
+                    if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
+                        ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
+                    }
+
                 }
-            }
-            const interval_AD_remove = setInterval(AD_remove, 500);
+                // Удаление с наблюдением
+                function AD_remove() {
+                    targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
+                    if (targetNode_observer) {
+                        clearInterval(interval_AD_remove)
+                        AD_remove_node()
+                        const observer = new MutationObserver((mutationsList, observer) => {
+                            for (let mutation of mutationsList) {
+                                if (mutation.type === 'childList') {
+                                    mutation.addedNodes.forEach(node => {
+                                        if (node.nodeName === 'DIV') {
+                                            AD_remove_node(node, mutation)
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        observer.observe(targetNode_observer, observer_config)
+                        observers.push(observer)
+                    }
+                }
+                const interval_AD_remove = setInterval(AD_remove, 500)
+
+                }
         }
         // vk.com
         else if (currentURL.startsWith('https://vk.com/')) {
