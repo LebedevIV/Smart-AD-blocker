@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-18_22-04
+// @version      2024-08-19_19-09
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -85,46 +85,46 @@
                 }
 
                 // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
-                if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
-                    // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
-                    const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer');
-                    if (container) {
-                        // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
-                        let targetDiv = null;
-                        for (let child of container.children) {
-                            if (child.tagName === 'DIV' && child.childElementCount === 0) {
-                                let previousSibling = child.previousElementSibling;
-                                let hasAnchorBefore = false;
-                                while (previousSibling) {
-                                    if (previousSibling.tagName === 'A') {
-                                        hasAnchorBefore = true;
-                                        break;
-                                    }
-                                    previousSibling = previousSibling.previousElementSibling;
+                // if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
+                // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
+                const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer')
+                if (container) {
+                    // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
+                    let targetDiv = null
+                    for (let child of container.children) {
+                        if (child.tagName === 'DIV' && child.childElementCount === 0) {
+                            let previousSibling = child.previousElementSibling
+                            let hasAnchorBefore = false;
+                            while (previousSibling) {
+                                if (previousSibling.tagName === 'A') {
+                                    hasAnchorBefore = true
+                                    break
                                 }
-                                if (!hasAnchorBefore) {
-                                    targetDiv = child;
-                                    break;
-                                }
+                                previousSibling = previousSibling.previousElementSibling
+                            }
+                            if (!hasAnchorBefore) {
+                                targetDiv = child
+                                break
                             }
                         }
+                    }
 
-                        if (targetDiv) {
-                            // Удалить найденный div и все предшествующие ему внутри контейнера
-                            let currentChild = targetDiv;
-                            while (currentChild) {
-                                fact_Remove_AD_Top_3column = true
-                                let previousSibling = currentChild.previousElementSibling;
-                                if (previousSibling) {
-                                    container.removeChild(previousSibling);
-                                } else {
-                                    container.removeChild(currentChild);
-                                    break;
-                                }
+                    if (targetDiv) {
+                        // Удалить найденный div и все предшествующие ему внутри контейнера
+                        let currentChild = targetDiv
+                        while (currentChild) {
+                            fact_Remove_AD_Top_3column = true
+                            let previousSibling = currentChild.previousElementSibling
+                            if (previousSibling) {
+                                container.removeChild(previousSibling)
+                            } else {
+                                container.removeChild(currentChild)
+                                break
                             }
                         }
                     }
                 }
+                // }
 
 
             }
@@ -237,14 +237,32 @@
             }
             // Функция для проверки наличия и удаления блока рекламного банера Майлру в нижнем левом углу
             function checkAndRemoveMailruSuggestions(mutation) {
-                const targetNode = document.querySelector(config.nodes.mail_ru_suggestions);
+                const targetNode = document.querySelector(config.nodes.mail_ru_suggestions)
                 if (targetNode) {
                     // clearInterval(interval_MailruSuggestions); // Останавливаем интервал, так как элемент уже найден
                     targetNode.remove()
                 }
             }
-            const interval_GeneralBlock = setInterval(checkFor_GeneralBlock, 200);
+            const interval_GeneralBlock = setInterval(checkFor_GeneralBlock, 200)
 
+            }
+        // почта на мобильном устройстве
+        else if (currentURL.startsWith('https://touch.mail.ru/messages/')) {
+            // верхний узкий баннер
+            document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
+                            }
+                        })
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
         }
         else if (currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
             // нижний узкий баннер
@@ -625,77 +643,32 @@
 
         }
         else if (currentURL.startsWith('https://ya.ru/')) {
-            // Добавление кнопки "Реклама"
-            const EspeciallyForYou = CreateEspeciallyForYou()
-            // const EspeciallyForYou_Content = EspeciallyForYou.querySelector('div.shimmer')
-            // simple-popup dist-overlay__popup simple-popup_direction_center simple-popup_theme_modal simple-popup_autoclosable_yes simple-popup_overlay_yes simple-popup_has-close_yes simple-popup_delay-close_yes simple-popup_overlay-color_default simple-popup_shown_true simple-popup_delay-close-shown_yes
-            // simple-popup__content
-
-            // Удаление без наблюдения
-            // перенос всей рекламы в специальный фрейм "Специально для Вас..."
-            // const headline__personal = document.querySelector('div.headline__personal')
-            let targetNode
-            // курсы валют и нефти (сделать опциональным)
-            targetNode = document.querySelector('section.informers3__stocks')
-            // targetNode?.remove()
-            if (targetNode) {
-                targetNode.style.marginTop = '0.3rem'
-                EspeciallyForYou?.appendChild(targetNode)
+            // если это мбильное устройство
+            if (isMobileDevice()) {
+                document.querySelector('div.dialog__wrapper')?.remove()
             }
+            else {
+                // Добавление кнопки "Реклама"
+                const EspeciallyForYou = CreateEspeciallyForYou()
+                // const EspeciallyForYou_Content = EspeciallyForYou.querySelector('div.shimmer')
+                // simple-popup dist-overlay__popup simple-popup_direction_center simple-popup_theme_modal simple-popup_autoclosable_yes simple-popup_overlay_yes simple-popup_has-close_yes simple-popup_delay-close_yes simple-popup_overlay-color_default simple-popup_shown_true simple-popup_delay-close-shown_yes
+                // simple-popup__content
 
-            targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
-            // targetNode?.remove()
-            if (targetNode) EspeciallyForYou?.appendChild(targetNode)
-
-            // модальное окно посредине в начале "Сделайте Яндекс главной страницей"
-            targetNode = document.querySelector('div.simple-popup') ||
-                document.querySelector('div.dist-overlay__popup') ||
-                document.querySelector('div.simple-popup_direction_center') ||
-                document.querySelector('div.simple-popup_theme_modal') ||
-                document.querySelector('div.simple-popup_autoclosable_yes') ||
-                document.querySelector('div.simple-popup_overlay_yes') ||
-                document.querySelector('div.simple-popup_has-close_yes') ||
-                document.querySelector('div.simple-popup_delay-close_yes') ||
-                document.querySelector('div.simple-popup_overlay-color_default') ||
-                document.querySelector('div.simple-popup_shown_true') ||
-                document.querySelector('div.simple-popup_delay-close-shown_yes')
-            if (targetNode) {
-                targetNode.style.marginTop = '0.3rem'
-                EspeciallyForYou?.appendChild(targetNode)
-            }
-
-            const dist_stripe = document.querySelector("div.dist-stripe")
-            // dist_stripe?.parentNode.remove()
-            if (targetNode) EspeciallyForYou?.appendChild(targetNode)
-
-            // Добавление EspeciallyForYou под блок поля поиска
-            const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
-            if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
-                ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
-            }
-
-            const mainElement = document.querySelector('main.body__wrapper');
-            if (mainElement) {
-                const targetNode = mainElement.querySelector('div[data-hydration-id] > div.dist-stripe');
-                if (targetNode) EspeciallyForYou?.appendChild(targetNode.parentNode)
-            }
-
-            // Удаление с наблюдением
-            function AD_remove_node(node, mutation_test) {
-                // Кнопка "Установить Яндекс.браузер"
-                let targetNode = document.querySelector('div.link-bro')
-                if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
-                    if (EspeciallyForYou.querySelector('div.link-bro')) {
-                        targetNode?.remove()
-                    }
-                    else {
-                        targetNode.style.position = 'unset'
-                        targetNode.style.marginTop = '0.3rem'
-                        const targetNodeA = targetNode.querySelector('a')
-                        if (targetNodeA) targetNodeA.style.marginBottom = 0
-                        EspeciallyForYou?.appendChild(targetNode)
-                    }
+                // Удаление без наблюдения
+                // перенос всей рекламы в специальный фрейм "Специально для Вас..."
+                // const headline__personal = document.querySelector('div.headline__personal')
+                let targetNode
+                // курсы валют и нефти (сделать опциональным)
+                targetNode = document.querySelector('section.informers3__stocks')
+                // targetNode?.remove()
+                if (targetNode) {
+                    targetNode.style.marginTop = '0.3rem'
+                    EspeciallyForYou?.appendChild(targetNode)
                 }
+
+                targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
+                // targetNode?.remove()
+                if (targetNode) EspeciallyForYou?.appendChild(targetNode)
 
                 // модальное окно посредине в начале "Сделайте Яндекс главной страницей"
                 targetNode = document.querySelector('div.simple-popup') ||
@@ -714,30 +687,82 @@
                     EspeciallyForYou?.appendChild(targetNode)
                 }
 
-            }
-            function AD_remove() {
-                const targetNode = document.querySelector('div.search3__inner') // более точный блок для наблюдения изменений
-                if (targetNode) {
-                    clearInterval(interval_AD_remove)
-                    AD_remove_node()
-                    const observer = new MutationObserver((mutationsList, observer) => {
-                        for (let mutation of mutationsList) {
-                            if (mutation.type === 'childList') {
-                                mutation.addedNodes.forEach(node => {
-                                    if (node.nodeName === 'DIV') {
-                                        AD_remove_node(node, mutation)
-                                    }
-                                });
-                            }
-                        }
-                    });
-                    observer.observe(targetNode, observer_config)
-                    observers.push(observer)
-                }
-            }
-            const interval_AD_remove = setInterval(AD_remove, 500)
 
-            }
+                const dist_stripe = document.querySelector("div.dist-stripe")
+                // dist_stripe?.parentNode.remove()
+                if (targetNode) EspeciallyForYou?.appendChild(targetNode)
+
+                // Добавление EspeciallyForYou под блок поля поиска
+                const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
+                if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
+                    ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
+                }
+
+                const mainElement = document.querySelector('main.body__wrapper');
+                if (mainElement) {
+                    const targetNode = mainElement.querySelector('div[data-hydration-id] > div.dist-stripe');
+                    if (targetNode) EspeciallyForYou?.appendChild(targetNode.parentNode)
+                }
+
+                // Удаление с наблюдением
+                function AD_remove_node(node, mutation_test) {
+                    // Кнопка "Установить Яндекс.браузер"
+                    let targetNode = document.querySelector('div.link-bro')
+                    if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
+                        if (EspeciallyForYou.querySelector('div.link-bro')) {
+                            targetNode?.remove()
+                        }
+                        else {
+                            targetNode.style.position = 'unset'
+                            targetNode.style.marginTop = '0.3rem'
+                            const targetNodeA = targetNode.querySelector('a')
+                            if (targetNodeA) targetNodeA.style.marginBottom = 0
+                            EspeciallyForYou?.appendChild(targetNode)
+                        }
+                    }
+
+                    // модальное окно посредине в начале "Сделайте Яндекс главной страницей"
+                    targetNode = document.querySelector('div.simple-popup') ||
+                        document.querySelector('div.dist-overlay__popup') ||
+                        document.querySelector('div.simple-popup_direction_center') ||
+                        document.querySelector('div.simple-popup_theme_modal') ||
+                        document.querySelector('div.simple-popup_autoclosable_yes') ||
+                        document.querySelector('div.simple-popup_overlay_yes') ||
+                        document.querySelector('div.simple-popup_has-close_yes') ||
+                        document.querySelector('div.simple-popup_delay-close_yes') ||
+                        document.querySelector('div.simple-popup_overlay-color_default') ||
+                        document.querySelector('div.simple-popup_shown_true') ||
+                        document.querySelector('div.simple-popup_delay-close-shown_yes')
+                    if (targetNode) {
+                        targetNode.style.marginTop = '0.3rem'
+                        EspeciallyForYou?.appendChild(targetNode)
+                    }
+
+                }
+                function AD_remove() {
+                    const targetNode = document.querySelector('div.search3__inner') // более точный блок для наблюдения изменений
+                    if (targetNode) {
+                        clearInterval(interval_AD_remove)
+                        AD_remove_node()
+                        const observer = new MutationObserver((mutationsList, observer) => {
+                            for (let mutation of mutationsList) {
+                                if (mutation.type === 'childList') {
+                                    mutation.addedNodes.forEach(node => {
+                                        if (node.nodeName === 'DIV') {
+                                            AD_remove_node(node, mutation)
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        observer.observe(targetNode, observer_config)
+                        observers.push(observer)
+                    }
+                }
+                const interval_AD_remove = setInterval(AD_remove, 500)
+
+                }
+        }
         // каталог игр
         else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
@@ -1725,6 +1750,11 @@
 
         });
 
+    }
+
+    // определение мобильное устройство или ПК
+    function isMobileDevice() {
+        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
     }
 
     //     // Обработка события hashchange
