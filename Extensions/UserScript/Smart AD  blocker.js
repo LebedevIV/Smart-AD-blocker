@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-19_19-09
+// @version      2024-08-19_19-11
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -85,46 +85,46 @@
                 }
 
                 // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
-                // if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
-                // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
-                const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer')
-                if (container) {
-                    // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
-                    let targetDiv = null
-                    for (let child of container.children) {
-                        if (child.tagName === 'DIV' && child.childElementCount === 0) {
-                            let previousSibling = child.previousElementSibling
-                            let hasAnchorBefore = false;
-                            while (previousSibling) {
-                                if (previousSibling.tagName === 'A') {
-                                    hasAnchorBefore = true
+                if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
+                    // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
+                    const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer')
+                    if (container) {
+                        // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
+                        let targetDiv = null
+                        for (let child of container.children) {
+                            if (child.tagName === 'DIV' && child.childElementCount === 0) {
+                                let previousSibling = child.previousElementSibling
+                                let hasAnchorBefore = false;
+                                while (previousSibling) {
+                                    if (previousSibling.tagName === 'A') {
+                                        hasAnchorBefore = true
+                                        break
+                                    }
+                                    previousSibling = previousSibling.previousElementSibling
+                                }
+                                if (!hasAnchorBefore) {
+                                    targetDiv = child
                                     break
                                 }
-                                previousSibling = previousSibling.previousElementSibling
-                            }
-                            if (!hasAnchorBefore) {
-                                targetDiv = child
-                                break
                             }
                         }
-                    }
 
-                    if (targetDiv) {
-                        // Удалить найденный div и все предшествующие ему внутри контейнера
-                        let currentChild = targetDiv
-                        while (currentChild) {
-                            fact_Remove_AD_Top_3column = true
-                            let previousSibling = currentChild.previousElementSibling
-                            if (previousSibling) {
-                                container.removeChild(previousSibling)
-                            } else {
-                                container.removeChild(currentChild)
-                                break
+                        if (targetDiv) {
+                            // Удалить найденный div и все предшествующие ему внутри контейнера
+                            let currentChild = targetDiv
+                            while (currentChild) {
+                                fact_Remove_AD_Top_3column = true
+                                let previousSibling = currentChild.previousElementSibling
+                                if (previousSibling) {
+                                    container.removeChild(previousSibling)
+                                } else {
+                                    container.removeChild(currentChild)
+                                    break
+                                }
                             }
                         }
                     }
                 }
-                // }
 
 
             }
