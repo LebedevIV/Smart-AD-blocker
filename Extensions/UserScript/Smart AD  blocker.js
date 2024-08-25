@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-19_20-36
+// @version      2024-08-25_15-29
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -35,7 +35,8 @@
             mail_ru_banner_top_parent: 'div[slot="main-column"]',
             mail_ru_banner_top_parent_bannerClassList: ['span', 'article', 'p', 'section'], // все возможные типы нод, используемые в качестве контекнера рекламного баннера
             ya_ru_banner_under_search: 'div.banner.i-mini-bem', // все возможные типы нод, используемые в качестве контекнера рекламного баннера
-            ya_ru_search_suggestions: 'div.Modal.Modal_visible.Modal_hasAnimation.Distribution-SplashScreenModal.Distribution-SplashScreenModal_outerCross.SplashscreenDefault', // все возможные типы нод, используемые в качестве контекнера рекламного баннера
+            // ya_ru_search_suggestions: 'div.Modal.Modal_visible.Modal_hasAnimation.Distribution-SplashScreenModal.Distribution-SplashScreenModal_outerCross.SplashscreenDefault', // все возможные типы нод, используемые в качестве контекнера рекламного баннера
+            ya_ru_search_suggestions: 'div.Modal.Modal_visible.Modal_hasAnimation', // классы, используемые в качестве контекнера рекламного баннера
 
 
         }
@@ -267,12 +268,17 @@
         else if (currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
             // нижний узкий баннер
             document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
+            // правая панель
+            document.querySelector('div[class^="ReactViewer__attachesSidebar"]')?.remove()
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeName === 'DIV') {
+                                // нижний узкий баннер
                                 document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
+                                // правая панель
+                                document.querySelector('div[class^="ReactViewer__attachesSidebar"]')?.remove()
                             }
                         });
                     }
@@ -493,8 +499,13 @@
         // настроить обсервер
         else if (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) {
             // Добавление кнопки "Реклама"
-            const EspeciallyForYou = CreateEspeciallyForYou()
-            let EspeciallyForYou_fact = false
+            // const EspeciallyForYou = CreateEspeciallyForYou()
+            // let EspeciallyForYou_fact = false
+            const AdvDetails = {
+                Details: CreateEspeciallyForYou(),
+                Details_fact: false,
+                countBanners: 0,
+            }
             let ADRight_fact = false // факт вывода рекоамного блока справа внутри "Реклама"
 
             // блок справа
@@ -504,10 +515,14 @@
 
                 // баннер "Сделать поиск Яндекса основным?"
                 targetNode = document.querySelector(config.nodes.ya_ru_search_suggestions) || document.querySelector('div#distr-pcode-container') // 'div.Modal.Modal_visible.Modal_hasAnimation.Distribution-SplashScreenModal.Distribution-SplashScreenModal_outerCross.SplashscreenDefault'
+                // Modal Modal_visible Modal_hasAnimation Distribution-SplashScreenModal SplashscreenTopButton SplashscreenTopButton_layout_system_top_dark_close-button
                 if (targetNode) {
-                    if (EspeciallyForYou_fact === false) {
+                    // if (EspeciallyForYou_fact === false) {
+                    if (AdvDetails.Details_fact === false) {
                         targetNode.style.marginTop = '0.3rem'
-                        EspeciallyForYou?.appendChild(targetNode)
+                        // EspeciallyForYou?.appendChild(targetNode)
+                        AdvDetails.Details.appendChild(targetNode)
+                        AdvDetails.countBanners++
                     }
                     else {
                         targetNode?.remove()
@@ -536,7 +551,9 @@
                         const node_parentNode = findParentWithClassEndingInCard(node)
                         if (!ADRight_fact) {
                             node.style.marginTop = '0.3rem'
-                            EspeciallyForYou?.appendChild(node)
+                            // EspeciallyForYou?.appendChild(node)
+                            AdvDetails.Details.appendChild(node)
+                            AdvDetails.countBanners++
                             ADRight_fact = true
                         }
                         node_parentNode?.remove()
@@ -544,11 +561,21 @@
                     });
 
                     // добавление "Реклама" под блок-ссылку на источник изображения
-                    if (EspeciallyForYou_fact === false) {
-                        const div_imageSource = targetNodeModal.querySelector('div.ImagesViewer-LayoutSideblock')
-                        if (div_imageSource) {
-                            div_imageSource.appendChild(EspeciallyForYou)
-                            EspeciallyForYou_fact = true
+                    if (AdvDetails.countBanners > 0) {
+                        // if (EspeciallyForYou_fact === false) {
+                        if (AdvDetails.Details_fact === false) {
+
+                            const div_imageSource = targetNodeModal.querySelector('div.ImagesViewer-LayoutSideblock')
+                            if (div_imageSource) {
+                                // EspeciallyForYou.querySelector('summary').textContent += ' (' + AdvDetails.countBanners + ')'
+                                // div_imageSource.appendChild(EspeciallyForYou)
+                                // AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама') + ' (' + AdvDetails.countBanners + ')'
+                                AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама') + ` (${AdvDetails.countBanners})`
+                                div_imageSource.appendChild(AdvDetails.Details)
+                                // EspeciallyForYou_fact = true
+                                AdvDetails.Details_fact = true
+
+                            }
                         }
                     }
 
@@ -588,17 +615,24 @@
                         mutation.removedNodes.forEach(node => {
                             if (node.nodeName === 'DIV') {
                                 const targetNodeModal = document.querySelector('div.Modal.Modal_visible.Modal_theme_normal.ImagesViewer-Modal.ImagesViewer')
-                                // модальное окно изображения было закрыто
+                                // модальное окно изображения было закрыто или ещё не открылось
                                 if (!targetNodeModal) {
-                                    EspeciallyForYou_fact = false
+                                    // EspeciallyForYou_fact = false
+                                    AdvDetails.Details_fact = false
+
                                     ADRight_fact = false
                                     // Очистка <details>
                                     // Выбираем все дочерние элементы <details>, кроме <summary>
-                                    const childNodes = EspeciallyForYou.querySelectorAll('details > *:not(summary)');
+                                    // const childNodes = EspeciallyForYou.querySelectorAll('details > *:not(summary)')
+                                    const childNodes = AdvDetails.Details.querySelectorAll('details > *:not(summary)')
+
                                     // Удаляем каждый из выбранных элементов
                                     childNodes.forEach(node => {
-                                        EspeciallyForYou.removeChild(node);
+                                        // EspeciallyForYou.removeChild(node)
+                                        AdvDetails.Details.removeChild(node)
                                     });
+                                    // AdvDetails.countBanners = 0
+                                    AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама')
                                 }
                             }
                         });
@@ -649,7 +683,12 @@
             }
             else {
                 // Добавление кнопки "Реклама"
-                const EspeciallyForYou = CreateEspeciallyForYou()
+                // const EspeciallyForYou = CreateEspeciallyForYou()
+                const AdvDetails = {
+                    Details: CreateEspeciallyForYou(),
+                    Details_fact: false,
+                    countBanners: 0,
+                }
                 // const EspeciallyForYou_Content = EspeciallyForYou.querySelector('div.shimmer')
                 // simple-popup dist-overlay__popup simple-popup_direction_center simple-popup_theme_modal simple-popup_autoclosable_yes simple-popup_overlay_yes simple-popup_has-close_yes simple-popup_delay-close_yes simple-popup_overlay-color_default simple-popup_shown_true simple-popup_delay-close-shown_yes
                 // simple-popup__content
@@ -663,12 +702,17 @@
                 // targetNode?.remove()
                 if (targetNode) {
                     targetNode.style.marginTop = '0.3rem'
-                    EspeciallyForYou?.appendChild(targetNode)
+                    // EspeciallyForYou?.appendChild(targetNode)
+                    AdvDetails.Details.appendChild(targetNode)
+                    AdvDetails.countBanners++
                 }
 
                 targetNode = document.querySelector(config.nodes.ya_ru_banner_under_search)
                 // targetNode?.remove()
-                if (targetNode) EspeciallyForYou?.appendChild(targetNode)
+                if (targetNode) {
+                    AdvDetails.Details?.appendChild(targetNode)
+                    AdvDetails.countBanners++
+                }
 
                 // модальное окно посредине в начале "Сделайте Яндекс главной страницей"
                 targetNode = document.querySelector('div.simple-popup') ||
@@ -684,40 +728,52 @@
                     document.querySelector('div.simple-popup_delay-close-shown_yes')
                 if (targetNode) {
                     targetNode.style.marginTop = '0.3rem'
-                    EspeciallyForYou?.appendChild(targetNode)
+                    AdvDetails.Details.appendChild(targetNode)
+                    AdvDetails.countBanners++
                 }
 
 
                 const dist_stripe = document.querySelector("div.dist-stripe")
                 // dist_stripe?.parentNode.remove()
-                if (targetNode) EspeciallyForYou?.appendChild(targetNode)
-
-                // Добавление EspeciallyForYou под блок поля поиска
-                const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
-                if (ForEspeciallyForYou_Container && EspeciallyForYou.parentNode !== ForEspeciallyForYou_Container) {
-                    ForEspeciallyForYou_Container.appendChild(EspeciallyForYou)
+                if (targetNode) {
+                    AdvDetails.Details.appendChild(targetNode)
+                    AdvDetails.countBanners++
                 }
 
                 const mainElement = document.querySelector('main.body__wrapper');
                 if (mainElement) {
                     const targetNode = mainElement.querySelector('div[data-hydration-id] > div.dist-stripe');
-                    if (targetNode) EspeciallyForYou?.appendChild(targetNode.parentNode)
+                    if (targetNode) {
+                        AdvDetails.Details.appendChild(targetNode.parentNode)
+                        AdvDetails.countBanners++
+                    }
                 }
 
+                // Добавление EspeciallyForYou под блок поля поиска
+                if (AdvDetails.countBanners > 0) {
+                    const ForEspeciallyForYou_Container = document.querySelector('div.body__content')
+                    if (ForEspeciallyForYou_Container && AdvDetails.Details.parentNode !== ForEspeciallyForYou_Container) {
+                        AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама') + ' (' + AdvDetails.countBanners + ')'
+                        ForEspeciallyForYou_Container.appendChild(AdvDetails.Details)
+                    }
+                }
                 // Удаление с наблюдением
                 function AD_remove_node(node, mutation_test) {
                     // Кнопка "Установить Яндекс.браузер"
                     let targetNode = document.querySelector('div.link-bro')
-                    if (targetNode && targetNode.parentNode !== EspeciallyForYou) {
-                        if (EspeciallyForYou.querySelector('div.link-bro')) {
+                    if (targetNode && targetNode.parentNode !== AdvDetails.Details) {
+                        if (AdvDetails.Details.querySelector('div.link-bro')) {
                             targetNode?.remove()
+                            // AdvDetails.countBanners--
                         }
                         else {
                             targetNode.style.position = 'unset'
                             targetNode.style.marginTop = '0.3rem'
                             const targetNodeA = targetNode.querySelector('a')
                             if (targetNodeA) targetNodeA.style.marginBottom = 0
-                            EspeciallyForYou?.appendChild(targetNode)
+                            AdvDetails.Details.appendChild(targetNode)
+                            AdvDetails.countBanners++
+                            AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама') + ' (' + AdvDetails.countBanners + ')'
                         }
                     }
 
@@ -735,7 +791,9 @@
                         document.querySelector('div.simple-popup_delay-close-shown_yes')
                     if (targetNode) {
                         targetNode.style.marginTop = '0.3rem'
-                        EspeciallyForYou?.appendChild(targetNode)
+                        AdvDetails.Details.appendChild(targetNode)
+                        AdvDetails.countBanners++
+                        AdvDetails.Details.querySelector('summary').textContent = messageSpecialOffer('Реклама') + ' (' + AdvDetails.countBanners + ')'
                     }
 
                 }
@@ -1456,19 +1514,8 @@
         // Добавляем класс my-details-class к элементу <details>
         details.classList.add('details_EspeciallyForYou');
 
-        // Определение языка браузера
-        const browserLanguage = navigator.language || navigator.userLanguage;
-        let messageSpecialOffer = 'Реклама'
-
-        switch (browserLanguage) {
-            case "uken":
-                messageSpecialOffer = 'Реклама'
-                break;
-            default:
-                messageSpecialOffer = 'Реклама'
-        }
         const summary = document.createElement("summary");
-        summary.textContent = messageSpecialOffer;
+        summary.textContent = messageSpecialOffer('Реклама')
 
         const shimmer = document.createElement("div");
         shimmer.className = "shimmer";
@@ -1484,6 +1531,25 @@
         return details
     }
 
+    // Возврат строк в зависимости от языка
+    function messageSpecialOffer(idMsg) {
+        // Определение языка браузера
+        const browserLanguage = navigator.language || navigator.userLanguage
+        let messageSpecialOffer
+
+        switch (idMsg) {
+            case "Реклама":
+                messageSpecialOffer = 'Реклама'
+                switch (browserLanguage) {
+                    case "uken":
+                        messageSpecialOffer = 'Реклама'
+                        break;
+                    default:
+                        messageSpecialOffer = 'Реклама'
+                }
+                return messageSpecialOffer
+        }
+    }
     // https://mail.ru/
     // Функция для проверки наличия и удаления верхнего рекламного блока
     function mail_ru_checkAndRemoveTopBlock() {
