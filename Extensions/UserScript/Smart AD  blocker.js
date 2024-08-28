@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-25_15-29
+// @version      2024-08-28_20-08
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -58,6 +58,7 @@
                 // count_001++
                 // console.log('Счётчик вызовов:', count_001)
                 // let Div_AD
+
                 if (!node) { // первый запуск
                     document.querySelector("div.new-menu")?.previousSibling?.remove()
                 }
@@ -126,7 +127,8 @@
                         }
                     }
                 }
-
+                // removeElementsByClassContaining('banner__content-wrapper');
+                document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
 
             }
             // удаление правых рекламных блоков
@@ -185,6 +187,16 @@
                     }
                 }
             }
+//             // Функция для поиска и удаления всех элементов, имя класса которых содержит banner__content-wrapper
+//             function removeElementsByClassContaining(className) {
+//                 const elements = document.querySelectorAll('a');
+
+//                 elements.forEach(element => {
+//                     if (element.classList.contains(className)) {
+//                         element.remove();
+//                     }
+//                 });
+//             }
             // установка наблюдения за изменением блока-родителя
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
@@ -287,6 +299,46 @@
             observer.observe(document.body, observer_config)
             observers.push(observer)
         }
+        // else if (currentURL.startsWith('https://auto.mail.ru/forum/topic/')) {
+        // else if (currentURL.startsWith('https://auto.mail.ru/forum/')) {
+        else if (currentURL.startsWith('https://auto.mail.ru/')) {
+            // удаление всей рекламы, но не очень аккуратно
+
+            // Функция для проверки, что элемент имеет только один класс
+            function hasSingleClass(element, className) {
+                return element.classList.length === 1 && element.classList.contains(className);
+            }
+
+            // Функция для поиска и удаления всех подходящих div элементов
+            function removeDivsWithSingleClassAndId() {
+                const divs = document.querySelectorAll('div');
+
+                divs.forEach(div => {
+                    if (hasSingleClass(div, 'mailru-visibility-check') && div.id.startsWith('mailru')) {
+                        div.remove();
+                    }
+                });
+            }
+            // Вызов функции для удаления div элементов
+            removeDivsWithSingleClassAndId();
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                removeDivsWithSingleClassAndId();
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
+
+
+        }
+
         else if (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) {
             // верхний узкий баннер
             document.querySelector('div[class^="Worm__root--"]')?.remove()
@@ -1531,326 +1583,326 @@
         return details
     }
 
-    // Возврат строк в зависимости от языка
-    function messageSpecialOffer(idMsg) {
-        // Определение языка браузера
-        const browserLanguage = navigator.language || navigator.userLanguage
-        let messageSpecialOffer
+// Возврат строк в зависимости от языка
+function messageSpecialOffer(idMsg) {
+    // Определение языка браузера
+    const browserLanguage = navigator.language || navigator.userLanguage
+    let messageSpecialOffer
 
-        switch (idMsg) {
-            case "Реклама":
-                messageSpecialOffer = 'Реклама'
-                switch (browserLanguage) {
-                    case "uken":
-                        messageSpecialOffer = 'Реклама'
-                        break;
-                    default:
-                        messageSpecialOffer = 'Реклама'
-                }
-                return messageSpecialOffer
+    switch (idMsg) {
+        case "Реклама":
+            messageSpecialOffer = 'Реклама'
+            switch (browserLanguage) {
+                case "uken":
+                    messageSpecialOffer = 'Реклама'
+                    break;
+                default:
+                    messageSpecialOffer = 'Реклама'
+            }
+            return messageSpecialOffer
+    }
+}
+// https://mail.ru/
+// Функция для проверки наличия и удаления верхнего рекламного блока
+function mail_ru_checkAndRemoveTopBlock() {
+    let targetNode
+    targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
+    if (targetNode) {
+        // тип ноды меняется через каждые несколько секунд
+        let targetNode_banner
+
+        targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
+
+        if (targetNode_banner) {
+            targetNode_banner.remove()
         }
     }
-    // https://mail.ru/
-    // Функция для проверки наличия и удаления верхнего рекламного блока
-    function mail_ru_checkAndRemoveTopBlock() {
-        let targetNode
-        targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
-        if (targetNode) {
-            // тип ноды меняется через каждые несколько секунд
-            let targetNode_banner
-
-            targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
-
-            if (targetNode_banner) {
-                targetNode_banner.remove()
-            }
-        }
-        const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
-        targetNodes.forEach(node => {
-            node.remove();
-        });
+    const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
+    targetNodes.forEach(node => {
+        node.remove();
+    });
 
 
-        // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
-
-        // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-        function findElementByTextInShadow(shadowRoot, tag, text) {
-            const elements = shadowRoot.querySelectorAll(tag);
-            for (let i = 0; i < elements.length; i++) {
-                if (elements[i].textContent === text) {
-                    return elements[i];
-                }
-            }
-            return null;
-        }
-
-        //         // Найти все shadow host'ы на странице
-        //         const shadowHosts = document.querySelectorAll('*');
-
-        //         shadowHosts.forEach(shadowHost => {
-        //             const shadowRoot = shadowHost.shadowRoot;
-
-        //             if (shadowRoot) {
-        //                 // Найти элемент с текстом "Реклама" внутри shadow root
-        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
-
-        //                 if (рекламаElement) {
-        //                     // Подняться по родительским нодам вплоть до shadow-root
-        //                     let currentNode = рекламаElement;
-        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
-        //                         currentNode = currentNode.parentNode;
-        //                     }
-
-        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
-        //                     console.log(currentNode);
-        //                 } else {
-        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
-        //                 }
-        //             } else {
-        //                 console.log('Shadow root не найден');
-        //             }
-        //         });
-
-    }
-    function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
-        if (node_test && node_test.nodeName === 'DIV') {
-            const DivBlockclassList = Array.from(node_test.classList);
-            if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
-                // DivBlockclassList.some(className => className === 'feed__row') &&
-                // DivBlockclassList.some(className => className === '_is-mailru-morda')
-               ) {
-                // document.querySelectorAll('article.card-wrapper').forEach(node => {
-                //     node?.remove()
-                // })
-                document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
-                    node?.remove()
-                })
-                document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-                    node?.remove()
-                })
-            }
-        }
-        // if (node_test && node_test.nodeName === 'IMG') {
-        //     const DivBlockclassList = Array.from(node_test.classList);
-        //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
-        //        ) {
-        //         document.querySelectorAll('article.card-wrapper').forEach(node => {
-        //             node?.remove()
-        //         })
-        //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-        //             node?.remove()
-        //         })
-        //     }
-        // }
-
-
-    }
     // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
-    function mail_ru_checkAndRemove_РекламаВShadow() {
 
-        //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-        //         function findElementByTextInShadow(shadowRoot, tag, text) {
-        //             const elements = shadowRoot.querySelectorAll(tag);
-        //             for (let i = 0; i < elements.length; i++) {
-        //                 if (elements[i].textContent === text) {
-        //                     return elements[i];
-        //                 }
-        //             }
-        //             return null;
-        //         }
-
-        //         // Найти все shadow host'ы на странице
-        //         const shadowHosts = document.querySelectorAll('*');
-
-        //         shadowHosts.forEach(shadowHost => {
-        //             const shadowRoot = shadowHost.shadowRoot;
-
-        //             if (shadowRoot) {
-        //                 // Найти элемент с текстом "Реклама" внутри shadow root
-        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
-
-        //                 if (рекламаElement) {
-        //                     // Подняться по родительским нодам вплоть до shadow-root
-        //                     let currentNode = рекламаElement;
-        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
-        //                         currentNode = currentNode.parentNode;
-        //                     }
-
-        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
-        //                     console.log(currentNode);
-        //                 } else {
-        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
-        //                 }
-        //             } else {
-        //                 console.log('Shadow root не найден');
-        //             }
-        //         });
-
-
-
-
-
-        //*************
-
-
-        //         function findParentNodeAboveShadowRoot() {
-        //             const adSpan = document.querySelector('span:contains("Реклама")');
-
-        //             if (adSpan) {
-        //                 let currentNode = adSpan.parentNode;
-        //                 while (currentNode && currentNode.id !== 'shadow-root') {
-        //                     currentNode = currentNode.parentNode;
-        //                 }
-
-        //                 if (currentNode && currentNode.parentNode) {
-        //                     return currentNode.parentNode;
-        //                 }
-        //             }
-
-        //             return null;
-        //         }
-
-        //         const parentNode = findParentNodeAboveShadowRoot();
-
-        //         if (parentNode) {
-        //             console.log('Parent node above shadow-root:', parentNode);
-        //         } else {
-        //             console.log('Could not find the specified node.');
-        //         }
-
-        //*****************
-
-
-        function findParentNodeAboveShadowRoot() {
-
-            // Find all elements with a closed shadow root
-            const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
-
-            // Iterate through the shadow roots and change their mode to 'open'
-            shadowRoots.forEach(el => {
-                el.shadowRoot.mode = 'open';
-            });
-
-            // Find all span elements
-            const spans = document.querySelectorAll('span');
-
-            // Iterate through the spans and find the one with the text "Реклама"
-            for (let i = 0; i < spans.length; i++) {
-                if (spans[i].textContent === 'Реклама') {
-                    let currentNode = spans[i].parentNode;
-
-                    // Traverse up the DOM until the shadow root is found
-                    while (currentNode && currentNode.id !== 'shadow-root') {
-                        currentNode = currentNode.parentNode;
-                    }
-
-                    // Return the parent of the shadow root
-                    if (currentNode && currentNode.parentNode) {
-                        return currentNode.parentNode;
-                    }
-                }
+    // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+    function findElementByTextInShadow(shadowRoot, tag, text) {
+        const elements = shadowRoot.querySelectorAll(tag);
+        for (let i = 0; i < elements.length; i++) {
+            if (elements[i].textContent === text) {
+                return elements[i];
             }
-
-            return null; // Return null if the node is not found
         }
-
-        const parentNode = findParentNodeAboveShadowRoot();
-
-        if (parentNode) {
-            console.log('Parent node above shadow-root:', parentNode);
-        } else {
-            console.log('Could not find the specified node.');
-        }
-
-
-
-
-
-
-
-
+        return null;
     }
 
-    function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
-        const classList = Array.from(Node.classList);
-        if (classList.length === 3 &&
-            classList.some(className => className.length === 7) &&
-            classList.some(className => className.length === 7) &&
-            classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
-            Node.remove();
-            // Node.style.display = 'none';
+    //         // Найти все shadow host'ы на странице
+    //         const shadowHosts = document.querySelectorAll('*');
 
+    //         shadowHosts.forEach(shadowHost => {
+    //             const shadowRoot = shadowHost.shadowRoot;
+
+    //             if (shadowRoot) {
+    //                 // Найти элемент с текстом "Реклама" внутри shadow root
+    //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+    //                 if (рекламаElement) {
+    //                     // Подняться по родительским нодам вплоть до shadow-root
+    //                     let currentNode = рекламаElement;
+    //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+    //                         currentNode = currentNode.parentNode;
+    //                     }
+
+    //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+    //                     console.log(currentNode);
+    //                 } else {
+    //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+    //                 }
+    //             } else {
+    //                 console.log('Shadow root не найден');
+    //             }
+    //         });
+
+}
+function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
+    if (node_test && node_test.nodeName === 'DIV') {
+        const DivBlockclassList = Array.from(node_test.classList);
+        if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
+            // DivBlockclassList.some(className => className === 'feed__row') &&
+            // DivBlockclassList.some(className => className === '_is-mailru-morda')
+           ) {
+            // document.querySelectorAll('article.card-wrapper').forEach(node => {
+            //     node?.remove()
+            // })
+            document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
+                node?.remove()
+            })
+            document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+                node?.remove()
+            })
         }
     }
+    // if (node_test && node_test.nodeName === 'IMG') {
+    //     const DivBlockclassList = Array.from(node_test.classList);
+    //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
+    //        ) {
+    //         document.querySelectorAll('article.card-wrapper').forEach(node => {
+    //             node?.remove()
+    //         })
+    //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+    //             node?.remove()
+    //         })
+    //     }
+    // }
 
-    // внизу справа "Сделать поиск Яндекса основным?"
-    function yandex_dzen_questionYandexGeneralSearch() {
-        // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
-        // Выбираем все div
-        const allDivs = document.querySelectorAll('div');
 
-        // Фильтруем div, чтобы оставить только те, у которых ровно три класса
-        const divsWithThreeClasses = Array.from(allDivs).filter(div => {
-            const classes = div.classList;
-            return classes.length === 3;
+}
+// Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+function mail_ru_checkAndRemove_РекламаВShadow() {
+
+    //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+    //         function findElementByTextInShadow(shadowRoot, tag, text) {
+    //             const elements = shadowRoot.querySelectorAll(tag);
+    //             for (let i = 0; i < elements.length; i++) {
+    //                 if (elements[i].textContent === text) {
+    //                     return elements[i];
+    //                 }
+    //             }
+    //             return null;
+    //         }
+
+    //         // Найти все shadow host'ы на странице
+    //         const shadowHosts = document.querySelectorAll('*');
+
+    //         shadowHosts.forEach(shadowHost => {
+    //             const shadowRoot = shadowHost.shadowRoot;
+
+    //             if (shadowRoot) {
+    //                 // Найти элемент с текстом "Реклама" внутри shadow root
+    //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+    //                 if (рекламаElement) {
+    //                     // Подняться по родительским нодам вплоть до shadow-root
+    //                     let currentNode = рекламаElement;
+    //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+    //                         currentNode = currentNode.parentNode;
+    //                     }
+
+    //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+    //                     console.log(currentNode);
+    //                 } else {
+    //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+    //                 }
+    //             } else {
+    //                 console.log('Shadow root не найден');
+    //             }
+    //         });
+
+
+
+
+
+    //*************
+
+
+    //         function findParentNodeAboveShadowRoot() {
+    //             const adSpan = document.querySelector('span:contains("Реклама")');
+
+    //             if (adSpan) {
+    //                 let currentNode = adSpan.parentNode;
+    //                 while (currentNode && currentNode.id !== 'shadow-root') {
+    //                     currentNode = currentNode.parentNode;
+    //                 }
+
+    //                 if (currentNode && currentNode.parentNode) {
+    //                     return currentNode.parentNode;
+    //                 }
+    //             }
+
+    //             return null;
+    //         }
+
+    //         const parentNode = findParentNodeAboveShadowRoot();
+
+    //         if (parentNode) {
+    //             console.log('Parent node above shadow-root:', parentNode);
+    //         } else {
+    //             console.log('Could not find the specified node.');
+    //         }
+
+    //*****************
+
+
+    function findParentNodeAboveShadowRoot() {
+
+        // Find all elements with a closed shadow root
+        const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
+
+        // Iterate through the shadow roots and change their mode to 'open'
+        shadowRoots.forEach(el => {
+            el.shadowRoot.mode = 'open';
         });
 
+        // Find all span elements
+        const spans = document.querySelectorAll('span');
 
-        divsWithThreeClasses.forEach(div => {
-            const DivChild = div.querySelector('div');
-            function checkDivHasAnyId(div) {
-                if (!div) {
-                    // console.log('Div not found.');
-                    return false;
+        // Iterate through the spans and find the one with the text "Реклама"
+        for (let i = 0; i < spans.length; i++) {
+            if (spans[i].textContent === 'Реклама') {
+                let currentNode = spans[i].parentNode;
+
+                // Traverse up the DOM until the shadow root is found
+                while (currentNode && currentNode.id !== 'shadow-root') {
+                    currentNode = currentNode.parentNode;
                 }
 
-                if (!div.id) {
-                    // console.log('Div does not have an id.');
-                    return false;
+                // Return the parent of the shadow root
+                if (currentNode && currentNode.parentNode) {
+                    return currentNode.parentNode;
                 }
+            }
+        }
 
-                // console.log('Div has an id.');
-                // Проверяем, что div имеет ровно один класс
-                if (div.classList.length !== 1) {
-                    // console.log('Div does not have exactly one class.');
-                    return false;
-                }
+        return null; // Return null if the node is not found
+    }
 
-                // есть вложенный div, принадлежащий пяти классам
-                const DivChild2 = div.querySelector('div');
-                if (!DivChild2) {
-                    return false;
+    const parentNode = findParentNodeAboveShadowRoot();
 
-                }
-                // Проверяем, что div принадлежит ровно 5-ти классам
-                if (DivChild2.classList.length !== 5) {
-                    // console.log('Div does not have exactly 5 classes.');
-                    return false;
-                }
+    if (parentNode) {
+        console.log('Parent node above shadow-root:', parentNode);
+    } else {
+        console.log('Could not find the specified node.');
+    }
 
-                return true;
+
+
+
+
+
+
+
+}
+
+function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
+    const classList = Array.from(Node.classList);
+    if (classList.length === 3 &&
+        classList.some(className => className.length === 7) &&
+        classList.some(className => className.length === 7) &&
+        classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
+        Node.remove();
+        // Node.style.display = 'none';
+
+    }
+}
+
+// внизу справа "Сделать поиск Яндекса основным?"
+function yandex_dzen_questionYandexGeneralSearch() {
+    // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
+    // Выбираем все div
+    const allDivs = document.querySelectorAll('div');
+
+    // Фильтруем div, чтобы оставить только те, у которых ровно три класса
+    const divsWithThreeClasses = Array.from(allDivs).filter(div => {
+        const classes = div.classList;
+        return classes.length === 3;
+    });
+
+
+    divsWithThreeClasses.forEach(div => {
+        const DivChild = div.querySelector('div');
+        function checkDivHasAnyId(div) {
+            if (!div) {
+                // console.log('Div not found.');
+                return false;
             }
 
-            const result = checkDivHasAnyId(DivChild);
-            if (result) div.remove()
+            if (!div.id) {
+                // console.log('Div does not have an id.');
+                return false;
+            }
 
-        });
+            // console.log('Div has an id.');
+            // Проверяем, что div имеет ровно один класс
+            if (div.classList.length !== 1) {
+                // console.log('Div does not have exactly one class.');
+                return false;
+            }
 
-    }
+            // есть вложенный div, принадлежащий пяти классам
+            const DivChild2 = div.querySelector('div');
+            if (!DivChild2) {
+                return false;
 
-    // определение мобильное устройство или ПК
-    function isMobileDevice() {
-        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-    }
+            }
+            // Проверяем, что div принадлежит ровно 5-ти классам
+            if (DivChild2.classList.length !== 5) {
+                // console.log('Div does not have exactly 5 classes.');
+                return false;
+            }
 
-    //     // Обработка события hashchange
-    //     window.addEventListener('hashchange', handleUrlChange);
+            return true;
+        }
 
-    //     // Обработка события popstate
-    //     window.addEventListener('popstate', handleUrlChange);
+        const result = checkDivHasAnyId(DivChild);
+        if (result) div.remove()
 
-    // Проверка изменений в URL при загрузке страницы
-    handleUrlChange();
+    });
+
+}
+
+// определение мобильное устройство или ПК
+function isMobileDevice() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+}
+
+//     // Обработка события hashchange
+//     window.addEventListener('hashchange', handleUrlChange);
+
+//     // Обработка события popstate
+//     window.addEventListener('popstate', handleUrlChange);
+
+// Проверка изменений в URL при загрузке страницы
+handleUrlChange();
 
 
 
