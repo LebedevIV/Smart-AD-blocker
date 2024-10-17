@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-10-17_09-05
+// @version      2024-10-17_09-35
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -162,81 +162,81 @@
                 // console.log('Счётчик вызовов:', count_001)
                 // let Div_AD
 
-                if (!node) { // первый запуск
-                    document.querySelector("div.new-menu")?.previousSibling?.remove()
-                }
-                else { // запуск из обсервера
-                    if (node.nodeName === 'DIV') { // application app application_new-toolbar
-                        // const Div_AD_classList = Array.from(Div_AD.classList)
-                        // первое открытие страницы
-                        if (node.classList.length === 3 &&
-                            node.classList[0] === 'application' &&
-                            node.classList[1] === 'app' &&
-                            node.classList[2] === 'application_new-toolbar' )
-                        {
-                            // count_001++
-                            // console.log('Счётчик вызовов:', count_001)
-                            // console.log('Remove_AD_Top:', node)
-                            // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
-                            node.querySelector("div.new-menu")?.previousSibling?.remove()
-                        }
-                        // изменение адреса страницы при навигации - привязка к любому изменяемому элементу
-                        else if (node.classList[0] === 'portal-menu-element' &&
-                                 node.classList[1] === 'portal-menu-element_select')
-                        {
-                            document.querySelector("div.new-menu")?.previousSibling?.remove()
-                        }
-                    }
-                }
+                // if (!node) { // первый запуск
+                //     document.querySelector("div.new-menu")?.previousSibling?.remove()
+                // }
+                // else { // запуск из обсервера
+                //     if (node.nodeName === 'DIV') { // application app application_new-toolbar
+                //         // const Div_AD_classList = Array.from(Div_AD.classList)
+                //         // первое открытие страницы
+                //         if (node.classList.length === 3 &&
+                //             node.classList[0] === 'application' &&
+                //             node.classList[1] === 'app' &&
+                //             node.classList[2] === 'application_new-toolbar' )
+                //         {
+                //             // count_001++
+                //             // console.log('Счётчик вызовов:', count_001)
+                //             // console.log('Remove_AD_Top:', node)
+                //             // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
+                //             node.querySelector("div.new-menu")?.previousSibling?.remove()
+                //         }
+                //         // изменение адреса страницы при навигации - привязка к любому изменяемому элементу
+                //         else if (node.classList[0] === 'portal-menu-element' &&
+                //                  node.classList[1] === 'portal-menu-element_select')
+                //         {
+                //             document.querySelector("div.new-menu")?.previousSibling?.remove()
+                //         }
+                //     }
+                // }
 
 
 
 
 
-                // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
-                if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
-                    // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
-                    const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer')
-                    if (container) {
-                        // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
-                        let targetDiv = null
-                        for (let child of container.children) {
-                            if (child.tagName === 'DIV' && child.childElementCount === 0) {
-                                let previousSibling = child.previousElementSibling
-                                let hasAnchorBefore = false;
-                                while (previousSibling) {
-                                    if (previousSibling.tagName === 'A') {
-                                        hasAnchorBefore = true
-                                        break
-                                    }
-                                    previousSibling = previousSibling.previousElementSibling
-                                }
-                                if (!hasAnchorBefore) {
-                                    targetDiv = child
-                                    break
-                                }
-                            }
-                        }
+//                 // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
+//                 if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
+//                     // Найти div с классом ReactVirtualized__Grid__innerScrollContainer
+//                     const container = document.querySelector('div.ReactVirtualized__Grid__innerScrollContainer')
+//                     if (container) {
+//                         // Найти первый дочерний div, у которого нет других дочерних элементов и перед которым нет элементов <a>
+//                         let targetDiv = null
+//                         for (let child of container.children) {
+//                             if (child.tagName === 'DIV' && child.childElementCount === 0) {
+//                                 let previousSibling = child.previousElementSibling
+//                                 let hasAnchorBefore = false;
+//                                 while (previousSibling) {
+//                                     if (previousSibling.tagName === 'A') {
+//                                         hasAnchorBefore = true
+//                                         break
+//                                     }
+//                                     previousSibling = previousSibling.previousElementSibling
+//                                 }
+//                                 if (!hasAnchorBefore) {
+//                                     targetDiv = child
+//                                     break
+//                                 }
+//                             }
+//                         }
 
-                        if (targetDiv) {
-                            // Удалить найденный div и все предшествующие ему внутри контейнера
-                            let currentChild = targetDiv
-                            while (currentChild) {
-                                fact_Remove_AD_Top_3column = true
-                                let previousSibling = currentChild.previousElementSibling
-                                if (previousSibling) {
-                                    container.removeChild(previousSibling)
-                                } else {
-                                    container.removeChild(currentChild)
-                                    break
-                                }
-                            }
-                        }
-                    }
-                }
+//                         if (targetDiv) {
+//                             // Удалить найденный div и все предшествующие ему внутри контейнера
+//                             let currentChild = targetDiv
+//                             while (currentChild) {
+//                                 fact_Remove_AD_Top_3column = true
+//                                 let previousSibling = currentChild.previousElementSibling
+//                                 if (previousSibling) {
+//                                     container.removeChild(previousSibling)
+//                                 } else {
+//                                     container.removeChild(currentChild)
+//                                     break
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
                 // removeElementsByClassContaining('banner__content-wrapper');
-                document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
-
+                // document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
+                document.querySelectorAll('div.react-async').forEach(node2 => {node2?.remove()})
             }
 
             function Remove_AD_НадСпискомПисем () {
@@ -371,14 +371,15 @@
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         FactMutationChildList = true
-                        // mutation.addedNodes.forEach(node => {
+                        mutation.addedNodes.forEach(node => {
                             // Remove_AD_Top(node)
 
                             // Remove_AD_Right(node)
-                        // })
+                        })
                     }
                 }
                 if (FactMutationChildList) {
+                    Remove_AD_Top()
                     Remove_AD_НадСпискомПисем()
                     Remove_AD_Right()
                 }
@@ -386,7 +387,7 @@
             observer.observe(document, observer_config) // удаление при изменении блока-родителя
             observers.push(observer)
             // удаление при загрузке
-            // Remove_AD_Top()
+            Remove_AD_Top()
             Remove_AD_НадСпискомПисем ()
             Remove_AD_Right()
 
