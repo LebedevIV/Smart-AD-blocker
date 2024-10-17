@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-08-28_20-08
+// @version      2024-10-17_09-05
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -12,20 +12,123 @@
 // @match        https://sportmail.ru/*
 // @match        https://*.ya.ru/*
 // @match        https://*.yandex.ru/*
+// @match        https://*.dzen.ru/*
 // @match        https://*.ok.ru/*
 // @match        https://*.vk.com/*
-// @match        https://*.dzen.ru/*
+// @require        https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @grant          GM_getValue
+// @grant          GM_setValue
+// @grant          GM_registerMenuCommand
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        none
 // @downloadURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru%2C%20Dzenru%2C%20VK%2C%20OK.user.js
 // @updateURL https://update.greasyfork.org/scripts/499243/Smart%20AD%20blocker%20for%3A%20Yandex%2C%20Mailru%2C%20Dzenru%2C%20VK%2C%20OK.meta.js
 // ==/UserScript==
 
-(function() {
-    'use strict';
+/* global GM_config */
+
+(() => {
+    'use strict'
+
+    GM_config.init({
+        id: 'sc_config',
+        title: GM_info.script.name + ' Настройки',
+        fields: {
+            DEBUG_MODE: {
+                label: 'Debug mode',
+                type: 'checkbox',
+                default: false,
+                title: 'Log debug messages to the console'
+            },
+            MAILRU_ON: {
+                label: 'mail.ru',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для mail.ru'
+            },
+            SPORTMAILRU_ON: {
+                label: 'sportmail.ru',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для sportmail.ru'
+            },
+            YANDEX_ON: {
+                label: 'Яндекс',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс (ya.ru и yandex.ru)'
+            },
+            DZEN_ON: {
+                label: 'Дзэн',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Дзэн (dzen.ru)'
+            },
+            VK_ON: {
+                label: 'Вконтакте',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Вконтакте (vk.com)'
+            },
+            OK_ON: {
+                label: 'Одноклассники',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Одноклассники (ok.ru)'
+            },
+        },
+        events: {
+            init: onInit
+        }
+    })
+
+    GM_registerMenuCommand('Настройки', () => {
+        GM_config.open()
+    })
+
+    class Debugger {
+        constructor (name, enabled) {
+            this.debug = {}
+            if (!window.console) {
+                return () => { }
+            }
+            Object.getOwnPropertyNames(window.console).forEach(key => {
+                if (typeof window.console[key] === 'function') {
+                    if (enabled) {
+                        this.debug[key] = window.console[key].bind(window.console, name + ': ')
+                    } else {
+                        this.debug[key] = () => { }
+                    }
+                }
+            })
+            return this.debug
+        }
+    }
+
+    var DEBUG
+
+    let MAILRU_ON = true, SPORTMAILRU_ON = true, YANDEX_ON = true, DZEN_ON = true, VK_ON = true, OK_ON = true
+
+    function onInit() {
+        DEBUG = new Debugger(GM_info.script.name, GM_config.get('DEBUG_MODE'))
+
+        MAILRU_ON = GM_config.get('MAILRU_ON')
+        SPORTMAILRU_ON = GM_config.get('SPORTMAILRU_ON')
+        YANDEX_ON = GM_config.get('YANDEX_ON')
+        DZEN_ON = GM_config.get('DZEN_ON')
+        VK_ON = GM_config.get('VK_ON')
+        OK_ON = GM_config.get('OK_ON')
+
+        // сюада надо бы поместить все функции, но пока под вопросом
+        handleUrlChange()
+    }
+
+
+
+
+
 
     // получаем текущий адрес страницы
-    const currentURL = window.location.href
+    let currentURL = window.location.href
     const config = {
         SettingsOnOff: true,
         isRunningAsExtension: false,
@@ -51,7 +154,7 @@
     // Функция для обработки изменений URL
     function handleUrlChange() {
         // console.log('URL changed to:', window.location.href);
-        if (currentURL.startsWith('https://e.mail.ru/')) {
+        if (currentURL.startsWith('https://e.mail.ru/') && MAILRU_ON) {
             // удаление верхнего рекламного блока
             let fact_Remove_AD_Top_3column = false // факт удаления верхнего рекламного блока в интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
             function Remove_AD_Top(node) {
@@ -85,6 +188,10 @@
                         }
                     }
                 }
+
+
+
+
 
                 // В интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
                 if (!fact_Remove_AD_Top_3column) { // ранее не удалялось
@@ -131,87 +238,156 @@
                 document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
 
             }
+
+            function Remove_AD_НадСпискомПисем () {
+                //                 // Find the div with the class "ReactVirtualized__Grid__innerScrollContainer"
+                //                 const container = document.querySelector('.ReactVirtualized__Grid__innerScrollContainer');
+
+                //                 // Find all div elements with a style of "top: 0px;" and height > 0 inside the container
+                //                 const targetDivs = Array.from(container.querySelectorAll('div')).filter(div => {
+                //                     const style = window.getComputedStyle(div);
+                //                     return style.getPropertyValue('top') === '0px' && parseFloat(style.getPropertyValue('height')) > 0;
+                //                 });
+
+                //                 // Get the first three elements from the targetDivs array
+                //                 const firstThreeDivs = targetDivs.slice(0, 3);
+
+                //                 // Set the display property to "none" for each of the first three target divs
+                //                 firstThreeDivs.forEach(div => {
+                //                     div.style.display = 'none';
+                //                 });
+
+                // Find the div with the class "ReactVirtualized__Grid__innerScrollContainer"
+                const container = document.querySelector('.ReactVirtualized__Grid__innerScrollContainer');
+
+                // Find all div elements with a style of "top: 0px;" inside the container
+                const targetDivs = Array.from(container.querySelectorAll('div')).filter(div => {
+                    // return window.getComputedStyle(div).getPropertyValue('top') === '0px' && parseFloat(window.getComputedStyle(div).getPropertyValue('height')) > 0;
+                    return window.getComputedStyle(div).getPropertyValue('top') === '0px' ;
+                });
+
+                // Get the first three elements from the targetDivs array
+                const firstThreeDivs = targetDivs.slice(0, 3);
+
+                // Set the display property to "none" for each of the first three target divs
+                firstThreeDivs.forEach(div => {
+                    div.style.display = 'none';
+                });
+
+
+            }
+
             // удаление правых рекламных блоков
             function Remove_AD_Right(node) {
                 // блок опрделяется непосредственно перед анализом так как иначе теряется
-                function Remove_AD_Right_IfNode(targetNode){
-                    const span = targetNode?.querySelector('span')
-                    if (span) {
-                        const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented') // классы элемента до переименования
-                        if (RightBlock) {
-                            // console.log('Remove_AD_Right_1:', RightBlock)
-                            RightBlock?.remove()
-                        }
-                        else { // классы элемента после переименования
-                            // Получаем непосредственные дочерние элементы
-                            const divs = span.children;
+                // function Remove_AD_Right_IfNode(targetNode){
+                //                     const span = targetNode?.querySelector('span')
+                //                     if (span) {
+                //                         const RightBlock = span.querySelector('div.layout__column.layout__column_right.layout__column_right-indented') // классы элемента до переименования
+                //                         if (RightBlock) {
+                //                             // console.log('Remove_AD_Right_1:', RightBlock)
+                //                             RightBlock?.remove()
+                //                         }
+                //                         else { // классы элемента после переименования
+                //                             // Получаем непосредственные дочерние элементы
+                //                             const divs = span.children;
 
-                            // Перебираем дочерние элементы
-                            if (divs.length === 3) {
-                                for (let div of divs) {
-                                    // const classList = Array.from(div.classList);
-                                    if (div.classList.length === 3 &&
-                                        div.classList[0].length === 7 &&
-                                        div.classList[1].length === 15 &&
-                                        div.classList[2].length === 15)
-                                    {
-                                        // console.log('Remove_AD_Right_2:', div)
-                                        div?.remove()
-                                        break
-                                    }
-                                }
-                            }
-                        }
+                //                             // Перебираем дочерние элементы
+                //                             if (divs.length === 3) {
+                //                                 for (let div of divs) {
+                //                                     // const classList = Array.from(div.classList);
+                //                                     if (div.classList.length === 3 &&
+                //                                         div.classList[0].length === 7 &&
+                //                                         div.classList[1].length === 15 &&
+                //                                         div.classList[2].length === 15)
+                //                                     {
+                //                                         // console.log('Remove_AD_Right_2:', div)
+                //                                         div?.remove()
+                //                                         break
+                //                                     }
+                //                                 }
+                //                             }
+                //                         }
+                //                     }
+
+                // }
+                // if (!node) { // первый запуск
+                //     const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
+                //     Remove_AD_Right_IfNode(targetNode)
+                // }
+                // else { // запуск из обсервера
+                //     if (node.nodeName === 'DIV') { // application app application_new-toolbar
+                //         // const Div_AD_classList = Array.from(Div_AD.classList)
+                //         if (node.classList.length === 3 &&
+                //             node.classList[0] === 'application' &&
+                //             node.classList[1] === 'app' &&
+                //             node.classList[2] === 'application_new-toolbar' )
+                //         {
+                //             // count_002++
+                //             // console.log('Счётчик вызовов:', count_002)
+                //             // console.log('Remove_AD_Right:', node)
+                //             // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
+                //             // node.querySelector("div.new-menu")?.previousSibling?.remove()
+                //             const targetNode = node.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
+                //             Remove_AD_Right_IfNode(targetNode)
+                //         }
+                //     }
+                // }
+                // Функция для проверки наличия CSS-свойства --right-column-width
+                const noads_button = document.querySelector('div.noads-button')
+                if(noads_button) {
+                    noads_button.remove()
+
+                    function hasRightColumnWidth(element) {
+                        const style = window.getComputedStyle(element);
+                        return style.getPropertyValue('--right-column-width') !== '';
                     }
-                }
-                if (!node) { // первый запуск
-                    const targetNode = document.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
-                    Remove_AD_Right_IfNode(targetNode)
-                }
-                else { // запуск из обсервера
-                    if (node.nodeName === 'DIV') { // application app application_new-toolbar
-                        // const Div_AD_classList = Array.from(Div_AD.classList)
-                        if (node.classList.length === 3 &&
-                            node.classList[0] === 'application' &&
-                            node.classList[1] === 'app' &&
-                            node.classList[2] === 'application_new-toolbar' )
-                        {
-                            // count_002++
-                            // console.log('Счётчик вызовов:', count_002)
-                            // console.log('Remove_AD_Right:', node)
-                            // запуск из обсервера: приходится заново искать объект, так как он уже не равен добавляемой ноде
-                            // node.querySelector("div.new-menu")?.previousSibling?.remove()
-                            const targetNode = node.querySelector(config.nodes.mail_ru_email_GeneralBlock) // 'div.application-mail__layout.application-mail__layout_main'
-                            Remove_AD_Right_IfNode(targetNode)
-                        }
-                    }
+
+                    // Получаем все элементы на странице
+                    const allElements = document.querySelectorAll('*');
+
+                    // Фильтруем элементы, у которых есть свойство --right-column-width
+                    const elementsWithRightColumnWidth = Array.from(allElements).filter(hasRightColumnWidth);
+
+                    // Переопределяем свойство --right-column-width на 0px для найденных элементов
+                    elementsWithRightColumnWidth.forEach(element => {
+                        element.style.setProperty('--right-column-width', '0px');
+                    })
                 }
             }
-//             // Функция для поиска и удаления всех элементов, имя класса которых содержит banner__content-wrapper
-//             function removeElementsByClassContaining(className) {
-//                 const elements = document.querySelectorAll('a');
+            //             // Функция для поиска и удаления всех элементов, имя класса которых содержит banner__content-wrapper
+            //             function removeElementsByClassContaining(className) {
+            //                 const elements = document.querySelectorAll('a');
 
-//                 elements.forEach(element => {
-//                     if (element.classList.contains(className)) {
-//                         element.remove();
-//                     }
-//                 });
-//             }
+            //                 elements.forEach(element => {
+            //                     if (element.classList.contains(className)) {
+            //                         element.remove();
+            //                     }
+            //                 });
+            //             }
             // установка наблюдения за изменением блока-родителя
             const observer = new MutationObserver((mutationsList, observer) => {
+                let FactMutationChildList = false
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
-                        mutation.addedNodes.forEach(node => {
-                            Remove_AD_Top(node)
-                            Remove_AD_Right(node)
-                        })
+                        FactMutationChildList = true
+                        // mutation.addedNodes.forEach(node => {
+                            // Remove_AD_Top(node)
+
+                            // Remove_AD_Right(node)
+                        // })
                     }
+                }
+                if (FactMutationChildList) {
+                    Remove_AD_НадСпискомПисем()
+                    Remove_AD_Right()
                 }
             })
             observer.observe(document, observer_config) // удаление при изменении блока-родителя
             observers.push(observer)
             // удаление при загрузке
-            Remove_AD_Top()
+            // Remove_AD_Top()
+            Remove_AD_НадСпискомПисем ()
             Remove_AD_Right()
 
 
@@ -260,7 +436,7 @@
 
             }
         // почта на мобильном устройстве
-        else if (currentURL.startsWith('https://touch.mail.ru/messages/')) {
+        else if (currentURL.startsWith('https://touch.mail.ru/messages/') && MAILRU_ON) {
             // верхний узкий баннер
             document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
             const observer = new MutationObserver((mutationsList, observer) => {
@@ -277,7 +453,7 @@
             observer.observe(document.body, observer_config)
             observers.push(observer)
         }
-        else if (currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
+        else if (currentURL.startsWith('https://cloud.mail.ru/attaches/') && MAILRU_ON) {
             // нижний узкий баннер
             document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
             // правая панель
@@ -301,7 +477,7 @@
         }
         // else if (currentURL.startsWith('https://auto.mail.ru/forum/topic/')) {
         // else if (currentURL.startsWith('https://auto.mail.ru/forum/')) {
-        else if (currentURL.startsWith('https://auto.mail.ru/')) {
+        else if (currentURL.startsWith('https://auto.mail.ru/') && MAILRU_ON) {
             // удаление всей рекламы, но не очень аккуратно
 
             // Функция для проверки, что элемент имеет только один класс
@@ -339,15 +515,16 @@
 
         }
 
-        else if (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) {
+        else if ((currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) && MAILRU_ON) {
             // верхний узкий баннер
             document.querySelector('div[class^="Worm__root--"]')?.remove()
         }
-        else if (currentURL.startsWith('https://news.mail.ru/') ||
-                 currentURL.startsWith('https://vfokuse.mail.ru/') ||
-                 currentURL.startsWith('https://sportmail.ru/') ||
-                 currentURL.startsWith('https://finance.mail.ru/')
-                ) {
+        else if ((currentURL.startsWith('https://sportmail.ru/') && SPORTMAILRU_ON) ||
+                 ((currentURL.startsWith('https://news.mail.ru/') ||
+                   currentURL.startsWith('https://vfokuse.mail.ru/') ||
+                   currentURL.startsWith('https://finance.mail.ru/')
+                  ) && MAILRU_ON
+                 )) {
             // нижний узкий баннер
             function AD_remove_node(node_test, mutation_test) {
                 if (currentURL.startsWith('https://finance.mail.ru/')) {
@@ -407,7 +584,7 @@
             observers.push(observer)
             AD_remove_node()
         }
-        else if (currentURL.startsWith('https://mail.ru/')) {
+        else if (currentURL.startsWith('https://mail.ru/') && MAILRU_ON) {
             mail_ru_checkAndRemoveTopBlock()
             // mail_ru_checkAndRemove_РекламаInSpan()
 
@@ -518,7 +695,7 @@
             // const interval_AD_remove = setInterval(AD_remove, 500)
 
         }
-        else if (currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search')) {
+        else if ((currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search')) && YANDEX_ON) {
             function AD_remove_node(node, mutation_test) {
                 // баннер внизу справа "Сделать Яндекс основным поисковиком?"
                 let targetNode
@@ -549,7 +726,7 @@
 
         }
         // настроить обсервер
-        else if (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) {
+        else if ((currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) && YANDEX_ON) {
             // Добавление кнопки "Реклама"
             // const EspeciallyForYou = CreateEspeciallyForYou()
             // let EspeciallyForYou_fact = false
@@ -699,7 +876,7 @@
 
         // настроить обсервер
         // сделать пропуск видеозаставки
-        else if (currentURL.startsWith('https://ya.ru/video/')) {
+        else if (currentURL.startsWith('https://ya.ru/video/') && YANDEX_ON) {
             // баннер сверху
             function AD_remove_node(node, mutation_test) {
                 const targetNodes = document.querySelectorAll('div[role="button"]')
@@ -728,7 +905,7 @@
             yandex_dzen_questionYandexGeneralSearch()
 
         }
-        else if (currentURL.startsWith('https://ya.ru/')) {
+        else if (currentURL.startsWith('https://ya.ru/') && YANDEX_ON) {
             // если это мбильное устройство
             if (isMobileDevice()) {
                 document.querySelector('div.dialog__wrapper')?.remove()
@@ -874,7 +1051,7 @@
                 }
         }
         // каталог игр
-        else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
+        else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/') && YANDEX_ON) {
             // реклама в каталоге игр
             function AD_remove_node(node, mutation_test) {
                 const nodeDiv = node.querySelector('div')
@@ -912,7 +1089,7 @@
             observers.push(observer)
         }
         // на странице игры
-        else if (currentURL.startsWith('https://yandex.ru/games/app/')) {
+        else if (currentURL.startsWith('https://yandex.ru/games/app/') && YANDEX_ON) {
             // центральный баннер
             function AD_center_remove() {
                 const targetNodes = document.querySelectorAll('div.play-modal_with-blur')
@@ -957,7 +1134,7 @@
 
         }
         // почтовый ящик
-        else if (currentURL.startsWith('https://mail.yandex.ru/')) {
+        else if (currentURL.startsWith('https://mail.yandex.ru/') && YANDEX_ON) {
             // реклама внизу слева
 
             function AD_remove_node(node, mutation_test) {
@@ -1000,7 +1177,7 @@
             const interval_AD_remove = setInterval(AD_remove, 500);
         }
         // почтовый ящик
-        else if (currentURL.startsWith('https://yandex.ru/maps/')) {
+        else if (currentURL.startsWith('https://yandex.ru/maps/') && YANDEX_ON) {
             // реклама справа
             function AD_remove_first() {
                 // реклама справа
@@ -1041,7 +1218,7 @@
         }
         // https://yandex.ru/health
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://yandex.ru/health')) {
+        else if (currentURL.startsWith('https://yandex.ru/health') && YANDEX_ON) {
 
             function AD_remove_node(node, mutation_test) {
                 let targetNode
@@ -1084,7 +1261,7 @@
         }
 
         // Яндекс.погода: карта
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
+        else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/') && DZEN_ON) {
             // внизу справа "Сделать поиск Яндекса основным?"
             yandex_dzen_questionYandexGeneralSearch()
 
@@ -1096,7 +1273,7 @@
 
         }
         // Яндекс.погода: сводка
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?')) {
+        else if ((currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?')) && DZEN_ON) {
 
             // реклама справа
             const targetNode_rightColumn = document.querySelector('div#content_right.content__right')
@@ -1139,7 +1316,7 @@
 
         }
         // Яндекс.погода: на месяц
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/month')) {
+        else if (currentURL.startsWith('https://dzen.ru/pogoda/month') && DZEN_ON) {
 
             // реклама справа страницы
             let targetNode_rightColumn
@@ -1154,7 +1331,7 @@
         }
         // Дзен.Статьи
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/a/')) {
+        else if (currentURL.startsWith('https://dzen.ru/a/') && DZEN_ON) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
                 // верхний баннер
@@ -1202,7 +1379,7 @@
             }
         // Дзен.Видео
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/video/')) {
+        else if (currentURL.startsWith('https://dzen.ru/video/') && DZEN_ON) {
             function AD_remove_node(node, mutation_test) {
                 // document.querySelectorAll('div[class^="video-card-ad"]').forEach(node => {
                 document.querySelectorAll('div.video-card-ads').forEach(node => {
@@ -1254,7 +1431,7 @@
         }
         // Дзен.Shorts
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/shorts/')) {
+        else if (currentURL.startsWith('https://dzen.ru/shorts/') && DZEN_ON) {
             function AD_remove_node(node, mutation_test) {
                 // банерок вверху справа
                 // возможно, для более точноо поиска: auto-slide-ad__ ; более общий правый блок: short-viewer-layout__
@@ -1304,15 +1481,9 @@
             AD_remove_node()
         }
 
-
-
-
-
-
-
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
-        else if (currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/')) {
+        else if ((currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/')) && DZEN_ON) {
             if (isMobileDevice()) {
                 // верхний баннер
                 document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
@@ -1436,7 +1607,7 @@
                 }
         }
         // vk.com
-        else if (currentURL.startsWith('https://vk.com/')) {
+        else if (currentURL.startsWith('https://vk.com/') && VK_ON) {
             // реклама слева
 
             function AD_remove() {
@@ -1492,7 +1663,7 @@
         }
 
         // ok.ru
-        else if (currentURL.startsWith('https://ok.ru/')) {
+        else if (currentURL.startsWith('https://ok.ru/') && OK_ON) {
             // реклама справа
             function AD_remove() {
                 const targetNode_rightColumn = document.querySelector('div#rightColumn')
@@ -1895,14 +2066,41 @@ function isMobileDevice() {
     return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
 
-//     // Обработка события hashchange
-//     window.addEventListener('hashchange', handleUrlChange);
 
-//     // Обработка события popstate
-//     window.addEventListener('popstate', handleUrlChange);
+// // Обработка события hashchange (не срабатывает)
+// window.addEventListener('hashchange', handleUrlChange);
+
+// // Обработка события popstate (не срабатывает)
+// window.addEventListener('popstate', handleUrlChange);
+// Function to handle URL changes
+function handleUrlChange2(newUrl) {
+    if (currentURL !== newUrl) {
+        // console.log('URL changed from', currentUrl, 'to', newUrl);
+        currentURL = newUrl;
+        // You can add your custom logic here
+        // handleUrlChange()
+        onInit()
+    }
+}
+
+
+// Override pushState and replaceState to track URL changes
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function() {
+    originalPushState.apply(history, arguments);
+    handleUrlChange2(window.location.href);
+};
+
+history.replaceState = function() {
+    originalReplaceState.apply(history, arguments);
+    handleUrlChange2(window.location.href);
+};
+
 
 // Проверка изменений в URL при загрузке страницы
-handleUrlChange();
+// handleUrlChange(); // перенесено в Init
 
 
 
