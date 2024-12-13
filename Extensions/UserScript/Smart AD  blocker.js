@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2024-11-14_20-12
+// @version      2024-12-13_15-34
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -15,6 +15,7 @@
 // @match        https://*.dzen.ru/*
 // @match        https://*.ok.ru/*
 // @match        https://*.vk.com/*
+// @match        https://vkvideo.ru/*
 // @require        https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -69,6 +70,12 @@
                 default: true,
                 title: 'Включить для Вконтакте (vk.com)'
             },
+            VK_VIDEO_ON: {
+                label: 'Вконтакте видео',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Вконтакте (vkvideo.ru)'
+            },
             OK_ON: {
                 label: 'Одноклассники',
                 type: 'checkbox',
@@ -106,7 +113,7 @@
 
     var DEBUG
 
-    let MAILRU_ON = true, SPORTMAILRU_ON = true, YANDEX_ON = true, DZEN_ON = true, VK_ON = true, OK_ON = true
+    let MAILRU_ON = true, SPORTMAILRU_ON = true, YANDEX_ON = true, DZEN_ON = true, VK_ON = true, VK_VIDEO_ON = true, OK_ON = true
     let FirstOpen = false
 
     function onInit() {
@@ -117,6 +124,7 @@
         YANDEX_ON = GM_config.get('YANDEX_ON')
         DZEN_ON = GM_config.get('DZEN_ON')
         VK_ON = GM_config.get('VK_ON')
+        VK_VIDEO_ON = GM_config.get('VK_VIDEO_ON')
         OK_ON = GM_config.get('OK_ON')
 
         // сюада надо бы поместить все функции, но пока под вопросом
@@ -158,7 +166,9 @@
     // Функция для обработки изменений URL
     function handleUrlChange() {
         // console.log('URL changed to:', window.location.href);
-        if (currentURL.startsWith('https://e.mail.ru/') && MAILRU_ON) {
+        // if (MAILRU_ON && currentURL.startsWith('https://e.mail.ru/')) {
+        if (MAILRU_ON && currentURL.startsWith('https://e.mail.ru/')) {
+
             // удаление верхнего рекламного блока
             let fact_Remove_AD_Top_3column = false // факт удаления верхнего рекламного блока в интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
             function Remove_AD_Top(node) {
@@ -294,7 +304,7 @@
 
             }
         // почта на мобильном устройстве
-        else if (currentURL.startsWith('https://touch.mail.ru/messages/') && MAILRU_ON) {
+        else if (MAILRU_ON && currentURL.startsWith('https://touch.mail.ru/messages/')) {
             // верхний узкий баннер
             document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
             const observer = new MutationObserver((mutationsList, observer) => {
@@ -311,7 +321,7 @@
             observer.observe(document.body, observer_config)
             observers.push(observer)
         }
-        else if (currentURL.startsWith('https://cloud.mail.ru/attaches/') && MAILRU_ON) {
+        else if (MAILRU_ON && currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
             // нижний узкий баннер
             document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
             // правая панель
@@ -335,7 +345,7 @@
         }
         // else if (currentURL.startsWith('https://auto.mail.ru/forum/topic/')) {
         // else if (currentURL.startsWith('https://auto.mail.ru/forum/')) {
-        else if (currentURL.startsWith('https://auto.mail.ru/') && MAILRU_ON) {
+        else if (MAILRU_ON && currentURL.startsWith('https://auto.mail.ru/') ) {
             // удаление всей рекламы, но не очень аккуратно
 
             // Функция для проверки, что элемент имеет только один класс
@@ -373,15 +383,15 @@
 
         }
 
-        else if ((currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/')) && MAILRU_ON) {
+        else if (MAILRU_ON && (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/'))) {
             // верхний узкий баннер
             document.querySelector('div[class^="Worm__root--"]')?.remove()
         }
-        else if ((currentURL.startsWith('https://sportmail.ru/') && SPORTMAILRU_ON) ||
-                 ((currentURL.startsWith('https://news.mail.ru/') ||
-                   currentURL.startsWith('https://vfokuse.mail.ru/') ||
-                   currentURL.startsWith('https://finance.mail.ru/')
-                  ) && MAILRU_ON
+        else if ((SPORTMAILRU_ON && currentURL.startsWith('https://sportmail.ru/')) ||
+                 (MAILRU_ON && (currentURL.startsWith('https://news.mail.ru/') ||
+                                currentURL.startsWith('https://vfokuse.mail.ru/') ||
+                                currentURL.startsWith('https://finance.mail.ru/')
+                               )
                  )) {
             // нижний узкий баннер
             function AD_remove_node(node_test, mutation_test) {
@@ -442,7 +452,7 @@
             observers.push(observer)
             AD_remove_node()
         }
-        else if (currentURL.startsWith('https://mail.ru/') && MAILRU_ON) {
+        else if (MAILRU_ON && currentURL.startsWith('https://mail.ru/')) {
             mail_ru_checkAndRemoveTopBlock()
 
             const observer = new MutationObserver((mutationsList, observer) => {
@@ -485,7 +495,7 @@
             // const interval_AD_remove = setInterval(AD_remove, 500)
 
         }
-        else if ((currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search')) && YANDEX_ON) {
+        else if (YANDEX_ON && (currentURL.startsWith('https://ya.ru/search') || currentURL.startsWith('https://yandex.ru/search'))) {
             function AD_remove_node(node, mutation_test) {
                 // баннер внизу справа "Сделать Яндекс основным поисковиком?"
                 let targetNode
@@ -516,7 +526,7 @@
 
         }
         // настроить обсервер
-        else if ((currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/')) && YANDEX_ON) {
+        else if (YANDEX_ON && (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/'))) {
             // Добавление кнопки "Реклама"
             // const EspeciallyForYou = CreateEspeciallyForYou()
             // let EspeciallyForYou_fact = false
@@ -666,7 +676,7 @@
 
         // настроить обсервер
         // сделать пропуск видеозаставки
-        else if (currentURL.startsWith('https://ya.ru/video/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://ya.ru/video/')) {
             // баннер сверху
             function AD_remove_node(node, mutation_test) {
                 const targetNodes = document.querySelectorAll('div[role="button"]')
@@ -695,7 +705,7 @@
             yandex_dzen_questionYandexGeneralSearch()
 
         }
-        else if (currentURL.startsWith('https://ya.ru/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://ya.ru/')) {
             // если это мбильное устройство
             if (isMobileDevice()) {
                 document.querySelector('div.dialog__wrapper')?.remove()
@@ -844,7 +854,7 @@
                 }
         }
         // каталог игр
-        else if (currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
             function AD_remove_node(node, mutation_test) {
                 const nodeDiv = node.querySelector('div')
@@ -893,7 +903,7 @@
             observers.push(observer)
         }
         // на странице игры
-        else if (currentURL.startsWith('https://yandex.ru/games/app/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/games/app/')) {
             // центральный баннер
             const interval_AD_center_remove = setInterval(AD_center_remove, 1000);
             // правый блок рекламы
@@ -974,7 +984,7 @@
             // }
         }
         // почтовый ящик
-        else if (currentURL.startsWith('https://mail.yandex.ru/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://mail.yandex.ru/')) {
             // реклама внизу слева
 
             function AD_remove_node(node, mutation_test) {
@@ -1017,7 +1027,7 @@
             const interval_AD_remove = setInterval(AD_remove, 500);
         }
         // почтовый ящик
-        else if (currentURL.startsWith('https://yandex.ru/maps/') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/maps/')) {
             // реклама справа
             function AD_remove_first() {
                 // реклама справа
@@ -1058,7 +1068,7 @@
         }
         // https://yandex.ru/health
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://yandex.ru/health') && YANDEX_ON) {
+        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/health')) {
 
             function AD_remove_node(node, mutation_test) {
                 let targetNode
@@ -1101,7 +1111,7 @@
         }
 
         // Яндекс.погода: карта
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/maps/') && DZEN_ON) {
+        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
             // внизу справа "Сделать поиск Яндекса основным?"
             yandex_dzen_questionYandexGeneralSearch()
 
@@ -1113,7 +1123,7 @@
 
         }
         // Яндекс.погода: сводка
-        else if ((currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?')) && DZEN_ON) {
+        else if (DZEN_ON && (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?'))) {
 
             // реклама справа
             const targetNode_rightColumn = document.querySelector('div#content_right.content__right')
@@ -1156,7 +1166,7 @@
 
         }
         // Яндекс.погода: на месяц
-        else if (currentURL.startsWith('https://dzen.ru/pogoda/month') && DZEN_ON) {
+        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/pogoda/month')) {
 
             // реклама справа страницы
             let targetNode_rightColumn
@@ -1171,7 +1181,7 @@
         }
         // Дзен.Статьи
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/a/') && DZEN_ON) {
+        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/a/')) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
                 // верхний баннер
@@ -1195,6 +1205,7 @@
                 }
             }
             function AD_remove() {
+                document.querySelectorAll('div.content--article-item__sideColumn-3P').forEach(node => {node.remove()})
                 targetNode_observer = document.querySelector('div#page-root') // более точный блок для наблюдения изменений
                 if (targetNode_observer) {
                     clearInterval(interval_AD_remove)
@@ -1219,7 +1230,7 @@
             }
         // Дзен.Видео
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/video/') && DZEN_ON) {
+        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/video/')) {
             function AD_remove_node(node, mutation_test) {
                 // document.querySelectorAll('div[class^="video-card-ad"]').forEach(node => {
                 document.querySelectorAll('div.video-card-ads').forEach(node => {
@@ -1271,7 +1282,7 @@
         }
         // Дзен.Shorts
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (currentURL.startsWith('https://dzen.ru/shorts/') && DZEN_ON) {
+        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/shorts/')) {
             function AD_remove_node(node, mutation_test) {
                 // банерок вверху справа
                 // возможно, для более точноо поиска: auto-slide-ad__ ; более общий правый блок: short-viewer-layout__
@@ -1323,7 +1334,7 @@
 
         // Дзен: общее
         // брать за образец в случае хаотичной рекламы
-        else if ((currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/')) && DZEN_ON) {
+        else if (DZEN_ON && (currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/'))) {
             if (isMobileDevice()) {
                 // верхний баннер
                 document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
@@ -1424,6 +1435,7 @@
                 // Удаление с наблюдением
                 function AD_remove() {
                     targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
+                    document.querySelectorAll('div.content--article-item__sideColumn-3P').forEach(node => {node.remove()})
                     if (targetNode_observer) {
                         clearInterval(interval_AD_remove)
                         AD_remove_node()
@@ -1447,7 +1459,7 @@
                 }
         }
         // vk.com
-        else if (currentURL.startsWith('https://vk.com/') && VK_ON) {
+        else if (VK_ON && currentURL.startsWith('https://vk.com/')) {
             // реклама слева
 
             function AD_remove() {
@@ -1499,6 +1511,56 @@
                 }
             });
             observer.observe(document.querySelector('div#public'), observer_config)
+            observers.push(observer)
+        }
+        // vkvideo.ru
+        else if (VK_VIDEO_ON && currentURL.startsWith('https://vkvideo.ru/video-')) {
+            // реклама слева
+
+            function Video_AD_remove() {
+                const videoplayer_ads_actions = document.querySelector('div.videoplayer_ads_actions')
+                if (videoplayer_ads_actions)
+                    videoplayer_ads_actions.style.display = 'none'
+                document.querySelector('div.rb-adman-ad-actions')?.remove()
+                document.querySelector('div.videoplayer_ads_media_el')?.remove()
+                document.querySelector('div.videoplayer_ads')?.remove()
+            }
+            const interval_AD_remove = setInterval(Video_AD_remove, 500);
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                clearInterval(interval_AD_remove)
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        // console.log('Новые узлы добавлены:', mutation.addedNodes);
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeName === 'DIV') {
+                                if (node.classList.contains('videoplayer_ads_actions') ) {
+                                    node.style.display = 'none'
+                                    node.remove()
+                                }
+                                else if (node.classList.contains('rb-adman-ad-actions')  ||
+                                         node.classList.contains('videoplayer_ads_media_el') ||
+                                         node.classList.contains('videoplayer_ads')
+                                        ) {
+                                    node.remove()
+                                }
+                                else if (node.classList.contains('videoplayer_status_icon')
+                                        ) {
+
+                                    const videoplayer_ads_actions = document.querySelector('div.videoplayer_ads_actions')
+                                    if (videoplayer_ads_actions)
+                                        videoplayer_ads_actions.style.display = 'none'
+                                    document.querySelector('div.rb-adman-ad-actions')?.remove()
+                                    document.querySelector('div.videoplayer_ads_media_el')?.remove()
+                                    document.querySelector('div.videoplayer_ads')?.remove()
+
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            observer.observe(document.getElementById('react_rootVideo_page'), observer_config)
             observers.push(observer)
         }
 
@@ -1677,9 +1739,48 @@
             }
         });
 
+        // Трети способ: внутри div slot="main-column" найти на верхнем уровне все непустые ноды, расположенные между div со свойством data-bem и div, принадлежащим классу class="tabs__container"
+        // Функция для поиска всех непустых нод на верхнем уровне между двумя элементами
+        function findNodesBetweenElements(container, startSelector, endSelector) {
+            const startElement = container.querySelector(startSelector);
+            const endElement = container.querySelector(endSelector);
+
+            if (!startElement || !endElement) {
+                console.error('Start or end element not found.');
+                return [];
+            }
+
+            const nodes = [];
+            let currentNode = startElement.nextSibling;
+
+            while (currentNode && currentNode !== endElement) {
+                if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.textContent.trim() !== '') {
+                    nodes.push(currentNode);
+                }
+                currentNode = currentNode.nextSibling;
+            }
+
+            return nodes;
+        }
+
+        // Находим контейнер с атрибутом slot="main-column"
+        const mainColumn = document.querySelector('div[slot="main-column"]');
+
+        if (mainColumn) {
+            // Находим все непустые ноды на верхнем уровне между div с data-bem и div с классом tabs__container
+            const nodes = findNodesBetweenElements(mainColumn, 'div[data-bem]', 'div.tabs__container');
+
+            // Выводим найденные ноды в консоль
+            nodes.forEach(node => {
+                console.log(node);
+            });
+        } else {
+            console.error('Container with slot="main-column" not found.');
+        }
 
 
     }
+
     function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
         if (node_test && node_test.nodeName === 'DIV') {
             const DivBlockclassList = Array.from(node_test.classList);
