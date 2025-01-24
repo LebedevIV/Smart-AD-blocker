@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-01-17_07-04
+// @version      2025-01-24_05-41
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -904,8 +904,11 @@
         }
         // на странице игры
         else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/games/app/')) {
-            // центральный баннер
-            const interval_AD_center_remove = setInterval(AD_center_remove, 1000);
+            // центральный баннер: пока отключаю так как использвется в играх для наград - заменить на отключение только изображения внутри
+            // const interval_AD_center_remove = setInterval(AD_center_remove, 1000);
+            const Реклама_в_центральном_баннере = document.querySelector('div.prowo__inner')
+            if (Реклама_в_центральном_баннере)
+                Реклама_в_центральном_баннере.style.display = 'none'
             // правый блок рекламы
             // const interval_RiggtBlock_remove = setInterval(RiggtBlock_remove, 1000);
             // кнопка "Отключить рекламу"
@@ -933,7 +936,7 @@
             // нижний ряд других игр
             document.querySelector('div.play-similar-games > span.close-button')?.click()
             const observer = new MutationObserver((mutationsList, observer) => {
-                clearInterval(interval_AD_center_remove)
+                // clearInterval(interval_AD_center_remove)
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
@@ -952,10 +955,20 @@
                                     node?.remove() // контроль
                                 }
                                 // центральный баннер
-                                else if (node.matches('div.play-modal_with-blur')) {
-                                    node.parentNode.style.display = 'none'
-                                    // node?.remove() // контроль
+                                // else if (node.matches('div.play-modal_with-blur')) {
+                                //     node.parentNode.style.display = 'none'
+                                //     // node?.remove() // контроль
+                                // }
+                                else if (node.matches('div.prowo__inner')) {
+                                    node.style.display = 'none'
+                                } else {
+                                    // Проверяем вложенные элементы
+                                    const Внутренняя_нода = node.querySelector('div.prowo__inner');
+                                    if (Внутренняя_нода) {
+                                        Внутренняя_нода.style.display = 'none'
+                                    }
                                 }
+
                                 // клик по кнопке закрытия
                                 document.querySelector('div[data-testid="YandexFullscreenRender-Button"]')?.click()
                                 document.querySelector('.close-button_type_adv-fullscreen')?.click()
