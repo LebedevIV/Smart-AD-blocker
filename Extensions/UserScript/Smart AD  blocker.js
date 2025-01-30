@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-01-24_05-41
+// @version      2025-01-30_20-54
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -41,10 +41,52 @@
                 title: 'Log debug messages to the console'
             },
             MAILRU_ON: {
-                label: 'mail.ru',
+                label: 'mail.ru: Главная страница',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для mail.ru'
+            },
+            MAILRU_email_ON: {
+                label: 'mail.ru: Почта (e.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Облака cloud.mail.ru'
+            },
+            MAILRU_cloud_ON: {
+                label: 'mail.ru: Облако (cloud.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Облака cloud.mail.ru'
+            },
+            MAILRU_doc_ON: {
+                label: 'mail.ru: Документы (doc.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Документы doc.mail.ru'
+            },
+            MAILRU_news_ON: {
+                label: 'mail.ru: Новости (news.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Новости news.mail.ru'
+            },
+            MAILRU_vfokuse_ON: {
+                label: 'mail.ru: ВФокусе (vfokuse.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для ВФокусе vfokuse.mail.ru'
+            },
+            MAILRU_finance_ON: {
+                label: 'mail.ru: Финансы (finance.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Финансы finance.mail.ru'
+            },
+            MAILRU_auto_ON: {
+                label: 'mail.ru: Автомобили (auto.mail.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Автомобили auto.mail.ru'
             },
             SPORTMAILRU_ON: {
                 label: 'sportmail.ru',
@@ -53,16 +95,106 @@
                 title: 'Включить для sportmail.ru'
             },
             YANDEX_ON: {
-                label: 'Яндекс',
+                label: 'Яндекс (ya.ru и yandex.ru)',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для Яндекс (ya.ru и yandex.ru)'
             },
-            DZEN_ON: {
-                label: 'Дзэн',
+            YANDEX_email_ON: {
+                label: 'Яндекс-почта (mail.yandex.ru)',
                 type: 'checkbox',
                 default: true,
-                title: 'Включить для Дзэн (dzen.ru)'
+                title: 'Включить для Яндекс-почты (mail.yandex.ru)'
+            },
+            YANDEX_disk_ON: {
+                label: 'Яндекс-диск (disk.yandex.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-диске (disk.yandex.ru)'
+            },
+            YANDEX_maps_ON: {
+                label: 'Яндекс-карты (yandex.ru/maps)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-картинки (yandex.ru/maps)'
+            },
+            YANDEX_images_ON: {
+                label: 'Яндекс-карты (yandex.ru/images)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-картинок (yandex.ru/images)'
+            },
+            YANDEX_video_ON: {
+                label: 'Яндекс-видео (yandex.ru/video)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-видео (yandex.ru/video)'
+            },
+            YANDEX_games_collection_ON: {
+                label: 'Яндекс-игры: коллекция (yandex.ru/games)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для коллекции Яндекс-игр (yandex.ru/games)'
+            },
+            YANDEX_games_app_ON: {
+                label: 'Яндекс-игры: игра (yandex.ru/games/app)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-игры (yandex.ru/games/app)'
+            },
+            YANDEX_health_ON: {
+                label: 'Яндекс-здоровье (yandex.ru/health)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-здоровье (yandex.ru/health)'
+            },
+            DZEN_ON: {
+                label: 'Яндекс-Дзен (dzen.ru)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен (dzen.ru)'
+            },
+            DZEN_video_ON: {
+                label: 'Яндекс-Дзен-Видео (dzen.ru/video)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен-Видео (dzen.ru/video)'
+            },
+            DZEN_shorts_ON: {
+                label: 'Яндекс-Дзен: Коротие видео (dzen.ru/shorts)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Короткие видео (dzen.ru/shorts)'
+            },
+            DZEN_pogoda_ON: {
+                label: 'Яндекс-Дзен: Погода (dzen.ru/pogoda)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Погода (dzen.ru/pogoda)'
+            },
+            DZEN_pogoda_maps_ON: {
+                label: 'Яндекс-Дзен: Погода на карте (dzen.ru/pogoda/maps)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Погода на карте (dzen.ru/pogoda/maps)'
+            },
+            DZEN_pogoda_details_ON: {
+                label: 'Яндекс-Дзен: Погода подробно (dzen.ru/pogoda/details)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Погода подробно (dzen.ru/pogoda/details)'
+            },
+            DZEN_pogoda_month_ON: {
+                label: 'Яндекс-Дзен: Погода на месяц (dzen.ru/pogoda/month)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Погода на месяц (dzen.ru/pogoda/month)'
+            },
+            DZEN_articles_ON: {
+                label: 'Яндекс-Дзен: Статьи (dzen.ru/articles)',
+                type: 'checkbox',
+                default: true,
+                title: 'Включить для Яндекс-Дзен: Статьи (dzen.ru/articles)'
             },
             VK_ON: {
                 label: 'Вконтакте',
@@ -113,16 +245,66 @@
 
     var DEBUG
 
-    let MAILRU_ON = true, SPORTMAILRU_ON = true, YANDEX_ON = true, DZEN_ON = true, VK_ON = true, VK_VIDEO_ON = true, OK_ON = true
+    let MAILRU_ON = true
+    let MAILRU_email_ON = true
+    let MAILRU_cloud_ON = true
+    let MAILRU_doc_ON = true
+    let MAILRU_news_ON = true
+    let MAILRU_vfokuse_ON = true
+    let MAILRU_finance_ON = true
+    let MAILRU_auto_ON = true
+    let SPORTMAILRU_ON = true
+    let YANDEX_ON = true
+    let YANDEX_email_ON = true
+    let YANDEX_disk_ON = true
+    let YANDEX_maps_ON = true
+    let YANDEX_images_ON = true
+    let YANDEX_video_ON = true
+    let YANDEX_games_collection_ON = true
+    let YANDEX_games_app_ON = true
+    let YANDEX_health_ON = true
+    let DZEN_ON = true
+    let DZEN_video_ON = true
+    let DZEN_shorts_ON = true
+    let DZEN_pogoda_ON = true
+    let DZEN_pogoda_maps_ON = true
+    let DZEN_pogoda_details_ON = true
+    let DZEN_pogoda_month_ON = true
+    let DZEN_articles_ON = true
+    let VK_ON = true
+    let VK_VIDEO_ON = true
+    let OK_ON = true
     let FirstOpen = false
 
     function onInit() {
         DEBUG = new Debugger(GM_info.script.name, GM_config.get('DEBUG_MODE'))
 
         MAILRU_ON = GM_config.get('MAILRU_ON')
+        MAILRU_email_ON = GM_config.get('MAILRU_email_ON')
+        MAILRU_cloud_ON = GM_config.get('MAILRU_cloud_ON')
+        MAILRU_doc_ON = GM_config.get('MAILRU_doc_ON')
+        MAILRU_news_ON = GM_config.get('MAILRU_news_ON')
+        MAILRU_vfokuse_ON = GM_config.get('MAILRU_vfokuse_ON')
+        MAILRU_finance_ON = GM_config.get('MAILRU_finance_ON')
+        MAILRU_auto_ON = GM_config.get('MAILRU_auto_ON')
         SPORTMAILRU_ON = GM_config.get('SPORTMAILRU_ON')
         YANDEX_ON = GM_config.get('YANDEX_ON')
+        YANDEX_email_ON = GM_config.get('YANDEX_email_ON')
+        YANDEX_disk_ON = GM_config.get('YANDEX_disk_ON')
+        YANDEX_maps_ON = GM_config.get('YANDEX_maps_ON')
+        YANDEX_images_ON = GM_config.get('YANDEX_images_ON')
+        YANDEX_video_ON = GM_config.get('YANDEX_video_ON')
+        YANDEX_games_collection_ON = GM_config.get('YANDEX_games_collection_ON')
+        YANDEX_games_app_ON = GM_config.get('YANDEX_games_app_ON')
+        YANDEX_health_ON = GM_config.get('YANDEX_health_ON')
         DZEN_ON = GM_config.get('DZEN_ON')
+        DZEN_video_ON = GM_config.get('DZEN_video_ON')
+        DZEN_shorts_ON = GM_config.get('DZEN_shorts_ON')
+        DZEN_pogoda_ON = GM_config.get('DZEN_pogoda_ON')
+        DZEN_pogoda_maps_ON = GM_config.get('DZEN_pogoda_maps_ON')
+        DZEN_pogoda_details_ON = GM_config.get('DZEN_pogoda_details_ON')
+        DZEN_pogoda_month_ON = GM_config.get('DZEN_pogoda_month_ON')
+        DZEN_articles_ON = GM_config.get('DZEN_articles_ON')
         VK_ON = GM_config.get('VK_ON')
         VK_VIDEO_ON = GM_config.get('VK_VIDEO_ON')
         OK_ON = GM_config.get('OK_ON')
@@ -133,11 +315,6 @@
             handleUrlChange()
         }
     }
-
-
-
-
-
 
     // получаем текущий адрес страницы
     let currentURL = window.location.href
@@ -167,7 +344,7 @@
     function handleUrlChange() {
         // console.log('URL changed to:', window.location.href);
         // if (MAILRU_ON && currentURL.startsWith('https://e.mail.ru/')) {
-        if (MAILRU_ON && currentURL.startsWith('https://e.mail.ru/')) {
+        if (MAILRU_email_ON && currentURL.startsWith('https://e.mail.ru/')) {
 
             // удаление верхнего рекламного блока
             let fact_Remove_AD_Top_3column = false // факт удаления верхнего рекламного блока в интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
@@ -304,7 +481,7 @@
 
             }
         // почта на мобильном устройстве
-        else if (MAILRU_ON && currentURL.startsWith('https://touch.mail.ru/messages/')) {
+        else if (MAILRU_email_ON && currentURL.startsWith('https://touch.mail.ru/messages/')) {
             // верхний узкий баннер
             document.querySelector('div.mailru-visibility-check')?.parentNode?.remove()
             const observer = new MutationObserver((mutationsList, observer) => {
@@ -321,7 +498,7 @@
             observer.observe(document.body, observer_config)
             observers.push(observer)
         }
-        else if (MAILRU_ON && currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
+        else if (MAILRU_cloud_ON && currentURL.startsWith('https://cloud.mail.ru/attaches/')) {
             // нижний узкий баннер
             document.querySelector('div[class^="ReactViewer__attachesinfo"]')?.remove()
             // правая панель
@@ -343,9 +520,7 @@
             observer.observe(document.body, observer_config)
             observers.push(observer)
         }
-        // else if (currentURL.startsWith('https://auto.mail.ru/forum/topic/')) {
-        // else if (currentURL.startsWith('https://auto.mail.ru/forum/')) {
-        else if (MAILRU_ON && currentURL.startsWith('https://auto.mail.ru/') ) {
+        else if (MAILRU_auto_ON && currentURL.startsWith('https://auto.mail.ru/') ) {
             // удаление всей рекламы, но не очень аккуратно
 
             // Функция для проверки, что элемент имеет только один класс
@@ -383,16 +558,19 @@
 
         }
 
-        else if (MAILRU_ON && (currentURL.startsWith('https://cloud.mail.ru/home/') || currentURL.startsWith('https://doc.mail.ru/'))) {
+        else if ((MAILRU_cloud_ON && currentURL.startsWith('https://cloud.mail.ru/home/')) ||
+                 (MAILRU_doc_ON && currentURL.startsWith('https://doc.mail.ru/'))
+                )
+        {
             // верхний узкий баннер
             document.querySelector('div[class^="Worm__root--"]')?.remove()
         }
         else if ((SPORTMAILRU_ON && currentURL.startsWith('https://sportmail.ru/')) ||
-                 (MAILRU_ON && (currentURL.startsWith('https://news.mail.ru/') ||
-                                currentURL.startsWith('https://vfokuse.mail.ru/') ||
-                                currentURL.startsWith('https://finance.mail.ru/')
-                               )
-                 )) {
+                 (MAILRU_news_ON && currentURL.startsWith('https://news.mail.ru/')) ||
+                 (MAILRU_vfokuse_ON && currentURL.startsWith('https://vfokuse.mail.ru/')) ||
+                 (MAILRU_finance_ON && currentURL.startsWith('https://finance.mail.ru/'))
+                )
+        {
             // нижний узкий баннер
             function AD_remove_node(node_test, mutation_test) {
                 if (currentURL.startsWith('https://finance.mail.ru/')) {
@@ -526,7 +704,7 @@
 
         }
         // настроить обсервер
-        else if (YANDEX_ON && (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/'))) {
+        else if (YANDEX_images_ON && (currentURL.startsWith('https://ya.ru/images/') || currentURL.startsWith('https://yandex.ru/images/'))) {
             // Добавление кнопки "Реклама"
             // const EspeciallyForYou = CreateEspeciallyForYou()
             // let EspeciallyForYou_fact = false
@@ -673,10 +851,8 @@
             AD_remove_node()
 
         }
-
-        // настроить обсервер
         // сделать пропуск видеозаставки
-        else if (YANDEX_ON && currentURL.startsWith('https://ya.ru/video/')) {
+        else if (YANDEX_video_ON && (currentURL.startsWith('https://ya.ru/video/') || currentURL.startsWith('https://yandex.ru/video/'))) {
             // баннер сверху
             function AD_remove_node(node, mutation_test) {
                 const targetNodes = document.querySelectorAll('div[role="button"]')
@@ -854,7 +1030,7 @@
                 }
         }
         // каталог игр
-        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
+        else if (YANDEX_games_collection_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
             function AD_remove_node(node, mutation_test) {
                 const nodeDiv = node.querySelector('div')
@@ -903,7 +1079,7 @@
             observers.push(observer)
         }
         // на странице игры
-        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/games/app/')) {
+        else if (YANDEX_games_app_ON && currentURL.startsWith('https://yandex.ru/games/app/')) {
             // центральный баннер: пока отключаю так как использвется в играх для наград - заменить на отключение только изображения внутри
             // const interval_AD_center_remove = setInterval(AD_center_remove, 1000);
             const Реклама_в_центральном_баннере = document.querySelector('div.prowo__inner')
@@ -1001,52 +1177,145 @@
 
             }
         }
-        // почтовый ящик
-        else if (YANDEX_ON && currentURL.startsWith('https://mail.yandex.ru/')) {
+        // Яндекс: почтовый ящик
+        // Изменено: 2025-01-28 20:01, Автор:
+        else if (YANDEX_email_ON && currentURL.startsWith('https://mail.yandex.ru/')) {
+            function Удаление_рекламы(node, mutation_test) {
+                // до включения обсервера
+                if (!node) {
+                    // реклама справа от списка писем
+                    document.querySelector('.js-scroller-right')?.remove()
+                    // реклама над списком писем
+                    document.getElementById('js-messages-direct')?.remove()
+                    if (currentURL.startsWith('https://mail.yandex.ru/lite/')) {
+                        // реклама над списком писем
+                        document.querySelector('div[class*="direct-stripe"]')?.remove()
+                    }
+                }
+                // после включения обсервера
+                else {
+                    // Проверяем добавленный элемент
+                    if (node.matches('div.js-scroller-right') || node.id === 'js-messages-direct') {
+                        node.remove()
+                    }
+                    // Проверяем вложенные элементы
+                    else {
+                        let Вложенный_элемент
+                        // реклама справа от списка писем
+                        Вложенный_элемент = node.querySelector('div.js-scroller-right')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
+                        // реклама над списком писем
+                        Вложенный_элемент = node.querySelector('#js-messages-direct')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
+                    }
+                    if (currentURL.startsWith('https://mail.yandex.ru/lite/')) {
+                        // реклама над списком писем
+                        // Функция для проверки, принадлежит ли элемент классу, содержащему фрагмент 'direct-stripe'
+                        function hasDirectStripeClass(node) {
+                            if (node && node.classList) {
+                                return Array.from(node.classList).some(className => className.includes('direct-stripe'));
+                            }
+                            return false;
+                        }
+                        if (hasDirectStripeClass(node)) {
+                            node.remove()
+                        }
+                        else {
+                            node.querySelector('div[class*="direct-stripe"]')?.remove()
+                        }
+                    }
+                }
+            }
+
+            Удаление_рекламы()
+            const интервал__Удаление_рекламы = setInterval(Удаление_рекламы, 500)
+
+            const callback = function (mutationsList, observer) {
+                clearInterval(интервал__Удаление_рекламы) // На смену приходит обсервер
+                for (const mutation of mutationsList) {
+                    // Проверяем, были ли добавлены новые узлы
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                Удаление_рекламы(node)
+                            }
+                        })
+                    }
+                }
+            }
+
+            const observer = new MutationObserver(callback)
+            observers.push(observer)
+
+            // Начинаем наблюдение за изменениями в DOM
+            observer.observe(document.body, {
+                childList: true, // Отслеживать добавление/удаление дочерних элементов
+                subtree: true,   // Отслеживать изменения во всем поддереве
+            })
+        }
+        // Яндекс: диск
+        // Изменено: 2025-01-29 22:01, Автор:
+        else if (YANDEX_disk_ON && currentURL.startsWith('https://disk.yandex.ru/')) {
             // реклама внизу слева
 
-            function AD_remove_node(node, mutation_test) {
-                // Проверяем, не содержит ли node он указанные классы
-                if (!node.classList.contains('ns-view-react-left-column') &&
-                    !node.classList.contains('ns-view-fill-height-placeholder-box') &&
-                    !node.classList.contains('ns-view-skin-saver-box') &&
-                    !node.classList.contains('ns-view-copyright-box')) {
-                    node.remove()
+            function Удаление_рекламы(node, mutation_test) {
+                // до включения обсервера
+                if (!node) {
+                    // реклама вверху
+                    document.querySelector('div.top-direct-line')?.remove()
                 }
-            }
-            function AD_remove() {
-                const targetNode = document.querySelector('div.ns-view-left-box.mail-Layout-Aside-Inner-Box.js-layout-aside-inner-box[data-key="box=left-box"]')
-                if (targetNode) {
-                    clearInterval(interval_AD_remove)
-                    const observer = new MutationObserver((mutationsList, observer) => {
-                        for (let mutation of mutationsList) {
-                            if (mutation.type === 'childList') {
-                                // console.log('Новые узлы добавлены:', mutation.addedNodes);
-                                mutation.addedNodes.forEach(node => {
-                                    if (node.nodeName === 'DIV' &&
-                                        node.parentNode === targetNode) {
-                                        AD_remove_node(node, mutation)
-                                    }
-                                });
-
-                            }
+                // после включения обсервера
+                else {
+                    // Проверяем добавленный элемент
+                    // реклама вверху
+                    if (node.matches('div.top-direct-line')) {
+                        node.remove()
+                    }
+                    // Проверяем вложенные элементы
+                    else {
+                        let Вложенный_элемент
+                        // реклама вверху
+                        Вложенный_элемент = node.querySelector('div.top-direct-line')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
                         }
-                    });
-                    observer.observe(targetNode, observer_config)
-                    observers.push(observer)
+                    }
 
-                    const targetNodes = targetNode.querySelectorAll('div')
-                    targetNodes?.forEach(node => {
-                        AD_remove_node(node)
-                    });
                 }
-
             }
-            const interval_AD_remove = setInterval(AD_remove, 500);
-            document.querySelector('.js-scroller-right').remove()
+
+            Удаление_рекламы()
+            const интервал__Удаление_рекламы = setInterval(Удаление_рекламы, 500)
+
+            const callback = function (mutationsList, observer) {
+                clearInterval(интервал__Удаление_рекламы) // На смену приходит обсервер
+                for (const mutation of mutationsList) {
+                    // Проверяем, были ли добавлены новые узлы
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                Удаление_рекламы(node)
+                            }
+                        })
+                    }
+                }
+            }
+
+            const observer = new MutationObserver(callback)
+            observers.push(observer)
+
+            // Начинаем наблюдение за изменениями в DOM
+            observer.observe(document.body, {
+                childList: true, // Отслеживать добавление/удаление дочерних элементов
+                subtree: true,   // Отслеживать изменения во всем поддереве
+            })
         }
-        // почтовый ящик
-        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/maps/')) {
+        // Яндекс: карты
+        else if (YANDEX_maps_ON && currentURL.startsWith('https://yandex.ru/maps/')) {
             // реклама справа
             function AD_remove_first() {
                 // реклама справа
@@ -1087,7 +1356,7 @@
         }
         // https://yandex.ru/health
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (YANDEX_ON && currentURL.startsWith('https://yandex.ru/health')) {
+        else if (YANDEX_health_ON && currentURL.startsWith('https://yandex.ru/health')) {
 
             function AD_remove_node(node, mutation_test) {
                 let targetNode
@@ -1130,7 +1399,7 @@
         }
 
         // Яндекс.погода: карта
-        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
+        else if (DZEN_pogoda_maps_ON && currentURL.startsWith('https://dzen.ru/pogoda/maps/')) {
             // внизу справа "Сделать поиск Яндекса основным?"
             yandex_dzen_questionYandexGeneralSearch()
 
@@ -1142,7 +1411,7 @@
 
         }
         // Яндекс.погода: сводка
-        else if (DZEN_ON && (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?'))) {
+        else if (DZEN_pogoda_details_ON && (currentURL.startsWith('https://dzen.ru/pogoda/?via=hl') || currentURL.startsWith('https://dzen.ru/pogoda/details') || currentURL.startsWith('https://dzen.ru/pogoda/?'))) {
 
             // реклама справа
             const targetNode_rightColumn = document.querySelector('div#content_right.content__right')
@@ -1185,7 +1454,7 @@
 
         }
         // Яндекс.погода: на месяц
-        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/pogoda/month')) {
+        else if (DZEN_pogoda_month_ON && currentURL.startsWith('https://dzen.ru/pogoda/month')) {
 
             // реклама справа страницы
             let targetNode_rightColumn
@@ -1200,7 +1469,7 @@
         }
         // Дзен.Статьи
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/a/')) {
+        else if (DZEN_articles_ON && currentURL.startsWith('https://dzen.ru/a/')) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
                 // верхний баннер
@@ -1249,7 +1518,7 @@
             }
         // Дзен.Видео
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/video/')) {
+        else if (DZEN_video_ON && currentURL.startsWith('https://dzen.ru/video/')) {
             function AD_remove_node(node, mutation_test) {
                 // document.querySelectorAll('div[class^="video-card-ad"]').forEach(node => {
                 document.querySelectorAll('div.video-card-ads').forEach(node => {
@@ -1301,7 +1570,7 @@
         }
         // Дзен.Shorts
         // брать за образец в случае рекламы внутри наблюдаемой ноды
-        else if (DZEN_ON && currentURL.startsWith('https://dzen.ru/shorts/')) {
+        else if (DZEN_shorts_ON && currentURL.startsWith('https://dzen.ru/shorts/')) {
             function AD_remove_node(node, mutation_test) {
                 // банерок вверху справа
                 // возможно, для более точноо поиска: auto-slide-ad__ ; более общий правый блок: short-viewer-layout__
@@ -1372,9 +1641,10 @@
                 // observers.push(observer)
             }
             else {
-                // Добавление кнопки "Специально для Вас..."
+                // Добавление кнопки "Реклама"
                 const EspeciallyForYou = CreateEspeciallyForYou()
                 let targetNode_observer
+
 
                 function AD_remove_node(node, mutation_test) {
                     let targetNode
@@ -1431,15 +1701,7 @@
                         }
                     }
                     // реклама в видеоблоках
-                    targetNodes = document.querySelectorAll('div.zenad-card-rtb__ad')
-                    targetNodes.forEach(node => {
-                        // if (node.parentNode !== EspeciallyForYou) {
-                        //     node.style.marginTop = '0.3rem'
-                        //     EspeciallyForYou?.appendChild(node)
-                        // }
-                        // удаление так как слишком много этой рекламы
-                        node.remove()
-                    })
+                    document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {node?.remove()})
                     // Модальное окно "Яндекс станет основным поиском"
                     document.querySelector('div#ya-dist-splashscreen')?.remove()
                     // Слева вверху "Сделать поиск Яндекса основным?"
@@ -1451,10 +1713,12 @@
                     }
 
                 }
+
+                //
                 // Удаление с наблюдением
                 function AD_remove() {
                     targetNode_observer = document.querySelector('div#banner-view') || document.querySelector('div#LayoutTopMicroRoot') // более точный блок для наблюдения изменений
-                    document.querySelectorAll('div.content--article-item__sideColumn-3P').forEach(node => {node.remove()})
+                    document.querySelectorAll('div.content--article-item__sideColumn-3P').forEach(node => {node?.remove()})
                     if (targetNode_observer) {
                         clearInterval(interval_AD_remove)
                         AD_remove_node()
@@ -1476,6 +1740,108 @@
                 const interval_AD_remove = setInterval(AD_remove, 500)
 
                 }
+
+
+            // Изменено: 2025-01-30 20:53, Автор:
+            let Блок_коллекции_статей_и_видео = document.querySelector('#LayoutContentMicroRoot')
+            Удаление_рекламы()
+            if (Блок_коллекции_статей_и_видео)
+                наблюдатель__Коллекция_видео__установка(Блок_коллекции_статей_и_видео)
+            // const интервал__Удаление_рекламы = setInterval(Удаление_рекламы, 500)
+
+            function Удаление_рекламы(node, mutation_test) {
+                // до включения обсервера
+                if (!node) {
+                    // Реклама в видеоблоках
+                    if (Блок_коллекции_статей_и_видео)
+                        Блок_коллекции_статей_и_видео.querySelectorAll('div[class*="dzen-desktop--card-rtb__"]').forEach(node => {node?.remove()})
+                    else // на всякий случай, но этого не будет
+                        document.querySelectorAll('div[class*="dzen-desktop--card-rtb__"]').forEach(node => {node?.remove()})
+                }
+                // после включения обсервера
+                else {
+                    // Реклама в видеоблоках
+                    // Проверяем добавленный элемент
+                    if (node.matches('div[class*="dzen-desktop--card-rtb__"]')) {
+                        node.remove()
+                    }
+                    // Проверяем вложенные элементы
+                    else {
+                        node.querySelectorAll('div[class*="dzen-desktop--card-rtb__"]').forEach(node => {node?.remove()})
+                    }
+
+                }
+            }
+
+
+            function наблюдатель__Коллекция_видео__установка(целевой_элемент) {
+                const callback = function (mutationsList, observer) {
+                    for (const mutation of mutationsList) {
+                        // Проверяем, были ли добавлены новые узлы
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach(node => {
+                                // if (node.nodeType === Node.ELEMENT_NODE) {
+                                    Удаление_рекламы(node)
+                                // }
+                            })
+                        }
+                    }
+                }
+
+                const наблюдатель__Коллекция_видео = new MutationObserver(callback)
+                const config = {
+                    childList: true, // Отслеживать добавление/удаление дочерних элементов
+                    subtree: true,   // Отслеживать изменения во всем поддереве
+                }
+                наблюдатель__Коллекция_видео.observe(целевой_элемент, config)
+                // clearInterval(интервал__Удаление_рекламы) // На смену приходит обсервер
+                Удаление_рекламы()
+                observers.push(наблюдатель__Коллекция_видео)
+
+            }
+
+            const наблюдатель__Появление_на_странице_нод_наблюдения = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // Блок коллекции_видео
+                                // Проверяем добавленный элемент
+                                let целевой_элемент // переменная для всех наблюдаемых нод
+                                if (Блок_коллекции_статей_и_видео) {
+                                    наблюдатель__Появление_на_странице_нод_наблюдения.disconnect() // сразу прекращаем наблюдение так как других целевых нод пока нет
+                                }
+                                else {
+                                    if (node.matches('#LayoutContentMicroRoot')) {
+                                        Блок_коллекции_статей_и_видео = node
+                                        наблюдатель__Коллекция_видео__установка(Блок_коллекции_статей_и_видео)
+                                        наблюдатель__Появление_на_странице_нод_наблюдения.disconnect() // сразу прекращаем наблюдение так как других целевых нод пока нет
+                                    }
+                                    // Проверяем вложенные элементы
+                                    else {
+                                        целевой_элемент = node.querySelector('#LayoutContentMicroRoot')
+                                        if (целевой_элемент) {
+                                            Блок_коллекции_статей_и_видео = целевой_элемент
+                                            наблюдатель__Коллекция_видео__установка(Блок_коллекции_статей_и_видео)
+                                            наблюдатель__Появление_на_странице_нод_наблюдения.disconnect() // сразу прекращаем наблюдение так как других целевых нод пока нет
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                });
+            });
+
+            const config = {
+                childList: true, // Отслеживать добавление/удаление дочерних элементов
+                subtree: true,   // Отслеживать изменения во всем поддереве
+            }
+            наблюдатель__Появление_на_странице_нод_наблюдения.observe(document.body, config)
+            observers.push(наблюдатель__Появление_на_странице_нод_наблюдения)
+
+
+
         }
         // vk.com
         else if (VK_ON && currentURL.startsWith('https://vk.com/')) {
@@ -1675,412 +2041,412 @@
         return details
     }
 
-// Возврат строк в зависимости от языка
-function messageSpecialOffer(idMsg) {
-    // Определение языка браузера
-    const browserLanguage = navigator.language || navigator.userLanguage
-    let messageSpecialOffer
+    // Возврат строк в зависимости от языка
+    function messageSpecialOffer(idMsg) {
+        // Определение языка браузера
+        const browserLanguage = navigator.language || navigator.userLanguage
+        let messageSpecialOffer
 
-    switch (idMsg) {
-        case "Реклама":
-            messageSpecialOffer = 'Реклама'
-            switch (browserLanguage) {
-                case "uken":
-                    messageSpecialOffer = 'Реклама'
-                    break;
-                default:
-                    messageSpecialOffer = 'Реклама'
-            }
-            return messageSpecialOffer
-    }
-}
-// https://mail.ru/
-// Функция для проверки наличия и удаления верхнего рекламного блока
-function mail_ru_checkAndRemoveTopBlock() {
-    let targetNode
-    targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
-    if (targetNode) {
-        // тип ноды меняется через каждые несколько секунд
-        let targetNode_banner
-
-        targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
-
-        if (targetNode_banner) {
-            targetNode_banner.remove()
+        switch (idMsg) {
+            case "Реклама":
+                messageSpecialOffer = 'Реклама'
+                switch (browserLanguage) {
+                    case "uken":
+                        messageSpecialOffer = 'Реклама'
+                        break;
+                    default:
+                        messageSpecialOffer = 'Реклама'
+                }
+                return messageSpecialOffer
         }
     }
-    const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
-    targetNodes.forEach(node => {
-        node.remove();
-    });
+    // https://mail.ru/
+    // Функция для проверки наличия и удаления верхнего рекламного блока
+    function mail_ru_checkAndRemoveTopBlock() {
+        let targetNode
+        targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
+        if (targetNode) {
+            // тип ноды меняется через каждые несколько секунд
+            let targetNode_banner
 
+            targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
 
-    // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
-
-    // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-    function findElementByTextInShadow(shadowRoot, tag, text) {
-        const elements = shadowRoot.querySelectorAll(tag);
-        for (let i = 0; i < elements.length; i++) {
-            if (elements[i].textContent === text) {
-                return elements[i];
+            if (targetNode_banner) {
+                targetNode_banner.remove()
             }
         }
-        return null;
-    }
+        const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
+        targetNodes.forEach(node => {
+            node.remove();
+        });
 
-    // Новый способ
-    // Получаем все элементы <div> на странице
-    const divElements = document.querySelectorAll('div');
 
-    // Проходимся по каждому элементу и проверяем его высоту и содержимое
-    divElements.forEach((element) => {
-        const height = parseInt(getComputedStyle(element).height);
-        const content = element.innerText.trim();
+        // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
 
-        // Проверяем, является ли элемент <div> с высотой 0px и без содержимого
-        if (height === 0 && content === '') {
-            // Находим предшествующий элемент <div> с высотой 90px
-            const previousDiv = element.previousElementSibling;
-            if (previousDiv && previousDiv.tagName === 'DIV' && parseInt(getComputedStyle(previousDiv).height) === 90) {
-                // Проверяем, содержит ли предшествующий элемент <div> с высотой 90px элемент <div> с текстом "0+", "6+", "12+" или "16+"
-                const innerDivs = previousDiv.querySelectorAll('div');
-                let hasText = false;
-                innerDivs.forEach((innerDiv) => {
-                    const innerDivText = innerDiv.innerText.trim();
-                    if (innerDivText === '0+' || innerDivText === '6+' || innerDivText === '12+' || innerDivText === '16+') {
-                        hasText = true;
+        // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        function findElementByTextInShadow(shadowRoot, tag, text) {
+            const elements = shadowRoot.querySelectorAll(tag);
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i].textContent === text) {
+                    return elements[i];
+                }
+            }
+            return null;
+        }
+
+        // Новый способ
+        // Получаем все элементы <div> на странице
+        const divElements = document.querySelectorAll('div');
+
+        // Проходимся по каждому элементу и проверяем его высоту и содержимое
+        divElements.forEach((element) => {
+            const height = parseInt(getComputedStyle(element).height);
+            const content = element.innerText.trim();
+
+            // Проверяем, является ли элемент <div> с высотой 0px и без содержимого
+            if (height === 0 && content === '') {
+                // Находим предшествующий элемент <div> с высотой 90px
+                const previousDiv = element.previousElementSibling;
+                if (previousDiv && previousDiv.tagName === 'DIV' && parseInt(getComputedStyle(previousDiv).height) === 90) {
+                    // Проверяем, содержит ли предшествующий элемент <div> с высотой 90px элемент <div> с текстом "0+", "6+", "12+" или "16+"
+                    const innerDivs = previousDiv.querySelectorAll('div');
+                    let hasText = false;
+                    innerDivs.forEach((innerDiv) => {
+                        const innerDivText = innerDiv.innerText.trim();
+                        if (innerDivText === '0+' || innerDivText === '6+' || innerDivText === '12+' || innerDivText === '16+') {
+                            hasText = true;
+                        }
+                    });
+                    if (hasText) {
+                        previousDiv.style.display = 'none'
                     }
-                });
-                if (hasText) {
-                    previousDiv.style.display = 'none'
                 }
             }
-        }
-    });
-
-    // Трети способ: внутри div slot="main-column" найти на верхнем уровне все непустые ноды, расположенные между div со свойством data-bem и div, принадлежащим классу class="tabs__container"
-    // Функция для поиска всех непустых нод на верхнем уровне между двумя элементами
-    function findNodesBetweenElements(container, startSelector, endSelector) {
-        const startElement = container.querySelector(startSelector);
-        const endElement = container.querySelector(endSelector);
-
-        if (!startElement || !endElement) {
-            console.error('Start or end element not found.');
-            return [];
-        }
-
-        const nodes = [];
-        let currentNode = startElement.nextSibling;
-
-        while (currentNode && currentNode !== endElement) {
-            if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.textContent.trim() !== '') {
-                nodes.push(currentNode);
-            }
-            currentNode = currentNode.nextSibling;
-        }
-
-        return nodes;
-    }
-
-    // Находим контейнер с атрибутом slot="main-column"
-    const mainColumn = document.querySelector('div[slot="main-column"]');
-
-    if (mainColumn) {
-        // Находим все непустые ноды на верхнем уровне между div с data-bem и div с классом tabs__container
-        const nodes = findNodesBetweenElements(mainColumn, 'div[data-bem]', 'div.tabs__container');
-
-        // Выводим найденные ноды в консоль
-        nodes.forEach(node => {
-            console.log(node);
-        });
-    } else {
-        console.error('Container with slot="main-column" not found.');
-    }
-
-
-}
-
-function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
-    if (node_test && node_test.nodeName === 'DIV') {
-        const DivBlockclassList = Array.from(node_test.classList);
-        if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
-            // DivBlockclassList.some(className => className === 'feed__row') &&
-            // DivBlockclassList.some(className => className === '_is-mailru-morda')
-           ) {
-            // document.querySelectorAll('article.card-wrapper').forEach(node => {
-            //     node?.remove()
-            // })
-            document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
-                node?.remove()
-            })
-            document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-                node?.remove()
-            })
-        }
-    }
-    // if (node_test && node_test.nodeName === 'IMG') {
-    //     const DivBlockclassList = Array.from(node_test.classList);
-    //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
-    //        ) {
-    //         document.querySelectorAll('article.card-wrapper').forEach(node => {
-    //             node?.remove()
-    //         })
-    //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-    //             node?.remove()
-    //         })
-    //     }
-    // }
-
-
-}
-// Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
-function mail_ru_checkAndRemove_РекламаВShadow() {
-
-    //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-    //         function findElementByTextInShadow(shadowRoot, tag, text) {
-    //             const elements = shadowRoot.querySelectorAll(tag);
-    //             for (let i = 0; i < elements.length; i++) {
-    //                 if (elements[i].textContent === text) {
-    //                     return elements[i];
-    //                 }
-    //             }
-    //             return null;
-    //         }
-
-    //         // Найти все shadow host'ы на странице
-    //         const shadowHosts = document.querySelectorAll('*');
-
-    //         shadowHosts.forEach(shadowHost => {
-    //             const shadowRoot = shadowHost.shadowRoot;
-
-    //             if (shadowRoot) {
-    //                 // Найти элемент с текстом "Реклама" внутри shadow root
-    //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
-
-    //                 if (рекламаElement) {
-    //                     // Подняться по родительским нодам вплоть до shadow-root
-    //                     let currentNode = рекламаElement;
-    //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
-    //                         currentNode = currentNode.parentNode;
-    //                     }
-
-    //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
-    //                     console.log(currentNode);
-    //                 } else {
-    //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
-    //                 }
-    //             } else {
-    //                 console.log('Shadow root не найден');
-    //             }
-    //         });
-
-
-
-
-
-    //*************
-
-
-    //         function findParentNodeAboveShadowRoot() {
-    //             const adSpan = document.querySelector('span:contains("Реклама")');
-
-    //             if (adSpan) {
-    //                 let currentNode = adSpan.parentNode;
-    //                 while (currentNode && currentNode.id !== 'shadow-root') {
-    //                     currentNode = currentNode.parentNode;
-    //                 }
-
-    //                 if (currentNode && currentNode.parentNode) {
-    //                     return currentNode.parentNode;
-    //                 }
-    //             }
-
-    //             return null;
-    //         }
-
-    //         const parentNode = findParentNodeAboveShadowRoot();
-
-    //         if (parentNode) {
-    //             console.log('Parent node above shadow-root:', parentNode);
-    //         } else {
-    //             console.log('Could not find the specified node.');
-    //         }
-
-    //*****************
-
-
-    function findParentNodeAboveShadowRoot() {
-
-        // Find all elements with a closed shadow root
-        const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
-
-        // Iterate through the shadow roots and change their mode to 'open'
-        shadowRoots.forEach(el => {
-            el.shadowRoot.mode = 'open';
         });
 
-        // Find all span elements
-        const spans = document.querySelectorAll('span');
+        // Трети способ: внутри div slot="main-column" найти на верхнем уровне все непустые ноды, расположенные между div со свойством data-bem и div, принадлежащим классу class="tabs__container"
+        // Функция для поиска всех непустых нод на верхнем уровне между двумя элементами
+        function findNodesBetweenElements(container, startSelector, endSelector) {
+            const startElement = container.querySelector(startSelector);
+            const endElement = container.querySelector(endSelector);
 
-        // Iterate through the spans and find the one with the text "Реклама"
-        for (let i = 0; i < spans.length; i++) {
-            if (spans[i].textContent === 'Реклама') {
-                let currentNode = spans[i].parentNode;
+            if (!startElement || !endElement) {
+                console.error('Start or end element not found.');
+                return [];
+            }
 
-                // Traverse up the DOM until the shadow root is found
-                while (currentNode && currentNode.id !== 'shadow-root') {
-                    currentNode = currentNode.parentNode;
+            const nodes = [];
+            let currentNode = startElement.nextSibling;
+
+            while (currentNode && currentNode !== endElement) {
+                if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.textContent.trim() !== '') {
+                    nodes.push(currentNode);
+                }
+                currentNode = currentNode.nextSibling;
+            }
+
+            return nodes;
+        }
+
+        // Находим контейнер с атрибутом slot="main-column"
+        const mainColumn = document.querySelector('div[slot="main-column"]');
+
+        if (mainColumn) {
+            // Находим все непустые ноды на верхнем уровне между div с data-bem и div с классом tabs__container
+            const nodes = findNodesBetweenElements(mainColumn, 'div[data-bem]', 'div.tabs__container');
+
+            // Выводим найденные ноды в консоль
+            nodes.forEach(node => {
+                console.log(node);
+            });
+        } else {
+            console.error('Container with slot="main-column" not found.');
+        }
+
+
+    }
+
+    function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
+        if (node_test && node_test.nodeName === 'DIV') {
+            const DivBlockclassList = Array.from(node_test.classList);
+            if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
+                // DivBlockclassList.some(className => className === 'feed__row') &&
+                // DivBlockclassList.some(className => className === '_is-mailru-morda')
+               ) {
+                // document.querySelectorAll('article.card-wrapper').forEach(node => {
+                //     node?.remove()
+                // })
+                document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
+                    node?.remove()
+                })
+                document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+                    node?.remove()
+                })
+            }
+        }
+        // if (node_test && node_test.nodeName === 'IMG') {
+        //     const DivBlockclassList = Array.from(node_test.classList);
+        //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
+        //        ) {
+        //         document.querySelectorAll('article.card-wrapper').forEach(node => {
+        //             node?.remove()
+        //         })
+        //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+        //             node?.remove()
+        //         })
+        //     }
+        // }
+
+
+    }
+    // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+    function mail_ru_checkAndRemove_РекламаВShadow() {
+
+        //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        //         function findElementByTextInShadow(shadowRoot, tag, text) {
+        //             const elements = shadowRoot.querySelectorAll(tag);
+        //             for (let i = 0; i < elements.length; i++) {
+        //                 if (elements[i].textContent === text) {
+        //                     return elements[i];
+        //                 }
+        //             }
+        //             return null;
+        //         }
+
+        //         // Найти все shadow host'ы на странице
+        //         const shadowHosts = document.querySelectorAll('*');
+
+        //         shadowHosts.forEach(shadowHost => {
+        //             const shadowRoot = shadowHost.shadowRoot;
+
+        //             if (shadowRoot) {
+        //                 // Найти элемент с текстом "Реклама" внутри shadow root
+        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+        //                 if (рекламаElement) {
+        //                     // Подняться по родительским нодам вплоть до shadow-root
+        //                     let currentNode = рекламаElement;
+        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+        //                         currentNode = currentNode.parentNode;
+        //                     }
+
+        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+        //                     console.log(currentNode);
+        //                 } else {
+        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+        //                 }
+        //             } else {
+        //                 console.log('Shadow root не найден');
+        //             }
+        //         });
+
+
+
+
+
+        //*************
+
+
+        //         function findParentNodeAboveShadowRoot() {
+        //             const adSpan = document.querySelector('span:contains("Реклама")');
+
+        //             if (adSpan) {
+        //                 let currentNode = adSpan.parentNode;
+        //                 while (currentNode && currentNode.id !== 'shadow-root') {
+        //                     currentNode = currentNode.parentNode;
+        //                 }
+
+        //                 if (currentNode && currentNode.parentNode) {
+        //                     return currentNode.parentNode;
+        //                 }
+        //             }
+
+        //             return null;
+        //         }
+
+        //         const parentNode = findParentNodeAboveShadowRoot();
+
+        //         if (parentNode) {
+        //             console.log('Parent node above shadow-root:', parentNode);
+        //         } else {
+        //             console.log('Could not find the specified node.');
+        //         }
+
+        //*****************
+
+
+        function findParentNodeAboveShadowRoot() {
+
+            // Find all elements with a closed shadow root
+            const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
+
+            // Iterate through the shadow roots and change their mode to 'open'
+            shadowRoots.forEach(el => {
+                el.shadowRoot.mode = 'open';
+            });
+
+            // Find all span elements
+            const spans = document.querySelectorAll('span');
+
+            // Iterate through the spans and find the one with the text "Реклама"
+            for (let i = 0; i < spans.length; i++) {
+                if (spans[i].textContent === 'Реклама') {
+                    let currentNode = spans[i].parentNode;
+
+                    // Traverse up the DOM until the shadow root is found
+                    while (currentNode && currentNode.id !== 'shadow-root') {
+                        currentNode = currentNode.parentNode;
+                    }
+
+                    // Return the parent of the shadow root
+                    if (currentNode && currentNode.parentNode) {
+                        return currentNode.parentNode;
+                    }
+                }
+            }
+
+            return null; // Return null if the node is not found
+        }
+
+        const parentNode = findParentNodeAboveShadowRoot();
+
+        if (parentNode) {
+            console.log('Parent node above shadow-root:', parentNode);
+        } else {
+            console.log('Could not find the specified node.');
+        }
+
+
+
+
+
+
+
+
+    }
+
+    function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
+        const classList = Array.from(Node.classList);
+        if (classList.length === 3 &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
+            Node.remove();
+            // Node.style.display = 'none';
+
+        }
+    }
+
+    // внизу справа "Сделать поиск Яндекса основным?"
+    function yandex_dzen_questionYandexGeneralSearch() {
+        // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
+        // Выбираем все div
+        const allDivs = document.querySelectorAll('div');
+
+        // Фильтруем div, чтобы оставить только те, у которых ровно три класса
+        const divsWithThreeClasses = Array.from(allDivs).filter(div => {
+            const classes = div.classList;
+            return classes.length === 3;
+        });
+
+
+        divsWithThreeClasses.forEach(div => {
+            const DivChild = div.querySelector('div');
+            function checkDivHasAnyId(div) {
+                if (!div) {
+                    // console.log('Div not found.');
+                    return false;
                 }
 
-                // Return the parent of the shadow root
-                if (currentNode && currentNode.parentNode) {
-                    return currentNode.parentNode;
+                if (!div.id) {
+                    // console.log('Div does not have an id.');
+                    return false;
+                }
+
+                // console.log('Div has an id.');
+                // Проверяем, что div имеет ровно один класс
+                if (div.classList.length !== 1) {
+                    // console.log('Div does not have exactly one class.');
+                    return false;
+                }
+
+                // есть вложенный div, принадлежащий пяти классам
+                const DivChild2 = div.querySelector('div');
+                if (!DivChild2) {
+                    return false;
+
+                }
+                // Проверяем, что div принадлежит ровно 5-ти классам
+                if (DivChild2.classList.length !== 5) {
+                    // console.log('Div does not have exactly 5 classes.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            const result = checkDivHasAnyId(DivChild);
+            if (result) div.remove()
+
+        });
+
+        // Новый способ
+        // Получаем все элементы <div> на странице
+        const divElements = document.querySelectorAll('div');
+        // Проходимся по каждому элементу и проверяем его содержимое
+        divElements.forEach((element) => {
+            if (element.innerText.includes('Сделать поиск Яндекса основным')) {
+                // Используем closest() для поиска родителя с указанным z-index
+                const parentElement = divElement.closest('[style*="z-index"]');
+                // Проверяем, найден ли родитель и его z-index
+                if (parentElement && parseInt(getComputedStyle(parentElement).zIndex) > 100) {
+                    parentElement.remove()
                 }
             }
+        });
+
+    }
+
+    // определение мобильное устройство или ПК
+    function isMobileDevice() {
+        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    }
+
+
+    // // Обработка события hashchange (не срабатывает)
+    // window.addEventListener('hashchange', handleUrlChange);
+
+    // // Обработка события popstate (не срабатывает)
+    // window.addEventListener('popstate', handleUrlChange);
+    // Function to handle URL changes
+    function handleUrlChange2(newUrl) {
+        if (currentURL !== newUrl) {
+            // console.log('URL changed from', currentUrl, 'to', newUrl);
+            currentURL = newUrl;
+            // You can add your custom logic here
+            // handleUrlChange()
+            onInit()
         }
-
-        return null; // Return null if the node is not found
-    }
-
-    const parentNode = findParentNodeAboveShadowRoot();
-
-    if (parentNode) {
-        console.log('Parent node above shadow-root:', parentNode);
-    } else {
-        console.log('Could not find the specified node.');
     }
 
 
+    // Override pushState and replaceState to track URL changes
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function() {
+        originalPushState.apply(history, arguments);
+        handleUrlChange2(window.location.href);
+    };
+
+    history.replaceState = function() {
+        originalReplaceState.apply(history, arguments);
+        handleUrlChange2(window.location.href);
+    };
 
 
-
-
-
-
-}
-
-function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
-    const classList = Array.from(Node.classList);
-    if (classList.length === 3 &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
-        Node.remove();
-        // Node.style.display = 'none';
-
-    }
-}
-
-// внизу справа "Сделать поиск Яндекса основным?"
-function yandex_dzen_questionYandexGeneralSearch() {
-    // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
-    // Выбираем все div
-    const allDivs = document.querySelectorAll('div');
-
-    // Фильтруем div, чтобы оставить только те, у которых ровно три класса
-    const divsWithThreeClasses = Array.from(allDivs).filter(div => {
-        const classes = div.classList;
-        return classes.length === 3;
-    });
-
-
-    divsWithThreeClasses.forEach(div => {
-        const DivChild = div.querySelector('div');
-        function checkDivHasAnyId(div) {
-            if (!div) {
-                // console.log('Div not found.');
-                return false;
-            }
-
-            if (!div.id) {
-                // console.log('Div does not have an id.');
-                return false;
-            }
-
-            // console.log('Div has an id.');
-            // Проверяем, что div имеет ровно один класс
-            if (div.classList.length !== 1) {
-                // console.log('Div does not have exactly one class.');
-                return false;
-            }
-
-            // есть вложенный div, принадлежащий пяти классам
-            const DivChild2 = div.querySelector('div');
-            if (!DivChild2) {
-                return false;
-
-            }
-            // Проверяем, что div принадлежит ровно 5-ти классам
-            if (DivChild2.classList.length !== 5) {
-                // console.log('Div does not have exactly 5 classes.');
-                return false;
-            }
-
-            return true;
-        }
-
-        const result = checkDivHasAnyId(DivChild);
-        if (result) div.remove()
-
-    });
-
-    // Новый способ
-    // Получаем все элементы <div> на странице
-    const divElements = document.querySelectorAll('div');
-    // Проходимся по каждому элементу и проверяем его содержимое
-    divElements.forEach((element) => {
-        if (element.innerText.includes('Сделать поиск Яндекса основным')) {
-            // Используем closest() для поиска родителя с указанным z-index
-            const parentElement = divElement.closest('[style*="z-index"]');
-            // Проверяем, найден ли родитель и его z-index
-            if (parentElement && parseInt(getComputedStyle(parentElement).zIndex) > 100) {
-                parentElement.remove()
-            }
-        }
-    });
-
-}
-
-// определение мобильное устройство или ПК
-function isMobileDevice() {
-    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-}
-
-
-// // Обработка события hashchange (не срабатывает)
-// window.addEventListener('hashchange', handleUrlChange);
-
-// // Обработка события popstate (не срабатывает)
-// window.addEventListener('popstate', handleUrlChange);
-// Function to handle URL changes
-function handleUrlChange2(newUrl) {
-    if (currentURL !== newUrl) {
-        // console.log('URL changed from', currentUrl, 'to', newUrl);
-        currentURL = newUrl;
-        // You can add your custom logic here
-        // handleUrlChange()
-        onInit()
-    }
-}
-
-
-// Override pushState and replaceState to track URL changes
-const originalPushState = history.pushState;
-const originalReplaceState = history.replaceState;
-
-history.pushState = function() {
-    originalPushState.apply(history, arguments);
-    handleUrlChange2(window.location.href);
-};
-
-history.replaceState = function() {
-    originalReplaceState.apply(history, arguments);
-    handleUrlChange2(window.location.href);
-};
-
-
-// Проверка изменений в URL при загрузке страницы
-// handleUrlChange(); // перенесено в Init
+    // Проверка изменений в URL при загрузке страницы
+    // handleUrlChange(); // перенесено в Init
 
 
 
