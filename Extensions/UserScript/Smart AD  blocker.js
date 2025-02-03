@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-03_20-47
+// @version      2025-02-04_03-29
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -154,11 +154,11 @@
                 default: true,
                 title: 'Включить для Яндекс-игры: игра (yandex.ru/games/app): Центральный рекламный блок'
             },
-            YANDEX_игры_app_AD_центральный_начальный_ВКЛ: {
-                label: 'Яндекс-игры: игра (yandex.ru/games/app): Центральный начальный рекламный блок',
+            YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ: {
+                label: 'Яндекс-игры: игра (yandex.ru/games/app): Нижний ряд других игр',
                 type: 'checkbox',
                 default: true,
-                title: 'Включить для Яндекс-игры: игра (yandex.ru/games/app): Центральный начальный рекламный блок'
+                title: 'Включить для Яндекс-игры: игра (yandex.ru/games/app): Нижний ряд других игр'
             },
             YANDEX_health_ON: {
                 label: 'Яндекс-здоровье (yandex.ru/health)',
@@ -282,7 +282,7 @@
     let YANDEX_games_app_ON = true
     let YANDEX_игры_app_AD_правый_ВКЛ = true
     let YANDEX_игры_app_AD_центральный_ВКЛ = true
-    let YANDEX_игры_app_AD_центральный_начальный_ВКЛ = true
+    let YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ = true
     let YANDEX_health_ON = true
     let DZEN_ON = true
     let DZEN_video_ON = true
@@ -319,7 +319,7 @@
         YANDEX_games_app_ON = GM_config.get('YANDEX_games_app_ON')
         YANDEX_игры_app_AD_правый_ВКЛ = GM_config.get('YANDEX_игры_app_AD_правый_ВКЛ')
         YANDEX_игры_app_AD_центральный_ВКЛ = GM_config.get('YANDEX_игры_app_AD_центральный_ВКЛ')
-        YANDEX_игры_app_AD_центральный_начальный_ВКЛ = GM_config.get('YANDEX_игры_app_AD_центральный_начальный_ВКЛ')
+        YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ = GM_config.get('YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ')
         YANDEX_health_ON = GM_config.get('YANDEX_health_ON')
         DZEN_ON = GM_config.get('DZEN_ON')
         DZEN_video_ON = GM_config.get('DZEN_video_ON')
@@ -1114,6 +1114,14 @@
                         const Реклама_в_центральном_баннере = document.querySelector('div.prowo__inner')
                         if (Реклама_в_центральном_баннере)
                             Реклама_в_центральном_баннере.style.display = 'none'
+                        // центральный баннер: кнопка закрытия
+                        const Вложенная_нода = document.querySelector('span[data-testid="YandexFullscreenRender-Button"]')
+                        if (Вложенная_нода) {
+                            // stop
+                            // Вложенная_нода.click() // вызывает глюк запуска игры
+                            Центральный_баннер__Наблюдение_за_изменяемым_родителем(Вложенная_нода)
+
+                        }
                     }
                     // правый блок рекламы
                     if (YANDEX_игры_app_AD_правый_ВКЛ) {
@@ -1140,20 +1148,9 @@
                     if (targetNode_RotateBanner)
                         targetNode_RotateBanner.style.display = 'none'
 
-                    // начальный центральный баннер
-                    if (YANDEX_игры_app_AD_центральный_начальный_ВКЛ) {
-                        // кнопка закрытия
-                        const Вложенная_нода = document.querySelector('span[data-testid="YandexFullscreenRender-Button"]')
-                        if (Вложенная_нода) {
-                            // stop
-                            // Вложенная_нода.click() // вызывает глюк запуска игры
-                            Центральный_баннер__Наблюдение_за_изменяемым_родителем(Вложенная_нода)
-
-                        }
-                    }
-
                     // нижний ряд других игр
-                    document.querySelector('div.play-similar-games > span.close-button')?.click()
+                    if (YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ)
+                        document.querySelector('div.play-similar-games > span.close-button')?.click()
 
                 }
                 // после включения обсервера
@@ -1170,7 +1167,7 @@
                                 кнопка_ОтключитьРекламу.parentNode.parentNode.style.display = 'none'
                         }
                         // нижний ряд других игр
-                        else if (node.matches('div.play-similar-games')) {
+                        else if (YANDEX_игры_app_AD_нижний_ряд_других_игр_ВКЛ && node.matches('div.play-similar-games')) {
                             node.querySelector('div.play-similar-games__all-games-tile > span.close-button')?.click() // клик по кнопке закрытия
                             node?.remove()
                         }
@@ -1179,10 +1176,10 @@
                         //     node.parentNode.style.display = 'none'
                         //     // node?.remove()
                         // }
-                        else if (node.matches('div.prowo__inner')) {
+                        else if (YANDEX_игры_app_AD_центральный_ВКЛ && node.matches('div.prowo__inner')) {
                             node.style.display = 'none'
                         }
-                        else if (node.matches('span[data-testid="YandexFullscreenRender-Button"]')) {
+                        else if (YANDEX_игры_app_AD_центральный_ВКЛ && node.matches('span[data-testid="YandexFullscreenRender-Button"]')) {
                             Центральный_баннер__Наблюдение_за_изменяемым_родителем(node)
                         }
                         // Проверяем вложенные элементы
@@ -1194,9 +1191,6 @@
                                 if (Вложенная_нода) {
                                     Вложенная_нода.style.display = 'none'
                                 }
-                            }
-                            // начальный центральный баннер
-                            if (YANDEX_игры_app_AD_центральный_начальный_ВКЛ) {
                                 // кнопка закрытия
                                 Вложенная_нода = node.querySelector('span[data-testid="YandexFullscreenRender-Button"]')
                                 if (Вложенная_нода) {
@@ -1225,22 +1219,9 @@
                             // Проверяем наличие нужных классов после изменения
                             if (Наблюдаемый_родитель.classList.contains('play-yandex-modal_visible') ||
                                 Наблюдаемый_родитель.classList.contains('play-modal_visible')) {
-                                // Отключаем наблюдатель и выполняем клик
                                 // Наблюдатель не отключаем так как рекламный блок вновь появляется на экране с теми же изменениями
                                 // observer.disconnect()
-
-                                // удаление блока с shadow-root, непосредственно содержащего рекламу, чтобы не отсвечивал пока не было клика по кнопке закрытия
-                                //                                                 let nodeWithShadowRoot = findShadowRoot(Наблюдаемый_родитель);
-
-                                //                                                 if (nodeWithShadowRoot) {
-                                //                                                     console.log('Нода с закрытым shadowRoot найдена:', nodeWithShadowRoot);
-                                //                                                     nodeWithShadowRoot.remove()
-                                //                                                 } else {
-                                //                                                     console.log('Нода с закрытым shadowRoot не найдена.');
-                                //                                                 }
-
                                 Вложенная_нода.click() // клик по кнопке закрытия
-
                             }
                         });
 
