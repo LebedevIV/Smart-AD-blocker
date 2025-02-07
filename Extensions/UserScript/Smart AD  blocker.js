@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-04_03-29
+// @version      2025-02-07_07-55
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -1054,53 +1054,91 @@
                 }
         }
         // каталог игр
+        // Изменено: 2025-02-07 07:55, Автор:
         else if (YANDEX_games_collection_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
-            function AD_remove_node(node, mutation_test) {
-                const nodeDiv = node.querySelector('div')
-                // Проверяем, является ли элемент div и не содержит ли он указанные классы
-                if (nodeDiv &&
-                    !nodeDiv.classList.contains('feed_block_suggested') &&
-                    !nodeDiv.classList.contains('feed_block_categorized')) {
-                    node.remove()
+            function Удаление_рекламы(node, mutation_test) {
+                // до включения обсервера
+                if (!node) {
+                    document.querySelectorAll('div.page__page.main-page > div#feeds > div.adaptive-width').forEach(node => {
+                        const nodeDiv = node.querySelector('div')
+                        // Проверяем, является ли элемент div и не содержит ли он указанные классы
+                        if (nodeDiv &&
+                            !nodeDiv.classList.contains('feed_block_suggested') &&
+                            !nodeDiv.classList.contains('feed_block_categorized'))
+                        {
+                            node?.remove()
+                        }
+                    });
+                    document.querySelectorAll('div[data-testid="feed-grid-banner"]').forEach(node => {node?.remove()})
+                    // Мобильная версия
+                    if (isMobileDevice()) {
+                        // Приглашение установить приложение (на весь экран)
+                        const iframes = document.querySelectorAll('iframe')
+                        // Перебираем все iframe элементы
+                        for (let iframe of iframes) {
+                            // Проверяем, есть ли атрибут scrolling со значением "no"
+                            if (iframe.getAttribute('scrolling') === 'no') {
+                                iframe.remove()
+                            }
+                        }
+
+                        document.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
+                    }
+                }
+                // после включения обсервера
+                else {
+                    // Мобильная версия
+                    if (isMobileDevice()) {
+                        if (node.nodeName === 'DIV' && node.className === 'feed_block_monetization') {
+                            node?.remove()
+                        }
+                        // Проверяем вложенные элементы
+                        else {
+                            if (node.nodeName === 'DIV') {
+                                node.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
+                            }
+                        }
+                    }
+                    else {
+                        if (node.nodeName === 'DIV' && node.className === 'adaptive-width') {
+                            const nodeDiv = node.querySelector('div')
+                            // Проверяем, является ли элемент div и не содержит ли он указанные классы
+                            if (nodeDiv &&
+                                !nodeDiv.classList.contains('feed_block_suggested') &&
+                                !nodeDiv.classList.contains('feed_block_categorized')) {
+                                node?.remove()
+                            }
+                        }
+                        else if (node.nodeName === 'LI' && node.matches('li.grid-list__game-item_adv')) {
+                            // document.querySelectorAll('div[data-testid="feed-grid-banner"]')?.forEach(node => {
+                            //     node.remove()
+                            // });
+                            node?.remove()
+                        }
+                        // Проверяем вложенные элементы
+                        else {
+
+
+                        }
+                    }
                 }
             }
-            function AD_remove() {
-                const targetNodes = document.querySelectorAll('div.page__page.main-page > div#feeds > div.adaptive-width')
-                targetNodes?.forEach(node => {
-                    AD_remove_node(node)
-                });
-                document.querySelectorAll('div[data-testid="feed-grid-banner"]')?.forEach(node => {
-                    node.remove()
-                });
-            }
-            const interval_AD_remove = setInterval(AD_remove, 500);
 
             const observer = new MutationObserver((mutationsList, observer) => {
-                clearInterval(interval_AD_remove) // отключение проверки по интервалу
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
                         mutation.addedNodes.forEach(node => {
-                            if (node.nodeName === 'DIV') {
-                                if (node.className === 'adaptive-width') {
-                                    AD_remove_node(node, mutation)
-                                }
-                            }
-                            else if (node.nodeName === 'LI' && node.matches('li.grid-list__game-item_adv')) {
-                                // document.querySelectorAll('div[data-testid="feed-grid-banner"]')?.forEach(node => {
-                                //     node.remove()
-                                // });
-                                node.remove()
-                            }
-                        });
-
+                            Удаление_рекламы(node)
+                        })
                     }
                 }
-            });
+            })
             // observer.observe(document.querySelector('div.page__right'), observer_config)
             observer.observe(document.body, observer_config)
-
             observers.push(observer)
+            Удаление_рекламы()
+
         }
         // на странице игры
         // Изменено: 2025-02-03 20:47, Автор:
