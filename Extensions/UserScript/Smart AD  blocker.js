@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-18_01-55
+// @version      2025-02-18_02-04
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -373,7 +373,7 @@
             let fact_Remove_AD_Top_3column = false // факт удаления верхнего рекламного блока в интерфейсе с тремя столбцами где содержимое письма в 3-м столбце
             function Remove_AD_Top(node) {
 
-                document.querySelectorAll('div.react-async').forEach(node2 => {node2?.remove()})
+                document.querySelectorAll('div.react-async').forEach(node => {node?.remove()})
             }
 
             function Remove_AD_НадСпискомПисем () {
@@ -437,7 +437,7 @@
                     }
                 }
                 if (FactMutationChildList) {
-                    Remove_AD_Top()
+                    // Remove_AD_Top()
                     // Remove_AD_НадСпискомПисем()
                     Remove_AD_Right()
                 }
