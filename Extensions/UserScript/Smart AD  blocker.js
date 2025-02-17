@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-07_07-55
+// @version      2025-02-18_01-55
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -101,13 +101,13 @@
                 title: 'Включить для Яндекс (ya.ru и yandex.ru)'
             },
             YANDEX_email_ON: {
-                label: 'Яндекс-почта (mail.yandex.ru)',
+                label: 'Яндекс-почта (mail.yandex.ru): Изменено: 2025-01-28 20:01',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для Яндекс-почты (mail.yandex.ru)'
             },
             YANDEX_disk_ON: {
-                label: 'Яндекс-диск (disk.yandex.ru)',
+                label: 'Яндекс-диск (disk.yandex.ru): Изменено: 2025-01-29 22:01',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для Яндекс-диске (disk.yandex.ru)'
@@ -131,13 +131,13 @@
                 title: 'Включить для Яндекс-видео (yandex.ru/video)'
             },
             YANDEX_games_collection_ON: {
-                label: 'Яндекс-игры: коллекция (yandex.ru/games)',
+                label: 'Яндекс-игры: коллекция (yandex.ru/games): Изменено: 2025-02-07 07:55',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для коллекции Яндекс-игр (yandex.ru/games)'
             },
             YANDEX_games_app_ON: {
-                label: 'Яндекс-игры: игра (yandex.ru/games/app)',
+                label: 'Яндекс-игры: игра (yandex.ru/games/app): Изменено: 2025-02-03 20:47',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для Яндекс-игры (yandex.ru/games/app)'
@@ -367,7 +367,6 @@
     // Функция для обработки изменений URL
     function handleUrlChange() {
         // console.log('URL changed to:', window.location.href);
-        // if (MAILRU_ON && currentURL.startsWith('https://e.mail.ru/')) {
         if (MAILRU_email_ON && currentURL.startsWith('https://e.mail.ru/')) {
 
             // удаление верхнего рекламного блока
@@ -423,16 +422,7 @@
                     })
                 }
             }
-            //             // Функция для поиска и удаления всех элементов, имя класса которых содержит banner__content-wrapper
-            //             function removeElementsByClassContaining(className) {
-            //                 const elements = document.querySelectorAll('a');
 
-            //                 elements.forEach(element => {
-            //                     if (element.classList.contains(className)) {
-            //                         element.remove();
-            //                     }
-            //                 });
-            //             }
             // установка наблюдения за изменением блока-родителя
             const observer = new MutationObserver((mutationsList, observer) => {
                 let FactMutationChildList = false
@@ -448,7 +438,7 @@
                 }
                 if (FactMutationChildList) {
                     Remove_AD_Top()
-                    Remove_AD_НадСпискомПисем()
+                    // Remove_AD_НадСпискомПисем()
                     Remove_AD_Right()
                 }
             })
@@ -456,7 +446,7 @@
             observers.push(observer)
             // удаление при загрузке
             Remove_AD_Top()
-            Remove_AD_НадСпискомПисем ()
+            // Remove_AD_НадСпискомПисем ()
             Remove_AD_Right()
 
 
@@ -1054,7 +1044,7 @@
                 }
         }
         // каталог игр
-        // Изменено: 2025-02-07 07:55, Автор:
+        // Изменено: 2025-02-18 01:55, Автор:
         else if (YANDEX_games_collection_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
             function Удаление_рекламы(node, mutation_test) {
@@ -1084,6 +1074,7 @@
                         }
 
                         document.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
+                        document.querySelectorAll('div[class$="-group"]').forEach(node => {node?.remove()})
                     }
                 }
                 // после включения обсервера
@@ -1093,10 +1084,14 @@
                         if (node.nodeName === 'DIV' && node.className === 'feed_block_monetization') {
                             node?.remove()
                         }
+                        else if (node.nodeName === 'DIV' && node.className.endsWith('-group')) {
+                            node?.remove()
+                        }
                         // Проверяем вложенные элементы
                         else {
                             if (node.nodeName === 'DIV') {
                                 node.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
+                                node.querySelectorAll('div[class$="-group"]').forEach(node => {node?.remove()})
                             }
                         }
                     }
@@ -1469,7 +1464,6 @@
             const interval_AD_remove = setInterval(AD_remove, 500);
         }
         // https://yandex.ru/health
-        // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (YANDEX_health_ON && currentURL.startsWith('https://yandex.ru/health')) {
 
             function AD_remove_node(node, mutation_test) {
@@ -1582,7 +1576,6 @@
             }
         }
         // Дзен.Статьи
-        // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (DZEN_articles_ON && currentURL.startsWith('https://dzen.ru/a/')) {
             let targetNode_observer
             function AD_remove_node(node, mutation_test) {
@@ -1631,7 +1624,6 @@
 
             }
         // Дзен.Видео
-        // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (DZEN_video_ON && currentURL.startsWith('https://dzen.ru/video/')) {
             function AD_remove_node(node, mutation_test) {
                 // document.querySelectorAll('div[class^="video-card-ad"]').forEach(node => {
@@ -1683,7 +1675,6 @@
                 }
         }
         // Дзен.Shorts
-        // брать за образец в случае рекламы внутри наблюдаемой ноды
         else if (DZEN_shorts_ON && currentURL.startsWith('https://dzen.ru/shorts/')) {
             function AD_remove_node(node, mutation_test) {
                 // банерок вверху справа
@@ -1735,7 +1726,6 @@
         }
 
         // Дзен: общее
-        // брать за образец в случае хаотичной рекламы
         else if (DZEN_ON && (currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/'))) {
             if (isMobileDevice()) {
                 // верхний баннер
