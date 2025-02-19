@@ -15,7 +15,7 @@ It is possible that ads may not be completely blocked, as portals regularly chan
 
 ************
 Userscript (Tampermonkey):
-https://greasyfork.org/en/scripts/499243-smart-ad-blocker-for-yandex-mail-ru-dzen-ru-vk-ok 
+https://greasyfork.org/ru/scripts/499243-smart-ad-blocker-for-yandex-mail-ru-dzen-ru-vk-ok 
 
 ************
 
