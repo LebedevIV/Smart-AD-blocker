@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-18_22-24
+// @version      2025-02-19_15-38
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -1990,6 +1990,7 @@
                     span.parentNode.parentNode.parentNode.parentNode.parentNode.remove();
                 }
             }
+            document.querySelectorAll('div[class*="_ads_"]').forEach(node => {node?.remove()})
 
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
@@ -2012,6 +2013,9 @@
 
 
                                 }
+                                else if (hasClassWithAds(node)) {
+                                    node?.remove()
+                                }
 
 
                             }
@@ -2022,6 +2026,16 @@
             });
             observer.observe(document.querySelector('div#public'), observer_config)
             observers.push(observer)
+
+            // Функция для проверки, принадлежит ли нода классу, название которого содержит '_ads_'
+            function hasClassWithAds(node) {
+                // Проверяем, что переданный объект является DOM-элементом и имеет classList
+                if (node && node.classList) {
+                    // Проверяем, содержит ли хотя бы один класс подстроку '_ads_'
+                    return [...node.classList].some(cls => cls.includes('_ads_'));
+                }
+                return false;
+            }
         }
         // vkvideo.ru
         else if (VK_VIDEO_ON && currentURL.startsWith('https://vkvideo.ru/video-')) {
@@ -2142,454 +2156,454 @@
                     }
                 }
             `;
-        document.head.appendChild(style);
+                                                      document.head.appendChild(style);
 
-        // Создание элемента details
-        const details = document.createElement("details");
-        // Добавляем класс my-details-class к элементу <details>
-        details.classList.add('details_EspeciallyForYou');
+                                                      // Создание элемента details
+                                                      const details = document.createElement("details");
+                                                      // Добавляем класс my-details-class к элементу <details>
+                                                      details.classList.add('details_EspeciallyForYou');
 
-        const summary = document.createElement("summary");
-        summary.textContent = messageSpecialOffer('Реклама')
+                                                      const summary = document.createElement("summary");
+                                                      summary.textContent = messageSpecialOffer('Реклама')
 
-        const shimmer = document.createElement("div");
-        shimmer.className = "shimmer";
+                                                      const shimmer = document.createElement("div");
+                                                      shimmer.className = "shimmer";
 
-        // const content = document.createElement("p");
-        // content.textContent = "Содержимое деталей...";
+                                                      // const content = document.createElement("p");
+                                                      // content.textContent = "Содержимое деталей...";
 
-        details.appendChild(summary);
-        details.appendChild(shimmer);
-        // details.appendChild(content);
+                                                      details.appendChild(summary);
+                                                      details.appendChild(shimmer);
+                                                      // details.appendChild(content);
 
-        // document.body.appendChild(details);
-        return details
-    }
+                                                      // document.body.appendChild(details);
+                                                      return details
+                                                  }
 
-// Возврат строк в зависимости от языка
-function messageSpecialOffer(idMsg) {
-    // Определение языка браузера
-    const browserLanguage = navigator.language || navigator.userLanguage
-    let messageSpecialOffer
+    // Возврат строк в зависимости от языка
+    function messageSpecialOffer(idMsg) {
+        // Определение языка браузера
+        const browserLanguage = navigator.language || navigator.userLanguage
+        let messageSpecialOffer
 
-    switch (idMsg) {
-        case "Реклама":
-            messageSpecialOffer = 'Реклама'
-            switch (browserLanguage) {
-                case "uken":
-                    messageSpecialOffer = 'Реклама'
-                    break;
-                default:
-                    messageSpecialOffer = 'Реклама'
-            }
-            return messageSpecialOffer
-    }
-}
-// https://mail.ru/
-// Функция для проверки наличия и удаления верхнего рекламного блока
-function mail_ru_checkAndRemoveTopBlock() {
-    let targetNode
-    targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
-    if (targetNode) {
-        // тип ноды меняется через каждые несколько секунд
-        let targetNode_banner
-
-        targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
-
-        if (targetNode_banner) {
-            targetNode_banner.remove()
+        switch (idMsg) {
+            case "Реклама":
+                messageSpecialOffer = 'Реклама'
+                switch (browserLanguage) {
+                    case "uken":
+                        messageSpecialOffer = 'Реклама'
+                        break;
+                    default:
+                        messageSpecialOffer = 'Реклама'
+                }
+                return messageSpecialOffer
         }
     }
-    const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
-    targetNodes.forEach(node => {
-        node.remove();
-    });
+    // https://mail.ru/
+    // Функция для проверки наличия и удаления верхнего рекламного блока
+    function mail_ru_checkAndRemoveTopBlock() {
+        let targetNode
+        targetNode = document.querySelector(config.nodes.mail_ru_banner_top_parent);
+        if (targetNode) {
+            // тип ноды меняется через каждые несколько секунд
+            let targetNode_banner
+
+            targetNode_banner = targetNode.querySelector('div.tgb-wrapper')
+
+            if (targetNode_banner) {
+                targetNode_banner.remove()
+            }
+        }
+        const targetNodes = document.querySelectorAll('div.letter-list-item-adv')
+        targetNodes.forEach(node => {
+            node.remove();
+        });
 
 
+        // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+
+        // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        function findElementByTextInShadow(shadowRoot, tag, text) {
+            const elements = shadowRoot.querySelectorAll(tag);
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i].textContent === text) {
+                    return elements[i];
+                }
+            }
+            return null;
+        }
+
+        // Новый способ
+        // Получаем все элементы <div> на странице
+        const divElements = document.querySelectorAll('div');
+
+        // Проходимся по каждому элементу и проверяем его высоту и содержимое
+        divElements.forEach((element) => {
+            const height = parseInt(getComputedStyle(element).height);
+            const content = element.innerText.trim();
+
+            // Проверяем, является ли элемент <div> с высотой 0px и без содержимого
+            if (height === 0 && content === '') {
+                // Находим предшествующий элемент <div> с высотой 90px
+                const previousDiv = element.previousElementSibling;
+                if (previousDiv && previousDiv.tagName === 'DIV' && parseInt(getComputedStyle(previousDiv).height) === 90) {
+                    // Проверяем, содержит ли предшествующий элемент <div> с высотой 90px элемент <div> с текстом "0+", "6+", "12+" или "16+"
+                    const innerDivs = previousDiv.querySelectorAll('div');
+                    let hasText = false;
+                    innerDivs.forEach((innerDiv) => {
+                        const innerDivText = innerDiv.innerText.trim();
+                        if (innerDivText === '0+' || innerDivText === '6+' || innerDivText === '12+' || innerDivText === '16+') {
+                            hasText = true;
+                        }
+                    });
+                    if (hasText) {
+                        previousDiv.style.display = 'none'
+                    }
+                }
+            }
+        });
+
+        // Трети способ: внутри div slot="main-column" найти на верхнем уровне все непустые ноды, расположенные между div со свойством data-bem и div, принадлежащим классу class="tabs__container"
+        // Функция для поиска всех непустых нод на верхнем уровне между двумя элементами
+        function findNodesBetweenElements(container, startSelector, endSelector) {
+            const startElement = container.querySelector(startSelector);
+            const endElement = container.querySelector(endSelector);
+
+            if (!startElement || !endElement) {
+                console.error('Start or end element not found.');
+                return [];
+            }
+
+            const nodes = [];
+            let currentNode = startElement.nextSibling;
+
+            while (currentNode && currentNode !== endElement) {
+                if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.textContent.trim() !== '') {
+                    nodes.push(currentNode);
+                }
+                currentNode = currentNode.nextSibling;
+            }
+
+            return nodes;
+        }
+
+        // Находим контейнер с атрибутом slot="main-column"
+        const mainColumn = document.querySelector('div[slot="main-column"]');
+
+        if (mainColumn) {
+            // Находим все непустые ноды на верхнем уровне между div с data-bem и div с классом tabs__container
+            const nodes = findNodesBetweenElements(mainColumn, 'div[data-bem]', 'div.tabs__container');
+
+            // Выводим найденные ноды в консоль
+            nodes.forEach(node => {
+                console.log(node);
+            });
+        } else {
+            console.error('Container with slot="main-column" not found.');
+        }
+
+
+    }
+
+    function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
+        if (node_test && node_test.nodeName === 'DIV') {
+            const DivBlockclassList = Array.from(node_test.classList);
+            if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
+                // DivBlockclassList.some(className => className === 'feed__row') &&
+                // DivBlockclassList.some(className => className === '_is-mailru-morda')
+               ) {
+                // document.querySelectorAll('article.card-wrapper').forEach(node => {
+                //     node?.remove()
+                // })
+                document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
+                    node?.remove()
+                })
+                document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+                    node?.remove()
+                })
+            }
+        }
+        // if (node_test && node_test.nodeName === 'IMG') {
+        //     const DivBlockclassList = Array.from(node_test.classList);
+        //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
+        //        ) {
+        //         document.querySelectorAll('article.card-wrapper').forEach(node => {
+        //             node?.remove()
+        //         })
+        //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
+        //             node?.remove()
+        //         })
+        //     }
+        // }
+
+
+    }
     // Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
+    function mail_ru_checkAndRemove_РекламаВShadow() {
 
-    // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-    function findElementByTextInShadow(shadowRoot, tag, text) {
-        const elements = shadowRoot.querySelectorAll(tag);
-        for (let i = 0; i < elements.length; i++) {
-            if (elements[i].textContent === text) {
-                return elements[i];
+        //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
+        //         function findElementByTextInShadow(shadowRoot, tag, text) {
+        //             const elements = shadowRoot.querySelectorAll(tag);
+        //             for (let i = 0; i < elements.length; i++) {
+        //                 if (elements[i].textContent === text) {
+        //                     return elements[i];
+        //                 }
+        //             }
+        //             return null;
+        //         }
+
+        //         // Найти все shadow host'ы на странице
+        //         const shadowHosts = document.querySelectorAll('*');
+
+        //         shadowHosts.forEach(shadowHost => {
+        //             const shadowRoot = shadowHost.shadowRoot;
+
+        //             if (shadowRoot) {
+        //                 // Найти элемент с текстом "Реклама" внутри shadow root
+        //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
+
+        //                 if (рекламаElement) {
+        //                     // Подняться по родительским нодам вплоть до shadow-root
+        //                     let currentNode = рекламаElement;
+        //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
+        //                         currentNode = currentNode.parentNode;
+        //                     }
+
+        //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
+        //                     console.log(currentNode);
+        //                 } else {
+        //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
+        //                 }
+        //             } else {
+        //                 console.log('Shadow root не найден');
+        //             }
+        //         });
+
+
+
+
+
+        //*************
+
+
+        //         function findParentNodeAboveShadowRoot() {
+        //             const adSpan = document.querySelector('span:contains("Реклама")');
+
+        //             if (adSpan) {
+        //                 let currentNode = adSpan.parentNode;
+        //                 while (currentNode && currentNode.id !== 'shadow-root') {
+        //                     currentNode = currentNode.parentNode;
+        //                 }
+
+        //                 if (currentNode && currentNode.parentNode) {
+        //                     return currentNode.parentNode;
+        //                 }
+        //             }
+
+        //             return null;
+        //         }
+
+        //         const parentNode = findParentNodeAboveShadowRoot();
+
+        //         if (parentNode) {
+        //             console.log('Parent node above shadow-root:', parentNode);
+        //         } else {
+        //             console.log('Could not find the specified node.');
+        //         }
+
+        //*****************
+
+
+        function findParentNodeAboveShadowRoot() {
+
+            // Find all elements with a closed shadow root
+            const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
+
+            // Iterate through the shadow roots and change their mode to 'open'
+            shadowRoots.forEach(el => {
+                el.shadowRoot.mode = 'open';
+            });
+
+            // Find all span elements
+            const spans = document.querySelectorAll('span');
+
+            // Iterate through the spans and find the one with the text "Реклама"
+            for (let i = 0; i < spans.length; i++) {
+                if (spans[i].textContent === 'Реклама') {
+                    let currentNode = spans[i].parentNode;
+
+                    // Traverse up the DOM until the shadow root is found
+                    while (currentNode && currentNode.id !== 'shadow-root') {
+                        currentNode = currentNode.parentNode;
+                    }
+
+                    // Return the parent of the shadow root
+                    if (currentNode && currentNode.parentNode) {
+                        return currentNode.parentNode;
+                    }
+                }
+            }
+
+            return null; // Return null if the node is not found
+        }
+
+        const parentNode = findParentNodeAboveShadowRoot();
+
+        if (parentNode) {
+            console.log('Parent node above shadow-root:', parentNode);
+        } else {
+            console.log('Could not find the specified node.');
+        }
+
+
+
+
+
+
+
+
+    }
+
+    function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
+        const classList = Array.from(Node.classList);
+        if (classList.length === 3 &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length === 7) &&
+            classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
+            Node.remove();
+            // Node.style.display = 'none';
+
+        }
+    }
+
+    // внизу справа "Сделать поиск Яндекса основным?"
+    function yandex_dzen_questionYandexGeneralSearch() {
+        // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
+        // Выбираем все div
+        const allDivs = document.querySelectorAll('div');
+
+        // Фильтруем div, чтобы оставить только те, у которых ровно три класса
+        const divsWithThreeClasses = Array.from(allDivs).filter(div => {
+            const classes = div.classList;
+            return classes.length === 3;
+        });
+
+
+        divsWithThreeClasses.forEach(div => {
+            const DivChild = div.querySelector('div');
+            function checkDivHasAnyId(div) {
+                if (!div) {
+                    // console.log('Div not found.');
+                    return false;
+                }
+
+                if (!div.id) {
+                    // console.log('Div does not have an id.');
+                    return false;
+                }
+
+                // console.log('Div has an id.');
+                // Проверяем, что div имеет ровно один класс
+                if (div.classList.length !== 1) {
+                    // console.log('Div does not have exactly one class.');
+                    return false;
+                }
+
+                // есть вложенный div, принадлежащий пяти классам
+                const DivChild2 = div.querySelector('div');
+                if (!DivChild2) {
+                    return false;
+
+                }
+                // Проверяем, что div принадлежит ровно 5-ти классам
+                if (DivChild2.classList.length !== 5) {
+                    // console.log('Div does not have exactly 5 classes.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            const result = checkDivHasAnyId(DivChild);
+            if (result) div.remove()
+
+        });
+
+        // Новый способ
+        // Получаем все элементы <div> на странице
+        const divElements = document.querySelectorAll('div');
+        // Проходимся по каждому элементу и проверяем его содержимое
+        divElements.forEach((element) => {
+            if (element.innerText.includes('Сделать поиск Яндекса основным')) {
+                // Используем closest() для поиска родителя с указанным z-index
+                const parentElement = divElement.closest('[style*="z-index"]');
+                // Проверяем, найден ли родитель и его z-index
+                if (parentElement && parseInt(getComputedStyle(parentElement).zIndex) > 100) {
+                    parentElement.remove()
+                }
+            }
+        });
+
+    }
+
+    // определение мобильное устройство или ПК
+    function isMobileDevice() {
+        return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    }
+
+    // поиск вложенной ноды, содержащей shadowRoot (не работает на 'closed')
+    function findShadowRoot(node, shadowRoot_mode = 'closed') {
+        // Проверяем, есть ли у текущей ноды shadowRoot
+        if (node.shadowRoot && node.shadowRoot.mode === shadowRoot_mode) {
+            console.log('Найдена нода с закрытым shadowRoot:', node);
+            return node;
+        }
+
+        // Рекурсивно обходим дочерние элементы
+        for (let child of node.children) {
+            let result = findShadowRoot(child);
+            if (result) {
+                return result;
             }
         }
+
         return null;
     }
 
-    // Новый способ
-    // Получаем все элементы <div> на странице
-    const divElements = document.querySelectorAll('div');
-
-    // Проходимся по каждому элементу и проверяем его высоту и содержимое
-    divElements.forEach((element) => {
-        const height = parseInt(getComputedStyle(element).height);
-        const content = element.innerText.trim();
-
-        // Проверяем, является ли элемент <div> с высотой 0px и без содержимого
-        if (height === 0 && content === '') {
-            // Находим предшествующий элемент <div> с высотой 90px
-            const previousDiv = element.previousElementSibling;
-            if (previousDiv && previousDiv.tagName === 'DIV' && parseInt(getComputedStyle(previousDiv).height) === 90) {
-                // Проверяем, содержит ли предшествующий элемент <div> с высотой 90px элемент <div> с текстом "0+", "6+", "12+" или "16+"
-                const innerDivs = previousDiv.querySelectorAll('div');
-                let hasText = false;
-                innerDivs.forEach((innerDiv) => {
-                    const innerDivText = innerDiv.innerText.trim();
-                    if (innerDivText === '0+' || innerDivText === '6+' || innerDivText === '12+' || innerDivText === '16+') {
-                        hasText = true;
-                    }
-                });
-                if (hasText) {
-                    previousDiv.style.display = 'none'
-                }
-            }
-        }
-    });
-
-    // Трети способ: внутри div slot="main-column" найти на верхнем уровне все непустые ноды, расположенные между div со свойством data-bem и div, принадлежащим классу class="tabs__container"
-    // Функция для поиска всех непустых нод на верхнем уровне между двумя элементами
-    function findNodesBetweenElements(container, startSelector, endSelector) {
-        const startElement = container.querySelector(startSelector);
-        const endElement = container.querySelector(endSelector);
-
-        if (!startElement || !endElement) {
-            console.error('Start or end element not found.');
-            return [];
-        }
-
-        const nodes = [];
-        let currentNode = startElement.nextSibling;
-
-        while (currentNode && currentNode !== endElement) {
-            if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.textContent.trim() !== '') {
-                nodes.push(currentNode);
-            }
-            currentNode = currentNode.nextSibling;
-        }
-
-        return nodes;
-    }
-
-    // Находим контейнер с атрибутом slot="main-column"
-    const mainColumn = document.querySelector('div[slot="main-column"]');
-
-    if (mainColumn) {
-        // Находим все непустые ноды на верхнем уровне между div с data-bem и div с классом tabs__container
-        const nodes = findNodesBetweenElements(mainColumn, 'div[data-bem]', 'div.tabs__container');
-
-        // Выводим найденные ноды в консоль
-        nodes.forEach(node => {
-            console.log(node);
-        });
-    } else {
-        console.error('Container with slot="main-column" not found.');
-    }
-
-
-}
-
-function mail_ru_checkAndRemove_РекламаInSpan(node_test, mutation_test) {
-    if (node_test && node_test.nodeName === 'DIV') {
-        const DivBlockclassList = Array.from(node_test.classList);
-        if (DivBlockclassList.some(className => className === 'mailru-dzen-themes') //||
-            // DivBlockclassList.some(className => className === 'feed__row') &&
-            // DivBlockclassList.some(className => className === '_is-mailru-morda')
-           ) {
-            // document.querySelectorAll('article.card-wrapper').forEach(node => {
-            //     node?.remove()
-            // })
-            document.querySelectorAll('article.zenad-card-rtb').forEach(node => {
-                node?.remove()
-            })
-            document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-                node?.remove()
-            })
-        }
-    }
-    // if (node_test && node_test.nodeName === 'IMG') {
-    //     const DivBlockclassList = Array.from(node_test.classList);
-    //     if (DivBlockclassList.some(className => className === 'zen-ui-zen-image-cover__image')
-    //        ) {
-    //         document.querySelectorAll('article.card-wrapper').forEach(node => {
-    //             node?.remove()
-    //         })
-    //         document.querySelectorAll('div.zenad-card-rtb__ad').forEach(node => {
-    //             node?.remove()
-    //         })
-    //     }
-    // }
-
-
-}
-// Поиск элемент с текстом "Реклама" внутри всех #shadow-root и определение блоков до #shadow-root
-function mail_ru_checkAndRemove_РекламаВShadow() {
-
-    //         // Функция для поиска элемента по текстовому содержимому внутри shadow DOM
-    //         function findElementByTextInShadow(shadowRoot, tag, text) {
-    //             const elements = shadowRoot.querySelectorAll(tag);
-    //             for (let i = 0; i < elements.length; i++) {
-    //                 if (elements[i].textContent === text) {
-    //                     return elements[i];
-    //                 }
-    //             }
-    //             return null;
-    //         }
-
-    //         // Найти все shadow host'ы на странице
-    //         const shadowHosts = document.querySelectorAll('*');
-
-    //         shadowHosts.forEach(shadowHost => {
-    //             const shadowRoot = shadowHost.shadowRoot;
-
-    //             if (shadowRoot) {
-    //                 // Найти элемент с текстом "Реклама" внутри shadow root
-    //                 const рекламаElement = findElementByTextInShadow(shadowRoot, 'span', 'Реклама');
-
-    //                 if (рекламаElement) {
-    //                     // Подняться по родительским нодам вплоть до shadow-root
-    //                     let currentNode = рекламаElement;
-    //                     while (currentNode && currentNode.parentNode !== shadowRoot) {
-    //                         currentNode = currentNode.parentNode;
-    //                     }
-
-    //                     // Теперь currentNode указывает на элемент, непосредственно следующий за shadow-root
-    //                     console.log(currentNode);
-    //                 } else {
-    //                     console.log('Элемент с текстом "Реклама" не найден внутри shadow root');
-    //                 }
-    //             } else {
-    //                 console.log('Shadow root не найден');
-    //             }
-    //         });
-
-
-
-
-
-    //*************
-
-
-    //         function findParentNodeAboveShadowRoot() {
-    //             const adSpan = document.querySelector('span:contains("Реклама")');
-
-    //             if (adSpan) {
-    //                 let currentNode = adSpan.parentNode;
-    //                 while (currentNode && currentNode.id !== 'shadow-root') {
-    //                     currentNode = currentNode.parentNode;
-    //                 }
-
-    //                 if (currentNode && currentNode.parentNode) {
-    //                     return currentNode.parentNode;
-    //                 }
-    //             }
-
-    //             return null;
-    //         }
-
-    //         const parentNode = findParentNodeAboveShadowRoot();
-
-    //         if (parentNode) {
-    //             console.log('Parent node above shadow-root:', parentNode);
-    //         } else {
-    //             console.log('Could not find the specified node.');
-    //         }
-
-    //*****************
-
-
-    function findParentNodeAboveShadowRoot() {
-
-        // Find all elements with a closed shadow root
-        const shadowRoots = Array.from(document.querySelectorAll('*')).filter(el => el.shadowRoot && el.shadowRoot.mode === 'closed');
-
-        // Iterate through the shadow roots and change their mode to 'open'
-        shadowRoots.forEach(el => {
-            el.shadowRoot.mode = 'open';
-        });
-
-        // Find all span elements
-        const spans = document.querySelectorAll('span');
-
-        // Iterate through the spans and find the one with the text "Реклама"
-        for (let i = 0; i < spans.length; i++) {
-            if (spans[i].textContent === 'Реклама') {
-                let currentNode = spans[i].parentNode;
-
-                // Traverse up the DOM until the shadow root is found
-                while (currentNode && currentNode.id !== 'shadow-root') {
-                    currentNode = currentNode.parentNode;
-                }
-
-                // Return the parent of the shadow root
-                if (currentNode && currentNode.parentNode) {
-                    return currentNode.parentNode;
-                }
-            }
-        }
-
-        return null; // Return null if the node is not found
-    }
-
-    const parentNode = findParentNodeAboveShadowRoot();
-
-    if (parentNode) {
-        console.log('Parent node above shadow-root:', parentNode);
-    } else {
-        console.log('Could not find the specified node.');
-    }
-
-
-
-
-
-
-
-
-}
-
-function mail_ru_checkAndRemoveTopBlock_classList(Node,mutation_test) {
-    const classList = Array.from(Node.classList);
-    if (classList.length === 3 &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length === 7) &&
-        classList.some(className => className.length >= 7 )) { // замечены варианты 15 и 17 длиной
-        Node.remove();
-        // Node.style.display = 'none';
-
-    }
-}
-
-// внизу справа "Сделать поиск Яндекса основным?"
-function yandex_dzen_questionYandexGeneralSearch() {
-    // <div class="nvBl_ nvBl_g9JqZb38zCZXEw nvBl_g9Z8ZofTxz9QBra_"><div id="dhbz" class="qb5a868df"><div class="ta805822e bacc75f5 fce2ef19d j2b3be76f o2301de0b"><div class="w6845527">
-    // Выбираем все div
-    const allDivs = document.querySelectorAll('div');
-
-    // Фильтруем div, чтобы оставить только те, у которых ровно три класса
-    const divsWithThreeClasses = Array.from(allDivs).filter(div => {
-        const classes = div.classList;
-        return classes.length === 3;
-    });
-
-
-    divsWithThreeClasses.forEach(div => {
-        const DivChild = div.querySelector('div');
-        function checkDivHasAnyId(div) {
-            if (!div) {
-                // console.log('Div not found.');
-                return false;
-            }
-
-            if (!div.id) {
-                // console.log('Div does not have an id.');
-                return false;
-            }
-
-            // console.log('Div has an id.');
-            // Проверяем, что div имеет ровно один класс
-            if (div.classList.length !== 1) {
-                // console.log('Div does not have exactly one class.');
-                return false;
-            }
-
-            // есть вложенный div, принадлежащий пяти классам
-            const DivChild2 = div.querySelector('div');
-            if (!DivChild2) {
-                return false;
-
-            }
-            // Проверяем, что div принадлежит ровно 5-ти классам
-            if (DivChild2.classList.length !== 5) {
-                // console.log('Div does not have exactly 5 classes.');
-                return false;
-            }
-
-            return true;
-        }
-
-        const result = checkDivHasAnyId(DivChild);
-        if (result) div.remove()
-
-    });
-
-    // Новый способ
-    // Получаем все элементы <div> на странице
-    const divElements = document.querySelectorAll('div');
-    // Проходимся по каждому элементу и проверяем его содержимое
-    divElements.forEach((element) => {
-        if (element.innerText.includes('Сделать поиск Яндекса основным')) {
-            // Используем closest() для поиска родителя с указанным z-index
-            const parentElement = divElement.closest('[style*="z-index"]');
-            // Проверяем, найден ли родитель и его z-index
-            if (parentElement && parseInt(getComputedStyle(parentElement).zIndex) > 100) {
-                parentElement.remove()
-            }
-        }
-    });
-
-}
-
-// определение мобильное устройство или ПК
-function isMobileDevice() {
-    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-}
-
-// поиск вложенной ноды, содержащей shadowRoot (не работает на 'closed')
-function findShadowRoot(node, shadowRoot_mode = 'closed') {
-    // Проверяем, есть ли у текущей ноды shadowRoot
-    if (node.shadowRoot && node.shadowRoot.mode === shadowRoot_mode) {
-        console.log('Найдена нода с закрытым shadowRoot:', node);
-        return node;
-    }
-
-    // Рекурсивно обходим дочерние элементы
-    for (let child of node.children) {
-        let result = findShadowRoot(child);
-        if (result) {
-            return result;
+    // // Обработка события hashchange (не срабатывает)
+    // window.addEventListener('hashchange', handleUrlChange);
+
+    // // Обработка события popstate (не срабатывает)
+    // window.addEventListener('popstate', handleUrlChange);
+    // Function to handle URL changes
+    function handleUrlChange2(newUrl) {
+        if (currentURL !== newUrl) {
+            // console.log('URL changed from', currentUrl, 'to', newUrl);
+            currentURL = newUrl;
+            // You can add your custom logic here
+            // handleUrlChange()
+            onInit()
         }
     }
 
-    return null;
-}
 
-// // Обработка события hashchange (не срабатывает)
-// window.addEventListener('hashchange', handleUrlChange);
+    // Override pushState and replaceState to track URL changes
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
 
-// // Обработка события popstate (не срабатывает)
-// window.addEventListener('popstate', handleUrlChange);
-// Function to handle URL changes
-function handleUrlChange2(newUrl) {
-    if (currentURL !== newUrl) {
-        // console.log('URL changed from', currentUrl, 'to', newUrl);
-        currentURL = newUrl;
-        // You can add your custom logic here
-        // handleUrlChange()
-        onInit()
-    }
-}
+    history.pushState = function() {
+        originalPushState.apply(history, arguments);
+        handleUrlChange2(window.location.href);
+    };
+
+    history.replaceState = function() {
+        originalReplaceState.apply(history, arguments);
+        handleUrlChange2(window.location.href);
+    };
 
 
-// Override pushState and replaceState to track URL changes
-const originalPushState = history.pushState;
-const originalReplaceState = history.replaceState;
-
-history.pushState = function() {
-    originalPushState.apply(history, arguments);
-    handleUrlChange2(window.location.href);
-};
-
-history.replaceState = function() {
-    originalReplaceState.apply(history, arguments);
-    handleUrlChange2(window.location.href);
-};
-
-
-// Проверка изменений в URL при загрузке страницы
-// handleUrlChange(); // перенесено в Init
+    // Проверка изменений в URL при загрузке страницы
+    // handleUrlChange(); // перенесено в Init
 
 
 
