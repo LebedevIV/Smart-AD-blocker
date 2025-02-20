@@ -1991,6 +1991,8 @@
                 }
             }
             document.querySelectorAll('div[class*="_ads_"]').forEach(node => {node?.remove()})
+            document.querySelectorAll('div.closed_comments').forEach(node => {node?.remove()})
+
 
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
@@ -2016,7 +2018,9 @@
                                 else if (hasClassWithAds(node)) {
                                     node?.remove()
                                 }
-
+                                else if (node.classList.contains('closed_comments')) {
+                                    node?.remove()
+                                }
 
                             }
                         });
