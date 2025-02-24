@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-24_06-52
+// @version      2025-02-24_19-55
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -371,6 +371,8 @@
     const observers = []
     // счётчики
     let count_001 = 0, count_002 = 0
+
+    const isDesktop = !isMobileDevice()
 
     // Функция для обработки изменений URL
     function handleUrlChange() {
@@ -931,10 +933,7 @@
         }
         else if (YANDEX_ON && currentURL.startsWith('https://ya.ru/')) {
             // если это мбильное устройство
-            if (isMobileDevice()) {
-                document.querySelector('div.dialog__wrapper')?.remove()
-            }
-            else {
+            if (isDesktop) {
                 // Добавление кнопки "Реклама"
                 // const EspeciallyForYou = CreateEspeciallyForYou()
                 const AdvDetails = {
@@ -1076,6 +1075,11 @@
                 const interval_AD_remove = setInterval(AD_remove, 500)
 
                 }
+            else {
+                document.querySelector('div.dialog__wrapper')?.remove()
+            }
+
+
         }
         // каталог игр
         // Изменено: 2025-02-18 01:55, Автор:
@@ -1096,7 +1100,7 @@
                     });
                     document.querySelectorAll('div[data-testid="feed-grid-banner"]').forEach(node => {node?.remove()})
                     // Мобильная версия
-                    if (isMobileDevice()) {
+                    if (!isDesktop) {
                         // Приглашение установить приложение (на весь экран)
                         const iframes = document.querySelectorAll('iframe')
                         // Перебираем все iframe элементы
@@ -1113,23 +1117,8 @@
                 }
                 // после включения обсервера
                 else {
-                    // Мобильная версия
-                    if (isMobileDevice()) {
-                        if (node.nodeName === 'DIV' && node.className === 'feed_block_monetization') {
-                            node?.remove()
-                        }
-                        else if (node.nodeName === 'DIV' && node.className.endsWith('-group')) {
-                            node?.remove()
-                        }
-                        // Проверяем вложенные элементы
-                        else {
-                            if (node.nodeName === 'DIV') {
-                                node.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
-                                node.querySelectorAll('div[class$="-group"]').forEach(node => {node?.remove()})
-                            }
-                        }
-                    }
-                    else {
+                    // Десктопная версия
+                    if (isDesktop) {
                         if (node.nodeName === 'DIV' && node.className === 'adaptive-width') {
                             const nodeDiv = node.querySelector('div')
                             // Проверяем, является ли элемент div и не содержит ли он указанные классы
@@ -1149,6 +1138,22 @@
                         else {
 
 
+                        }
+                    }
+                    // Мобильная версия
+                    else {
+                        if (node.nodeName === 'DIV' && node.className === 'feed_block_monetization') {
+                            node?.remove()
+                        }
+                        else if (node.nodeName === 'DIV' && node.className.endsWith('-group')) {
+                            node?.remove()
+                        }
+                        // Проверяем вложенные элементы
+                        else {
+                            if (node.nodeName === 'DIV') {
+                                node.querySelectorAll('div.feed_block_monetization').forEach(node => {node?.remove()})
+                                node.querySelectorAll('div[class$="-group"]').forEach(node => {node?.remove()})
+                            }
                         }
                     }
                 }
@@ -1573,35 +1578,95 @@
 
         }
         // Яндекс.погода: на 10 дней
-        // Изменено: 2025-02-24 06:16, Автор:
-        else if (YANDEX_погода_ON && currentURL.startsWith('https://yandex.ru/pogoda/?lat=')) {
-            // внизу справа "Сделать поиск Яндекса основным?"
-            // yandex_dzen_questionYandexGeneralSearch()
+        // Изменено: 2025-02-24 18:16, Автор:
+        else if (YANDEX_погода_ON && currentURL.startsWith('https://yandex.ru/pogoda?lat=')) {
 
-            // реклама справа
-            document.querySelector('#content_right')?.remove();
 
-            // TODO
-            // реклама между днями
-            // Находим все элементы на странице
-            const allElements = Array.from(document.querySelectorAll('*'));
+            function Удаление_рекламы(node, mutation_test) {
+                // до включения обсервера
+                if (!node) {
 
-            // Ищем индекс элемента с классом app-promo-button
-            const startIndex = allElements.findIndex(el => el.classList && el.classList.contains('app-promo-button'));
+                    // внизу справа "Сделать поиск Яндекса основным?"
+                    // yandex_dzen_questionYandexGeneralSearch()
 
-            // Ищем индекс элемента, содержащего -segment_js_inited в названии класса
-            const endIndex = allElements.findIndex(el => el.classList && [...el.classList].some(cls => cls.includes('-segment_js_inited')));
+                    // реклама справа
+                    document.querySelector('#content_right')?.remove();
 
-            // Если оба элемента найдены и startIndex < endIndex
-            if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
-                // Фильтруем элементы между startIndex и endIndex
-                const elementsBetween = allElements.slice(startIndex + 1, endIndex);
+                    // TODO
 
-                // Находим первый div среди элементов между ними
-                const targetDiv = elementsBetween.find(el => el.tagName === 'DIV');
-                targetDiv?.remove()
+                    РекламаМеждуДнями()
 
+                    document.querySelectorAll('article.card_without-card-decoration').forEach(node => {node?.remove()})
+
+                }
+                // после включения обсервера
+                else {
+                    // Десктопная версия
+                    if (isDesktop) {
+                        if (node.nodeName === 'article' && node.classList.contains('card_without-card-decoration') ) {
+                            node?.remove()
+                        }
+                        else if (node.nodeName === 'div' && node.classList.contains('app-promo-button__content') ) {
+                            node?.remove()
+                        }
+                        else if (node.nodeName === 'div' && node.classList.contains('app-promo-button') ) {
+                            РекламаМеждуДнями()
+                        }
+                        // Проверяем вложенные элементы
+                        else if (node.nodeType === 1) {
+                            let Вложенный_элемент
+
+                            // реклама между днями
+                            node.querySelectorAll('article.card_without-card-decoration').forEach(node => {node?.remove()})
+                            Вложенный_элемент = node.querySelector('div.app-promo-button')
+                            if(Вложенный_элемент)
+                                РекламаМеждуДнями()
+                            Вложенный_элемент = node.querySelector('div.adbanner')
+                            if(Вложенный_элемент)
+                                РекламаМеждуДнями()
+                        }
+                        РекламаМеждуДнями()
+                    }
+                }
             }
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            Удаление_рекламы(node)
+                        })
+                    }
+                }
+            })
+            // observer.observe(document.querySelector('div.page__right'), observer_config)
+            observer.observe(document.body, observer_config)
+            observers.push(observer)
+            Удаление_рекламы()
+
+            // реклама между днями
+            function РекламаМеждуДнями() {
+                // Находим все элементы на странице
+                const allElements = Array.from(document.querySelectorAll('*'));
+
+                // Ищем индекс элемента с классом app-promo-button
+                const startIndex = allElements.findIndex(el => el.classList && el.classList.contains('app-promo-button'));
+
+                // Ищем индекс элемента, содержащего -segment_js_inited в названии класса
+                const endIndex = allElements.findIndex(el => el.classList && [...el.classList].some(cls => cls.includes('-segment_js_inited')));
+
+                // Если оба элемента найдены и startIndex < endIndex
+                if (startIndex !== -1 && endIndex !== -1 && startIndex < endIndex) {
+                    // Фильтруем элементы между startIndex и endIndex
+                    const elementsBetween = allElements.slice(startIndex + 1, endIndex);
+
+                    // Находим первый div среди элементов между ними
+                    const targetDiv = elementsBetween.find(el => el.tagName === 'DIV');
+                    targetDiv?.remove()
+
+                }
+            }
+
 
         }
         // Дзен.погода: карта
@@ -1825,24 +1890,7 @@
 
         // Дзен: общее
         else if (DZEN_ON && (currentURL.startsWith('https://dzen.ru/') || currentURL.startsWith('https://m.dzen.ru/'))) {
-            if (isMobileDevice()) {
-                // верхний баннер
-                document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
-                // const observer = new MutationObserver((mutationsList, observer) => {
-                //     for (let mutation of mutationsList) {
-                //         if (mutation.type === 'childList') {
-                //             mutation.addedNodes.forEach(node => {
-                //                 if (node.nodeName === 'DIV') {
-                //                     document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
-                //                 }
-                //             })
-                //         }
-                //     }
-                // })
-                // observer.observe(document.body, observer_config)
-                // observers.push(observer)
-            }
-            else {
+            if (isDesktop) {
                 // Добавление кнопки "Реклама"
                 const EspeciallyForYou = CreateEspeciallyForYou()
                 let targetNode_observer
@@ -1942,6 +1990,24 @@
                 const interval_AD_remove = setInterval(AD_remove, 500)
 
                 }
+            // Мобильная версия
+            else {
+                // верхний баннер
+                document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
+                // const observer = new MutationObserver((mutationsList, observer) => {
+                //     for (let mutation of mutationsList) {
+                //         if (mutation.type === 'childList') {
+                //             mutation.addedNodes.forEach(node => {
+                //                 if (node.nodeName === 'DIV') {
+                //                     document.querySelectorAll('div[class*="dzen-mobile--dzen-mobile__hasBanner"]').forEach(node => {node?.remove()})
+                //                 }
+                //             })
+                //         }
+                //     }
+                // })
+                // observer.observe(document.body, observer_config)
+                // observers.push(observer)
+            }
 
 
             // Изменено: 2025-01-30 20:53, Автор:
