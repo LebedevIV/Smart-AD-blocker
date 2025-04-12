@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-12_12-57
+// @version      2025-04-12_13-47
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -131,7 +131,7 @@
                 title: 'Включить для Яндекс-видео (yandex.ru/video)'
             },
             YANDEX_games_collection_ON: {
-                label: 'Яндекс-игры: коллекция (yandex.ru/games): Изменено: 2025-02-07 07:55',
+                label: 'Яндекс-игры: коллекция (yandex.ru/games): Изменено: 2025-04-12 13:47',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для коллекции Яндекс-игр (yandex.ru/games)'
@@ -1082,7 +1082,7 @@
 
         }
         // каталог игр
-        // Изменено: 2025-02-18 01:55, Автор:
+        // Изменено: 2025-04-12 13:47, Автор:
         else if (YANDEX_games_collection_ON && currentURL.startsWith('https://yandex.ru/games/') && !currentURL.startsWith('https://yandex.ru/games/app/')) {
             // реклама в каталоге игр
             function Удаление_рекламы(node, mutation_test) {
@@ -1099,6 +1099,18 @@
                         }
                     });
                     document.querySelectorAll('div[data-testid="feed-grid-banner"]').forEach(node => {node?.remove()})
+                    // найти все li, принадлежащие классу, название которого начинается с grid-list__ и заканчивается на _adv
+                    const listItems = Array.from(document.querySelectorAll('li[class]')).filter(li => {
+                        return Array.from(li.classList).some(className =>
+                                                             /^grid-list__.*_adv$/.test(className)
+                                                            );
+                    });
+                    // Скрываем найденные элементы
+                    listItems.forEach(li => {
+                        li.style.display = 'none';
+                        console.log('Скрыт элемент:', li);
+                    });
+
                     // Мобильная версия
                     if (!isDesktop) {
                         // Приглашение установить приложение (на весь экран)
@@ -1128,11 +1140,19 @@
                                 node?.remove()
                             }
                         }
-                        else if (node.nodeName === 'LI' && node.matches('li.grid-list__game-item_adv')) {
-                            // document.querySelectorAll('div[data-testid="feed-grid-banner"]')?.forEach(node => {
-                            //     node.remove()
-                            // });
-                            node?.remove()
+                        else if (node.nodeName === 'LI') {
+                            if (node.matches('li.grid-list__game-item_adv')) {
+                                // document.querySelectorAll('div[data-testid="feed-grid-banner"]')?.forEach(node => {
+                                //     node.remove()
+                                // });
+                                node?.remove()
+                            }
+                            // принадлежащие классу, название которого начинается с grid-list__ и заканчивается на _adv
+                            else if (Array.from(node.classList).some(className =>
+                                                                       /^grid-list__.*_adv$/.test(className)
+                                                                      )) {
+                                node?.remove()
+                            }
                         }
                         // Проверяем вложенные элементы
                         else {
@@ -1424,8 +1444,8 @@
                         const isCorrectElement =
                               node.tagName === 'DIV' &&
                               Array.from(node.classList).some(className =>
-                                                                 className.startsWith('PageLayout-m__main-')
-                                                                )
+                                                              className.startsWith('PageLayout-m__main-')
+                                                             )
 
                         if (!isCorrectElement) {
                             startElement = node
