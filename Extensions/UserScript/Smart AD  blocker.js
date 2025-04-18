@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-12_13-47
+// @version      2025-04-19_01-11
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -1371,6 +1371,10 @@
                     if (node.matches('div.js-scroller-right') || node.id === 'js-messages-direct') {
                         node.remove()
                     }
+                    // предложение что-то приобрести на весь экран
+                    else if ((node instanceof HTMLDivElement) && (node.getAttribute('data-test-id') === 'promofullscreen')) {
+                        node.remove()
+                    }
                     else {
                         // Удаление_рекламы__Над_списком_писем (node)
                         // Проверяем вложенные элементы
@@ -1382,6 +1386,10 @@
                         }
                         // реклама над списком писем
                         Вложенный_элемент = node.querySelector('#js-messages-direct')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
+                        Вложенный_элемент = node.querySelector('div[data-test-id="promofullscreen"]')
                         if (Вложенный_элемент) {
                             Вложенный_элемент.remove()
                         }
@@ -1510,11 +1518,19 @@
                     if (node.matches('div.top-direct-line')) {
                         node.remove()
                     }
+                    // реклама диска бОьшего объёма
+                    else if (node.matches('div.Modal-Content')) {
+                        node.remove()
+                    }
                     // Проверяем вложенные элементы
                     else {
                         let Вложенный_элемент
                         // реклама вверху
                         Вложенный_элемент = node.querySelector('div.top-direct-line')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
+                        Вложенный_элемент = node.querySelector('div.Modal-Content')
                         if (Вложенный_элемент) {
                             Вложенный_элемент.remove()
                         }
