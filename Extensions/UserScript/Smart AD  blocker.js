@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-19_01-11
+// @version      2025-04-19_15-07
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -731,9 +731,24 @@
                 targetNode?.remove()
                 targetNode = document.querySelector('div.Distribution-Popup')
                 targetNode?.remove()
+
                 // вверху слева кнопка "Установите Яндекс Браузер"
                 targetNode = document.querySelector('div.DistrNav') || document.querySelector('div.HeaderDesktopActions-Distribution')
                 targetNode?.remove()
+
+                // баннер справа от поисковой строки
+                // Находим все div с id, начинающимся на "adv"
+                document.querySelectorAll('div[id^="adv"]').forEach(node => {
+                    node.style.display = 'none';
+                    // Ищем первого родителя с id="search-result-aside"
+                    const parentAside = node.closest('#search-result-aside');
+                    // Если такой родитель есть — скрываем и его
+                    if (parentAside) {
+                        parentAside.style.display = 'none';
+                    }
+                });
+
+
             }
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
@@ -1149,8 +1164,8 @@
                             }
                             // принадлежащие классу, название которого начинается с grid-list__ и заканчивается на _adv
                             else if (Array.from(node.classList).some(className =>
-                                                                       /^grid-list__.*_adv$/.test(className)
-                                                                      )) {
+                                                                     /^grid-list__.*_adv$/.test(className)
+                                                                    )) {
                                 node?.remove()
                             }
                         }
