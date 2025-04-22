@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-04-19_15-07
+// @version      2025-04-22_21-54
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -1379,6 +1379,11 @@
 
                     Удаление_рекламы__Справа_от_списка_писем()
 
+                    // баннер-стикер с предложением купить диск
+                    document.querySelector('div[data-popper-placement="bottom"]')?.remove()
+                    // модальное окно с предожением купить диск
+                    document.querySelector('div.Modal-Content')?.remove()
+
                 }
                 // после включения обсервера
                 else {
@@ -1386,8 +1391,15 @@
                     if (node.matches('div.js-scroller-right') || node.id === 'js-messages-direct') {
                         node.remove()
                     }
+                    // модальное окно с предожением купить диск
+                    else if (node.matches('div.Modal-Content')) {
+                        node.remove()
+                    }
                     // предложение что-то приобрести на весь экран
                     else if ((node instanceof HTMLDivElement) && (node.getAttribute('data-test-id') === 'promofullscreen')) {
+                        node.remove()
+                    }
+                    else if ((node instanceof HTMLDivElement) && (node.getAttribute('data-popper-placement') === 'bottom')) {
                         node.remove()
                     }
                     else {
@@ -1404,7 +1416,16 @@
                         if (Вложенный_элемент) {
                             Вложенный_элемент.remove()
                         }
+                        // модальное окно с предожением купить диск
+                        Вложенный_элемент = node.querySelector('div.Modal-Content')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
                         Вложенный_элемент = node.querySelector('div[data-test-id="promofullscreen"]')
+                        if (Вложенный_элемент) {
+                            Вложенный_элемент.remove()
+                        }
+                        Вложенный_элемент = node.querySelector('div[data-popper-placement="bottom"]')
                         if (Вложенный_элемент) {
                             Вложенный_элемент.remove()
                         }
