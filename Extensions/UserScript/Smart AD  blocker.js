@@ -2,7 +2,7 @@
 // @name         Smart AD blocker for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @name:ru         Умный блокировщик рекламы для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @namespace    http://tampermonkey.net/
-// @version      2025-05-15_1-10
+// @version      2025-05-21_20-47
 // @description  Smart AD blocker with dynamic blocking protection, for: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @description:ru  Умный блокировщик рекламы при динамической защите от блокировки, для: Yandex, Mail.ru, Dzen.ru, VK, OK
 // @author       Igor Lebedev
@@ -1209,8 +1209,9 @@
             Удаление_рекламы()
 
         }
+
         // на странице игры
-        // Изменено: 2025-02-03 20:47, Автор:
+        // Изменено: 2025-05-21 20:47, Автор:
         else if (YANDEX_games_app_ON && currentURL.startsWith('https://yandex.ru/games/app/')) {
 
             function Удаление_рекламы(node, mutation_test) {
@@ -1229,6 +1230,24 @@
                             Центральный_баннер__Наблюдение_за_изменяемым_родителем(Вложенная_нода)
 
                         }
+
+//                         document.querySelectorAll("div[id]").forEach(div => {
+//                             // Проверяем, есть ли класс, начинающийся с 'play-yandex-'
+//                             let hasClass = Array.from(div.classList).some(cls => cls.startsWith('play-yandex-'));
+//                             if (hasClass) {
+//                                 // Скрываем текущий div
+//                                 div.style.display = 'none';
+
+//                                 // Находим родителя с классом play-modal__inner
+//                                 const parent = div.closest('.play-modal__inner');
+//                                 if (parent) {
+//                                     // Устанавливаем границу
+//                                     parent.style.borderStyle = 'solid';
+//                                     parent.style.borderWidth = '1px';
+//                                 }
+//                             }
+//                         });
+
                     }
                     // правый блок рекламы
                     if (YANDEX_игры_app_AD_правый_ВКЛ) {
@@ -1289,6 +1308,22 @@
                         else if (YANDEX_игры_app_AD_центральный_ВКЛ && node.matches('span[data-testid="YandexFullscreenRender-Button"]')) {
                             Центральный_баннер__Наблюдение_за_изменяемым_родителем(node)
                         }
+                        else if (YANDEX_игры_app_AD_центральный_ВКЛ && node.nodeName === 'DIV' && node.id) {
+                            // Проверяем, есть ли id и класс, начинающийся с 'play-yandex-'
+                            const hasClass = Array.from(node.classList).some(cls => cls.startsWith('play-yandex-'));
+                            if (node.id && hasClass) {
+                                // Скрываем элемент
+                                node.style.display = 'none';
+
+                                // Находим родителя с классом play-modal__inner
+                                const parent = node.closest('.play-modal__inner');
+                                if (parent) {
+                                    // Устанавливаем границу
+                                    parent.style.borderStyle = 'solid';
+                                    parent.style.borderWidth = '1px';
+                                }
+                            }
+                        }
                         // Проверяем вложенные элементы
                         else {
                             let Вложенная_нода
@@ -1306,9 +1341,26 @@
                                     Центральный_баннер__Наблюдение_за_изменяемым_родителем(Вложенная_нода)
 
                                 }
+
+                                node.querySelectorAll("div[id]").forEach(div => {
+                                    // Проверяем, есть ли класс, начинающийся с 'play-yandex-'
+                                    let hasClass = Array.from(div.classList).some(cls => cls.startsWith('play-yandex-'));
+                                    if (hasClass) {
+                                        // Скрываем текущий div
+                                        div.style.display = 'none';
+
+                                        // Находим родителя с классом play-modal__inner
+                                        const parent = div.closest('.play-modal__inner') || div.closest('.prowo');
+                                        if (parent) {
+                                            // Устанавливаем границу
+                                            parent.style.borderStyle = 'solid';
+                                            parent.style.borderWidth = '1px';
+                                        }
+                                    }
+                                });
+
                             }
                         }
-
 
                     }
 
@@ -1343,7 +1395,6 @@
                 }
             }
 
-
             const observer = new MutationObserver((mutationsList, observer) => {
                 for (let mutation of mutationsList) {
                     if (mutation.type === 'childList') {
@@ -1360,6 +1411,7 @@
             Удаление_рекламы()
 
         }
+
         // Яндекс: почтовый ящик
         // Изменено: 2025-014-12 12:57, Автор:
         else if (YANDEX_email_ON && currentURL.startsWith('https://mail.yandex.ru/')) {
