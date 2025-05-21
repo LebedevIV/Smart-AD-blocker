@@ -137,7 +137,7 @@
                 title: 'Включить для коллекции Яндекс-игр (yandex.ru/games)'
             },
             YANDEX_games_app_ON: {
-                label: 'Яндекс-игры: игра (yandex.ru/games/app): Изменено: 2025-02-03 20:47',
+                label: 'Яндекс-игры: игра (yandex.ru/games/app): Изменено: 2025-05-21 20:47',
                 type: 'checkbox',
                 default: true,
                 title: 'Включить для Яндекс-игры (yandex.ru/games/app)'
